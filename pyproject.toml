@@ -17,6 +17,8 @@ pandas = "^1.4.1"
 pytest = "^7.0.1"
 coverage = {extras = ["toml"], version = "^6.3.2"}
 pytest-cov = "^3.0.0"
+mkdocs = "^1.2.3"
+mkdocs-material = "^8.2.4"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
