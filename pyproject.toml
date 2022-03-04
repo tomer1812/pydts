@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "pydts"
+version = "0.1.0"
+description = "Discrete timeline survival analysis"
+authors = ["Tomer Meir <tomer1812@gmail.com>", "Rom Gutman <rom.gutman1@gmail.com>", "Malka Gorfine <malkago12@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/tomer1812/pydts"
+repository = "https://github.com/tomer1812/pydts"
+keywords = ["discrete timeline", "time to event" ,"survival analysis", "competing events"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+pandas = "^1.4.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.0.1"
+coverage = {extras = ["toml"], version = "^6.3.2"}
+pytest-cov = "^3.0.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.coverage.paths]
+source = ["src", "*/site-packages"]
+
+[tool.coverage.run]
+branch = true
+source = ["pydts"]
+
+[tool.coverage.report]
+show_missing = true
