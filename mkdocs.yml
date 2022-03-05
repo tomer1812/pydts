@@ -35,6 +35,7 @@ extra_javascript:
 nav:
     - 'index.md'
     - Examples:
+      - Quick Start.ipynb
       - SimulatedDataset.ipynb
 
 plugins:
