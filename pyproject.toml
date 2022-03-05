@@ -12,7 +12,10 @@ keywords = ["discrete timeline", "time to event" ,"survival analysis", "competin
 [tool.poetry.dependencies]
 python = "^3.8"
 pandas = "^1.4.1"
+mkdocs = "^1.2.3"
+mkdocs-material = "^8.2.4"
 mknotebooks = "^0.7.1"
+mkdocstrings = "^0.18.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.0.1"
