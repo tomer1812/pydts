@@ -44,6 +44,3 @@ plugins:
 
 extra:
   copyright: Copyright &copy; 2022 Tomer Meir, Rom Gutman, Malka Gorfine
-  analytics:
-    provider: google
-    property: G-4PXS01G51T
