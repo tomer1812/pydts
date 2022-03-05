@@ -128,5 +128,32 @@ def main(seed=0, N_patients=DEFAULT_N_PATIENTS, output_dir=OUTPUT_DIR, filename=
     simulated_patients_df.set_index(PATIENT_NO_COL).to_csv(os.path.join(output_dir, filename))
 
 
+def default_sample_T(patients_df, d_times):
+    patients_df['T'] = np.clip(np.round(d_times * (patients_df['Z1'])), a_min=1, a_max=d_times+1)
+    return patients_df
+
+def default_sample_C(patients_df, d_times, n_patients):
+    patients_df['C'] = np.random.randint(low=1, high=d_times + 1, size=n_patients)
+    return patients_df
+
+def default_sample_J(patients_df, j_events, n_patients):
+    patients_df['J'] = np.random.randint(low=1, high=1 + j_events, size=n_patients)
+    return patients_df
+
+def generate_quick_start_df(n_patients=10000, d_times=150, j_events=2, n_cov=5, seed=0, pid_col='pid',
+                            sample_T=default_sample_T, sample_C=default_sample_C, sample_J=default_sample_J):
+    np.random.seed(seed)
+    covariates = [f'Z{i + 1}' for i in range(n_cov)]
+    patients_df = pd.DataFrame(data=np.random.uniform(low=0.0, high=1.0, size=[n_patients, n_cov]),
+                               columns=covariates)
+    patients_df.index.name = pid_col
+    patients_df = sample_T(patients_df, d_times)
+    patients_df = sample_C(patients_df, d_times, n_patients)
+    patients_df['X'] = patients_df[['T', 'C']].min(axis=1)
+    patients_df = sample_J(patients_df, j_events, n_patients)
+    patients_df.loc[patients_df['C'] < patients_df['T'], 'J'] = 0
+    return patients_df.reset_index()
+
+
 if __name__ == "__main__":
     main()
