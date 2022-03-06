@@ -8,6 +8,7 @@ readme = "README.md"
 homepage = "https://github.com/tomer1812/pydts"
 repository = "https://github.com/tomer1812/pydts"
 keywords = ["discrete timeline", "time to event" ,"survival analysis", "competing events"]
+documentation = "https://tomer1812.github.io/pydts"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
