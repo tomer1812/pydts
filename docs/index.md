@@ -1,17 +1,15 @@
-# Welcome to MkDocs
+[![pypi version](https://img.shields.io/pypi/v/pydts)](https://pypi.org/project/pydts/)
+[![Tests](https://github.com/tomer1812/pydts/workflows/Tests/badge.svg)](https://github.com/tomer1812/pydts/actions?workflow=Tests)
+[![Read the Docs](https://readthedocs.org/projects/hypermodern-python/badge/)](https://hypermodern-python.readthedocs.io/)
 
-For full documentation visit [mkdocs.org](https://www.mkdocs.org).
 
-## Commands
+# Discrete Time Survival Analysis  
+[Read the Docs](https://tomer1812.github.io/pydts/)  
+[Tomer Meir](https://tomer1812.github.io/), [Rom Gutman](https://github.com/RomGutman), [Malka Gorfine](https://www.tau.ac.il/~gorfinem/) 2022
 
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
+A Python package for discrete time survival data analysis.
 
-## Project layout
-
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+## Installation
+```console
+pip install pydts
+```
