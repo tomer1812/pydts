@@ -31,6 +31,8 @@ mkdocs-material = "^8.2.4"
 mknotebooks = "^0.7.1"
 mkdocstrings = "^0.18.1"
 jupyter = "^1.0.0"
+seaborn = "^0.11.2"
+scikit-survival = "^0.17.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
