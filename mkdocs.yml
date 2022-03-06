@@ -1,5 +1,9 @@
 theme:
   name: material
+  features:
+      - navigation.sections  # Sections are included in the navigation on the left.
+      - toc.integrate  # Table of contents is integrated on the left; does not appear separately on the right.
+      - header.autohide  # header disappears as you scroll
 
 site_name: PyDTS
 site_description: The documentation for the PyDTS software library.
@@ -33,10 +37,10 @@ extra_javascript:
 
 
 nav:
-    - 'index.md'
+    - Home: 'index.md'
     - Examples:
-      - QuickStart.ipynb
-      - SimulatedDataset.ipynb
+      - Simple Simulation Example: QuickStart.ipynb
+      - Hospitalization LOS Simulation: SimulatedDataset.ipynb
 
 plugins:
   - mknotebooks
