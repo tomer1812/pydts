@@ -132,7 +132,7 @@ def main(seed=0, N_patients=DEFAULT_N_PATIENTS, output_dir=OUTPUT_DIR, filename=
 def default_sampling_logic(Z, d_times):
     alpha1t = -1 -0.3*np.log(np.arange(start=1, stop=d_times+1))
     beta1 = -np.log([0.8, 3, 3, 2.5, 2])
-    alpha2t = -1 -0.4*np.log(np.arange(start=1, stop=d_times+1))
+    alpha2t = -1.75 -0.15*np.log(np.arange(start=1, stop=d_times+1))
     beta2 = -np.log([1, 3, 4, 3, 2])
     hazard1 = expit(alpha1t+(Z*beta1).sum())
     hazard2 = expit(alpha2t+(Z*beta2).sum())
