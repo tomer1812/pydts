@@ -2,6 +2,7 @@ import numpy as np
 from examples.simulations_data_config import *
 from config import *
 import pandas as pd
+from scipy.special import expit
 
 
 def sample_los(new_patient, age_mean, age_std, bmi_mean, bmi_std, coefs=COEFS, baseline_hazard_scale=8,
@@ -128,32 +129,45 @@ def main(seed=0, N_patients=DEFAULT_N_PATIENTS, output_dir=OUTPUT_DIR, filename=
     simulated_patients_df.set_index(PATIENT_NO_COL).to_csv(os.path.join(output_dir, filename))
 
 
-def default_sample_T(patients_df, d_times):
-    patients_df['T'] = np.clip(np.round(d_times * (patients_df['Z1'])), a_min=1, a_max=d_times+1)
-    return patients_df
+def default_sampling_logic(Z, d_times):
+    alpha1t = -1 -0.3*np.log(np.arange(start=1, stop=d_times+1))
+    beta1 = -np.log([0.8, 3, 3, 2.5, 2])
+    alpha2t = -1 -0.4*np.log(np.arange(start=1, stop=d_times+1))
+    beta2 = -np.log([1, 3, 4, 3, 2])
+    hazard1 = expit(alpha1t+(Z*beta1).sum())
+    hazard2 = expit(alpha2t+(Z*beta2).sum())
+    surv_func = np.array([1, *np.cumprod(1-hazard1-hazard2)[:-1]])
+    proba1 = hazard1*surv_func
+    proba2 = hazard2*surv_func
+    sum1 = np.sum(proba1)
+    sum2 = np.sum(proba2)
+    probj1t = proba1 / sum1
+    probj2t = proba2 / sum2
+    j_i = np.random.choice(a=[0, 1, 2], p=[1-sum1-sum2, sum1, sum2])
+    if j_i == 0:
+        T_i = d_times
+    elif j_i == 1:
+        T_i = np.random.choice(a=np.arange(1, d_times+1), p=probj1t)
+    else:
+        T_i = np.random.choice(a=np.arange(1, d_times+1), p=probj2t)
+    return j_i, T_i
 
-def default_sample_C(patients_df, d_times, n_patients):
-    patients_df['C'] = np.random.randint(low=1, high=d_times + 1, size=n_patients)
-    return patients_df
 
-def default_sample_J(patients_df, j_events, n_patients):
-    patients_df['J'] = np.random.randint(low=1, high=1 + j_events, size=n_patients)
-    return patients_df
-
-def generate_quick_start_df(n_patients=10000, d_times=150, j_events=2, n_cov=5, seed=0, pid_col='pid',
-                            sample_T=default_sample_T, sample_C=default_sample_C, sample_J=default_sample_J):
+def generate_quick_start_df(n_patients=10000, d_times=30, j_events=2, n_cov=5, seed=0, pid_col='pid',
+                            sampling_logic=default_sampling_logic):
     np.random.seed(seed)
     covariates = [f'Z{i + 1}' for i in range(n_cov)]
     patients_df = pd.DataFrame(data=np.random.uniform(low=0.0, high=1.0, size=[n_patients, n_cov]),
                                columns=covariates)
+    sampled = patients_df.apply(lambda row: sampling_logic(Z=row, d_times=d_times), axis=1)
+    patients_df = pd.concat([patients_df, pd.DataFrame.from_records(sampled, columns=['J', 'T'])], axis=1)
     patients_df.index.name = pid_col
-    patients_df = sample_T(patients_df, d_times)
-    patients_df = sample_C(patients_df, d_times, n_patients)
+    patients_df['C'] = np.random.randint(low=1, high=d_times+1, size=n_patients)
     patients_df['X'] = patients_df[['T', 'C']].min(axis=1)
-    patients_df = sample_J(patients_df, j_events, n_patients)
     patients_df.loc[patients_df['C'] < patients_df['T'], 'J'] = 0
     return patients_df.reset_index()
 
 
 if __name__ == "__main__":
-    main()
+    #main()
+    generate_quick_start_df(n_patients=2)
