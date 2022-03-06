@@ -9,7 +9,7 @@
 
 A Python package for discrete time survival data analysis.
 
-## Installation
+## Installation:
 ```console
 pip install pydts
 ```
