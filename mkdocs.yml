@@ -11,7 +11,7 @@ site_author: Tomer Meir, Rom Gutman
 
 repo_url: https://github.com/tomer1812/pydts/
 repo_name: tomer1812/pydts
-edit_uri: ""  # No edit button, as some of our pages are in /docs and some in /examples via symlink, so it's impossible for them all to be accurate
+edit_uri: ""  # No edit button, as some of our pages are in /docs and some in /examples_utils via symlink, so it's impossible for them all to be accurate
 
 strict: false  # Don't allow warnings during the build process
 

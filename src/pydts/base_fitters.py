@@ -1,46 +1,8 @@
 import numpy as np
 from scipy.special import logit
 import pandas as pd
-
-
-class BaseDiscreteModel:
-    """
-    This class specifies the discrete model structure
-    """
-
-    def fit(self):
-        raise NotImplemented
-
-    def predict(self):
-        raise NotImplemented
-
-    def print_summary(self):
-        raise NotImplemented
-
-    def _hazard(self, params, t, event_type):
-        raise NotImplemented
-
-    def _cumulative_hazard(self, params, t):
-        raise NotImplemented
-
-    def _h_func(self, a):
-        raise NotImplemented
-
-    def _log_likelihood(self):
-        raise NotImplemented
-
-
-class DiscreteModel(BaseDiscreteModel):
-
-    alpha_df: pd.DataFrame
-    beta_df: pd.DataFrame  # columns
-
-    def _hazard(self, params, t, event_type):
-        self._h_func()
-
-    def _h_func(self, a):
-        return logit(a)
-
+from typing import Callable, Iterator, List, Optional, Tuple, Union, Any, Iterable
+import statsmodels.api as sm
 
 
 # class BaseH1DiscreteModel(BaseDiscreteModel):
