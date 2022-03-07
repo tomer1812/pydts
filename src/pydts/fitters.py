@@ -45,7 +45,7 @@ class DataExpansionFitter:
         for event, model in self.event_models.items():
             _summary_func = getattr(model, summary_func, None)
             if _summary_func is not None:
-                print(f'Model summary for event: {event}')
+                print(f'\n\nModel summary for event: {event}')
                 print(_summary_func(**summary_kwargs))
             else:
                 print(f'Not {summary_func} function in event {event} model')
@@ -87,7 +87,7 @@ class TwoStagesFitter:
             covariates = [col for col in df if col not in [event_type_col, duration_col, pid_col]]
 
         expanded_df = get_expanded_df(df=df, event_type_col=event_type_col, duration_col=duration_col, pid_col=pid_col)
-        beta_models = self._fit_beta(expanded_df, events, covariates, **fit_beta_kwargs)
+        beta_models = self._fit_beta(expanded_df, events, covariates, duration_col=duration_col, **fit_beta_kwargs)
 
         y_t = len(df[duration_col]) - df[duration_col].value_counts().sort_index().cumsum()
         n_jt = df.groupby([event_type_col, duration_col]).size().to_frame().reset_index()

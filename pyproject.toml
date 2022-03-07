@@ -35,6 +35,7 @@ mkdocstrings = "^0.18.1"
 jupyter = "^1.0.0"
 seaborn = "^0.11.2"
 scikit-survival = "^0.17.1"
+tableone = "^0.7.10"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

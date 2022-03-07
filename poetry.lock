@@ -1474,6 +1474,32 @@ develop = ["cython (>=0.29.26)"]
 docs = ["sphinx", "nbconvert", "jupyter-client", "ipykernel", "matplotlib", "nbformat", "numpydoc", "pandas-datareader"]
 
 [[package]]
+name = "tableone"
+version = "0.7.10"
+description = "TableOne"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+numpy = ">=1.12.1"
+pandas = ">=0.22.0"
+scipy = ">=0.18.1"
+statsmodels = ">=0.8.0"
+tabulate = ">=0.8.2"
+
+[[package]]
+name = "tabulate"
+version = "0.8.9"
+description = "Pretty-print tabular data"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.extras]
+widechars = ["wcwidth"]
+
+[[package]]
 name = "terminado"
 version = "0.13.2"
 description = "Tornado websocket backend for the Xterm.js Javascript terminal emulator library."
@@ -1612,7 +1638,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "0ed97f47c8cfe82116fcb46f535e6c1fbb2f937ce29457985bb8747d1e1394d4"
+content-hash = "aa7f1a233791feb2ba480b0369d4cc92e6b1b622c8c16030a44190164a9ca5ef"
 
 [metadata.files]
 appnope = [
@@ -2618,6 +2644,14 @@ statsmodels = [
     {file = "statsmodels-0.13.2-cp39-cp39-win32.whl", hash = "sha256:461c82ab2265fa8457b96afc23ef3ca19f42eb070436e0241b57e58a38863901"},
     {file = "statsmodels-0.13.2-cp39-cp39-win_amd64.whl", hash = "sha256:39daab5a8a9332c8ea83d6464d065080c9ba65f236daf6a64aa18f64ef776fad"},
     {file = "statsmodels-0.13.2.tar.gz", hash = "sha256:77dc292c9939c036a476f1770f9d08976b05437daa229928da73231147cde7d4"},
+]
+tableone = [
+    {file = "tableone-0.7.10-py2.py3-none-any.whl", hash = "sha256:c42037fed76dd5149374b7641d40fd0ab206508961a919fb10a55876c888a780"},
+    {file = "tableone-0.7.10.tar.gz", hash = "sha256:6ef7d3a824d43e003eebb8bb93e9ed0fedeafd59e70581e65ae231654bcc4cee"},
+]
+tabulate = [
+    {file = "tabulate-0.8.9-py3-none-any.whl", hash = "sha256:d7c013fe7abbc5e491394e10fa845f8f32fe54f8dc60c6622c6cf482d25d47e4"},
+    {file = "tabulate-0.8.9.tar.gz", hash = "sha256:eb1d13f25760052e8931f2ef80aaf6045a6cceb47514db8beab24cded16f13a7"},
 ]
 terminado = [
     {file = "terminado-0.13.2-py3-none-any.whl", hash = "sha256:d61f112f3beb7271d953d3934f056af185f6be0750303581fa1c511379a8a5d0"},

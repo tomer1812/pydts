@@ -47,3 +47,9 @@ COEFS = pd.Series({
 ADMISSION_SERIAL_BINS = [0, 1.5, 4.5, 8.5, 21]
 ADMISSION_SERIAL_LABELS = [0, 1, 2, 3]
 SIMULATED_DATA_FILENAME = 'simulated_data.csv'
+
+preconditions = [SMOKING_COL, HYPERTENSION_COL, DIABETES_COL, ART_FIB_COL, COPD_COL, CRF_COL]
+font_sz = 14
+title_sz = 18
+AGE_BINS = list(range(0, 125, 5))
+AGE_LABELS = [f'{AGE_BINS[a]}' for a in range(len(AGE_BINS)-1)]
