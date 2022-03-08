@@ -1,1 +1,1 @@
-::: pydts.base_fitters
+::: pydts.base_fitters.TwoStagesFitter
