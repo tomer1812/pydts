@@ -41,6 +41,8 @@ nav:
     - Examples:
       - Simple Simulation Example: Simple Simulation.ipynb
       - Hospitalization LOS Simulation: SimulatedDataset.ipynb
+    - API:
+      - 'api/fitters.md'
 
 plugins:
   - mknotebooks

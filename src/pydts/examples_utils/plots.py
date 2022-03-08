@@ -8,7 +8,7 @@ warnings.filterwarnings('ignore')
 
 
 def plot_first_model_coefs(models, times, expanded_train_df, n_cov=5):
-    fig, axes = plt.subplots(1,2, figsize=(14,6))
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
     ax = axes[0]
     ax.set_title(r'$\alpha_{jt}$', fontsize=26)
     ax.scatter(times, models[1].params[:len(times)].values, label='J=1 (Pred)', color='tab:blue')
