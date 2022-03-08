@@ -2,7 +2,7 @@
 [![Tests](https://github.com/tomer1812/pydts/workflows/Tests/badge.svg)](https://github.com/tomer1812/pydts/actions?workflow=Tests)
 [![documentation](https://img.shields.io/badge/docs-mkdocs%20material-blue.svg?style=flat)](https://tomer1812.github.io/pydts)
 
-![PyDTS](docs/dtsicon.svg)  
+![PyDTS](docs/dtsicon.svg=100x60)  
 # Discrete Time Survival Analysis  
 [Read the Docs](https://tomer1812.github.io/pydts/)  
 [Tomer Meir](https://tomer1812.github.io/), [Rom Gutman](https://github.com/RomGutman), [Malka Gorfine](https://www.tau.ac.il/~gorfinem/) 2022
