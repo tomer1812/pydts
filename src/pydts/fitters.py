@@ -112,6 +112,11 @@ class TwoStagesFitter(ExpansionBasedFitter):
         ```
     """
 
+    def __init__(self):
+        super().__init__()
+        self.alpha_df = pd.DataFrame()
+        self.beta_models = {}
+
     def _alpha_jt(self, x, df, y_t, beta_j, n_jt, t):
         partial_df = df[df[self.duration_col] >= t]
         expit_add = (partial_df[self.covariates] * beta_j).sum(axis=1)
@@ -181,27 +186,26 @@ class TwoStagesFitter(ExpansionBasedFitter):
         expanded_df = self._expand_data(df=df, event_type_col=event_type_col, duration_col=duration_col,
                                         pid_col=pid_col)
 
-        beta_models = self._fit_beta(expanded_df, events, **fit_beta_kwargs)
+        self.beta_models = self._fit_beta(expanded_df, events, **fit_beta_kwargs)
 
         y_t = len(df[duration_col]) - df[duration_col].value_counts().sort_index().cumsum()
         n_jt = df.groupby([event_type_col, duration_col]).size().to_frame().reset_index()
         n_jt.columns = [event_type_col, duration_col, 'n_jt']
 
-        alpha_df = pd.DataFrame()
         for event in events:
             n_et = n_jt[n_jt[event_type_col] == event]
             n_et['opt_res'] = n_et.parallel_apply(lambda row: minimize(self._alpha_jt, x0=x0,
-                                    args=(df, y_t.loc[row[duration_col]], beta_models[event].params_, row['n_jt'],
+                                    args=(df, y_t.loc[row[duration_col]], self.beta_models[event].params_, row['n_jt'],
                                     row[duration_col])), axis=1)
             n_et['success'] = n_et['opt_res'].parallel_apply(lambda val: val.success)
             n_et['alpha_jt'] = n_et['opt_res'].parallel_apply(lambda val: val.x[0])
-            self.event_models[event] = [beta_models[event], n_et]
-            alpha_df = pd.concat([alpha_df, n_et], ignore_index=True)
+            self.event_models[event] = [self.beta_models[event], n_et]
+            self.alpha_df = pd.concat([self.alpha_df, n_et], ignore_index=True)
 
         return self.event_models
 
     def print_summary(self,
-                      summary_func: str = "summary",
+                      summary_func: str = "print_summary",
                       summary_kwargs: dict = {}) -> None:
         """
         This method prints the summary of the fitted models for all the events.
@@ -236,3 +240,5 @@ if __name__ == "__main__":
 
     m2 = TwoStagesFitter()
     m2.fit(df)
+    m2.print_summary()
+
