@@ -9,8 +9,6 @@ A Python package for discrete time survival data analysis.
 
 [Tomer Meir](https://tomer1812.github.io/), [Rom Gutman](https://github.com/RomGutman), [Malka Gorfine](https://www.tau.ac.il/~gorfinem/) 2022
 
-[Documentation](https://tomer1812.github.io/pydts/)  
-
 ## Installation
 ```console
 pip install pydts
