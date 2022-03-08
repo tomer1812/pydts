@@ -5,7 +5,7 @@
 # Discrete Time Survival Analysis  
 A Python package for discrete time survival data analysis.
 
-![PyMSM](docs/icon.png)  
+![PyDTS](docs/icon.png)  
 
 [Tomer Meir](https://tomer1812.github.io/), [Rom Gutman](https://github.com/RomGutman), [Malka Gorfine](https://www.tau.ac.il/~gorfinem/) 2022
 
