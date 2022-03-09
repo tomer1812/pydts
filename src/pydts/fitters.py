@@ -557,6 +557,50 @@ class TwoStagesFitter(ExpansionBasedFitter):
             se_df = pd.concat([se_df, mdf], axis=1)
         return se_df
 
+    def plot_all_events_beta(self, ax: plt.Axes = None, colors: list = COLORS, show: bool = True,
+                             title: Union[str, None] = None, xlabel: str = 't',  ylabel: str = r'$\beta_{j}$',
+                             fontsize: int = 18) -> plt.Axes:
+        """
+        This function plots the $ beta_{j} $ coefficients and standard errors of all the events.
+        Args:
+            ax (matplotlib.pyplot.Axes, Optional): ax to use
+            colors (list, Optional): colors names
+            show (bool, Optional): if to use plt.show()
+            title (str, Optional): axes title
+            xlabel (str, Optional): axes xlabel
+            ylabel (str, Optional): axes ylabel
+            fontsize (int, Optional): axes title, xlabel, ylabel fontsize
+
+        Returns:
+            ax (matplotlib.pyplot.Axes): output figure
+        """
+        if ax is None:
+            fig, ax = plt.subplots(1, 1)
+        title = r'$\beta_{j}$' + f' for all events' if title is None else title
+
+        se_df = self.get_beta_SE()
+
+        for idx, col in enumerate(se_df.columns):
+            if idx % 2 == 1:
+                continue
+            y = np.arange((idx//2)*len(se_df), (1+(idx//2))*len(se_df))
+            ax.errorbar(x=se_df.iloc[:, idx].values, y=y,
+                       color=colors[idx % len(colors)], xerr=se_df.iloc[:, idx+1].values, label=f'{col}',
+                       markersize=6, ls='', marker='o')
+
+        yt = list(se_df.index) * (len(se_df) // 2)
+        ax.set_yticks(np.arange(0, len(yt)))
+        ax.set_yticklabels(yt)
+        ax.set_title(title, fontsize=fontsize)
+        ax.set_xlabel(xlabel, fontsize=fontsize)
+        ax.set_ylabel(ylabel, fontsize=fontsize)
+        ax.grid()
+        plt.gca().invert_yaxis()
+        ax.legend()
+        if show:
+            plt.show()
+        return ax
+
 
 if __name__ == "__main__":
     from pydts.examples_utils.generate_simulations_data import generate_quick_start_df
@@ -579,5 +623,6 @@ if __name__ == "__main__":
     # m2.predict_cumulative_incident_function(test_df)
     # m2.predict(test_df)
     print(m2.get_beta_SE())
+    m2.plot_all_events_beta()
     print('x')
 
