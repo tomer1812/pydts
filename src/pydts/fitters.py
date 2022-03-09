@@ -542,6 +542,21 @@ class TwoStagesFitter(ExpansionBasedFitter):
                 self.predict_event_cumulative_incident_function(df=df, event=event)
         return df
 
+    def get_beta_SE(self):
+        """
+        This function returns the Beta coefficients and their Standard Errors for all the events.
+
+        Returns:
+            se_df (pandas.DataFrame): Beta coefficients and Standard Errors Dataframe
+
+        """
+        se_df = pd.DataFrame()
+        for event, model in self.beta_models.items():
+            mdf = pd.concat([model.params_, model.standard_errors_], axis=1)
+            mdf.columns = [f'j{event}_params', f'j{event}_SE']
+            se_df = pd.concat([se_df, mdf], axis=1)
+        return se_df
+
 
 if __name__ == "__main__":
     from pydts.examples_utils.generate_simulations_data import generate_quick_start_df
@@ -561,7 +576,8 @@ if __name__ == "__main__":
     #pred_df = m2.predict_overall_survival(test_df, t=5)
     #pred_prob = m2.predict_prob_event_j_at_t(test_df, event=1, t=2)
     #m2.predict_event_cumulative_incident_function(test_df, event=1)
-    m2.predict_cumulative_incident_function(test_df)
+    # m2.predict_cumulative_incident_function(test_df)
     # m2.predict(test_df)
+    print(m2.get_beta_SE())
     print('x')
 
