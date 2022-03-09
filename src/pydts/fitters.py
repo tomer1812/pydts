@@ -103,7 +103,7 @@ class DataExpansionFitter(ExpansionBasedFitter):
 class TwoStagesFitter(ExpansionBasedFitter):
 
     """
-    This class implements the new approach for fitting model to discrete time survival data  # TODO add reference
+    This class implements the new approach for fitting model to discrete time survival data.
     See also Simple Example section.
 
     Example:
@@ -234,7 +234,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
                          show=True, title=None, xlabel='t', ylabel=r'$\alpha_{jt}$', fontsize=18,
                          color: str = None, label: str = None) -> plt.Axes:
         """
-        This function plots a scatter plot of the $\alpha_{jt}$ coefficients of a specific event.
+        This function plots a scatter plot of the $ alpha_{jt} $ coefficients of a specific event.
         Args:
             event (Union[str, int]): event name
             ax (matplotlib.pyplot.Axes, Optional): ax to use
@@ -269,7 +269,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
                               show: bool = True, title: Union[str, None] = None, xlabel: str = 't',
                               ylabel: str = r'$\alpha_{jt}$', fontsize: int = 18) -> plt.Axes:
         """
-        This function plots a scatter plot of the $\alpha_{jt}$ coefficients of all the events.
+        This function plots a scatter plot of the $ alpha_{jt} $ coefficients of all the events.
         Args:
             ax (matplotlib.pyplot.Axes, Optional): ax to use
             scatter_kwargs (dict, Optional): keywords to pass to the scatter function
@@ -368,7 +368,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
             Union[int, np.array, pd.Series, pd.DataFrame]:
         """
         This function defines the transformation of the hazard function such that
-        $h ( \lambda_j (t | Z) ) = \alpha_{jt} + Z^{T} \beta_{j} $
+        $ h ( \lambda_j (t | Z) ) = \alpha_{jt} + Z^{T} \beta_{j} $
 
         Args:
             a (Union[int, np.array, pd.Series, pd.DataFrame]):
@@ -377,8 +377,8 @@ class TwoStagesFitter(ExpansionBasedFitter):
             i (Union[int, np.array, pd.Series, pd.DataFrame]): the inverse function applied on a. $ h^{-1} (a)$
         """
 
-        transform = logit(a)
-        return transform
+        i = logit(a)
+        return i
 
     def hazard_inverse_transformation(self, a: Union[int, np.array, pd.Series, pd.DataFrame]) -> \
             Union[int, np.array, pd.Series, pd.DataFrame]:
@@ -390,7 +390,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
             a (Union[int, np.array, pd.Series, pd.DataFrame]):
 
         Returns:
-            i (Union[int, np.array, pd.Series, pd.DataFrame]): the inverse function applied on a. $ h^{-1} (a)$
+            i (Union[int, np.array, pd.Series, pd.DataFrame]): the inverse function applied on a. $ h^{-1} (a) $
         """
         i = expit(a)
         return i
@@ -411,6 +411,7 @@ if __name__ == "__main__":
     m2.fit(df.drop(['C', 'T'], axis=1))
     #m2.plot_all_events_alpha()
     pred_df = m2.predict_hazard_all(test_df)
+
     # m2.predict(test_df)
     print('x')
 
