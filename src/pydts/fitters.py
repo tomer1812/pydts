@@ -416,6 +416,17 @@ class TwoStagesFitter(ExpansionBasedFitter):
         return i
 
     def predict_overall_survival(self, df: pd.DataFrame, t: int = None, return_hazards: bool = False) -> pd.DataFrame:
+        """
+        This function adds columns of the overall survival until time t.
+        Args:
+            df (pandas.DataFrame): dataframe with covariates columns
+            t (int): time
+            return_hazards (bool): if to keep the hazard columns
+
+        Returns:
+            df (pandas.DataFrame): dataframe with the additional overall survival columns
+
+        """
         all_hazards = self.predict_hazard_all(df)
         _times = self.times if t is None else [_t for _t in self.times if _t <= t]
         overall = pd.DataFrame()
@@ -431,6 +442,19 @@ class TwoStagesFitter(ExpansionBasedFitter):
         return overall
 
     def predict_prob_event_j_at_t(self, df: pd.DataFrame, event: Union[str, int], t: int) -> pd.DataFrame:
+        """
+        This function adds a column with probability of occurance of a specific event at a specific a time.
+
+        Args:
+            df (pandas.DataFrame): dataframe with covariates columns
+            event (Union[str, int]): event name
+            t (int): time
+
+        Returns:
+            df (pandas.DataFrame): dataframe an additional probability column
+
+        """
+
         if f'prob_j{event}_at_t{t}' not in df.columns:
             if t == 1:
                 if f'hazard_j{event}_t{t}' not in df.columns:
@@ -445,6 +469,18 @@ class TwoStagesFitter(ExpansionBasedFitter):
         return df
 
     def predict_prob_event_j_all(self, df: pd.DataFrame, event: Union[str, int]) -> pd.DataFrame:
+        """
+        This function adds columns of a specific event occurance probabilities.
+
+        Args:
+            df (pandas.DataFrame): dataframe with covariates columns
+            event (Union[str, int]): event name
+
+        Returns:
+            df (pandas.DataFrame): dataframe with probabilities columns
+
+        """
+
         if f'overall_survival_t{self.times[-1]}' not in df.columns:
             df = self.predict_overall_survival(df, return_hazards=True)
         for t in self.times:
@@ -453,11 +489,34 @@ class TwoStagesFitter(ExpansionBasedFitter):
         return df
 
     def predict_prob_events(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        This function adds columns of all the events occurance probabilities.
+        Args:
+            df (pandas.DataFrame): dataframe with covariates columns
+
+        Returns:
+            df (pandas.DataFrame): dataframe with probabilities columns
+
+        """
+
         for event in self.events:
             df = self.predict_prob_event_j_all(df=df, event=event)
         return df
 
     def predict_event_cumulative_incident_function(self, df: pd.DataFrame, event: Union[str, int]) -> pd.DataFrame:
+        """
+        This function adds a specific event columns of the predicted hazard function, overall survival, probabilities
+        of event occurance and cumulative incident function (CIF) to the given dataframe.
+
+        Args:
+            df (pandas.DataFrame): dataframe with covariates columns included
+            event (Union[str, int]): event name
+
+        Returns:
+            df (pandas.DataFrame): dataframe with additional prediction columns
+
+        """
+
         if f'prob_j{event}_at_t{self.times[-1]}' not in df.columns:
             df = self.predict_prob_events(df=df)
         cols = [f'prob_j{event}_at_t{t}' for t in self.times]
@@ -467,11 +526,21 @@ class TwoStagesFitter(ExpansionBasedFitter):
         return df
 
     def predict_cumulative_incident_function(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        This function adds columns of the predicted hazard function, overall survival, probabilities of event occurance
+        and cumulative incident function (CIF) to the given dataframe.
+
+        Args:
+            df (pandas.DataFrame): dataframe with covariates columns included
+
+        Returns:
+            df (pandas.DataFrame): dataframe with additional prediction columns
+
+        """
         for event in self.events:
             if f'cif_j{event}_at_t{self.times[-1]}' not in df.columns:
                 self.predict_event_cumulative_incident_function(df=df, event=event)
         return df
-
 
 
 if __name__ == "__main__":
