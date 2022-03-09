@@ -178,25 +178,25 @@ class TwoStagesFitter(ExpansionBasedFitter):
             event_models (dict): Fitted models dictionary. Keys - event names, Values - fitted models for the event.
         """
         pandarallel.initialize()
-        events = [c for c in sorted(df[event_type_col].unique()) if c != 0]
+        self.events = [c for c in sorted(df[event_type_col].unique()) if c != 0]
         if covariates is None:
             covariates = [col for col in df if col not in [event_type_col, duration_col, pid_col]]
         self.covariates = covariates
         self.event_type_col = event_type_col
         self.duration_col = duration_col
         self.pid_col = pid_col
-        self.times = sorted(df[duration_col].astype(float).unique())
+        self.times = sorted(df[duration_col].unique())
 
         expanded_df = self._expand_data(df=df, event_type_col=event_type_col, duration_col=duration_col,
                                         pid_col=pid_col)
 
-        self.beta_models = self._fit_beta(expanded_df, events, **fit_beta_kwargs)
+        self.beta_models = self._fit_beta(expanded_df, self.events, **fit_beta_kwargs)
 
         y_t = len(df[duration_col]) - df[duration_col].value_counts().sort_index().cumsum()
         n_jt = df.groupby([event_type_col, duration_col]).size().to_frame().reset_index()
         n_jt.columns = [event_type_col, duration_col, 'n_jt']
 
-        for event in events:
+        for event in self.events:
             n_et = n_jt[n_jt[event_type_col] == event]
             n_et['opt_res'] = n_et.parallel_apply(lambda row: minimize(self._alpha_jt, x0=x0,
                                     args=(df, y_t.loc[row[duration_col]], self.beta_models[event].params_, row['n_jt'],
@@ -317,7 +317,11 @@ class TwoStagesFitter(ExpansionBasedFitter):
             drop = False
 
         model = self.event_models[event]
-        beta_j_x = (df[self.covariates] * model[0].params_).sum(axis=1)
+        print(event, t)
+        try:
+            beta_j_x = (df[self.covariates] * model[0].params_).sum(axis=1)
+        except:
+            print('here')
         alpha_df = model[1].set_index(self.duration_col)
         _t = np.array([t_i for t_i in t if t_i in alpha_df.index])
         if len(_t) > 1:
@@ -325,9 +329,18 @@ class TwoStagesFitter(ExpansionBasedFitter):
         alpha_jt_t = pd.concat([alpha_df.loc[_t, 'alpha_jt'] * _t] * len(beta_j_x), axis=1).T
         alpha_jt_t.index = beta_j_x.index
         alpha_jt_t.columns = [f'j{event}_t{c}' for c in alpha_jt_t.columns]
+
+        hazard_df = self.hazard_inverse_transformation(alpha_jt_t + beta_j_x.values)
+
+        # todo validate this hazard imputation!
+        for t_i in self.times[1:]:
+            if f'j{event}_t{t_i}' not in hazard_df.columns:
+                hazard_df[f'j{event}_t{t_i}'] = hazard_df[f'j{event}_t{t_i-1}']
+        hazard_df = hazard_df[[f'j{event}_t{t_i}' for t_i in self.times]]
+
         if drop:
             df.drop(f'{self.duration_col}_copy', axis=1, inplace=True)
-        df = pd.concat([df, self.hazard_inverse_transformation(alpha_jt_t + beta_j_x.values)], axis=1)
+        df = pd.concat([df, hazard_df], axis=1)
         return df
 
     def predict_hazard_t(self, df: pd.DataFrame, t: np.array) -> pd.DataFrame:
@@ -343,7 +356,9 @@ class TwoStagesFitter(ExpansionBasedFitter):
             df (pd.DataFrame): samples with the prediction columns
         '''
 
-        df[f'{self.duration_col}_copy'] = df[self.duration_col]
+        if f'{self.duration_col}_copy' not in df.columns:
+            df[f'{self.duration_col}_copy'] = df[self.duration_col]
+
         for event, model in self.event_models.items():
             df = self.predict_hazard_jt(df=df, event=event, t=t)
         df.drop(f'{self.duration_col}_copy', axis=1, inplace=True)
@@ -395,6 +410,53 @@ class TwoStagesFitter(ExpansionBasedFitter):
         i = expit(a)
         return i
 
+    def predict_overall_survival(self, df: pd.DataFrame, t: int = None, return_hazards: bool = False) -> pd.DataFrame:
+        all_hazards = self.predict_hazard_all(df)
+        _times = self.times if t is None else [_t for _t in self.times if _t <= t]
+        overall = pd.DataFrame()
+        for t_i in _times:
+            cols = [f'j{e}_t{t_i}' for e in self.events]
+            t_i_hazard = 1 - all_hazards[cols].sum(axis=1)
+            t_i_hazard.name = f'overall_survival_t{t_i}'
+            overall = pd.concat([overall, t_i_hazard], axis=1)
+        overall = pd.concat([df, overall.cumprod(axis=1)], axis=1)
+        if return_hazards:
+            overall = pd.concat([overall, all_hazards[[c for c in all_hazards.columns
+                                                       if c not in overall.columns]]], axis=1)
+        return overall
+
+    def predict_prob_event_j_at_t(self, df: pd.DataFrame, event: Union[str, int], t: int) -> pd.DataFrame:
+        if not f'overall_survival_t{t - 1}' in df.columns:
+            df = self.predict_overall_survival(df, t=t, return_hazards=True)
+        elif not f'j{event}_t{t}' in df.columns:
+            df = self.predict_hazard_t(df, t=np.array([_t for _t in self.times if _t <= t]))
+        if t == 1:
+            df[f'prob_j{event}_at_t{t}'] = df[f'j{event}_t{t}']
+        else:
+            df[f'prob_j{event}_at_t{t}'] = df[f'overall_survival_t{t - 1}'] * df[f'j{event}_t{t}']
+        return df
+
+    def predict_prob_event_j_all(self, df: pd.DataFrame, event: Union[str, int]) -> pd.DataFrame:
+        if f'overall_survival_t{self.times[-1]}' not in df.columns:
+            df = self.predict_overall_survival(df, return_hazards=True)
+        for t in self.times:
+            df = self.predict_prob_event_j_at_t(df=df, event=event, t=t)
+        return df
+
+    def predict_prob_events(self, df: pd.DataFrame) -> pd.DataFrame:
+        for event in self.events:
+            df = self.predict_prob_event_j_all(df=df, event=event)
+        return df
+
+    def predict_event_cumulative_incident_function(self, df: pd.DataFrame, event: Union[str, int]) -> pd.DataFrame:
+        if f'prob_j{event}_at_t{self.times[-1]}' not in df.columns:
+            df = self.predict_prob_events(df=df)
+        cols = [f'prob_j{event}_at_t{t}' for t in self.times]
+        cif_df = df[cols].cumsum(axis=1)
+        cif_df.columns = [f'cif_j{event}_at_t{t}' for t in self.times]
+        df = pd.concat([df, cif_df], axis=1)
+        return df
+
 
 if __name__ == "__main__":
     from pydts.examples_utils.generate_simulations_data import generate_quick_start_df
@@ -402,16 +464,18 @@ if __name__ == "__main__":
     n_cov = 5
     patients_df = generate_quick_start_df(n_patients=n_patients, n_cov=n_cov, d_times=30, j_events=2,
                                           pid_col='pid', seed=0)
-    df, test_df = train_test_split(patients_df, test_size=0.25)
+    train_df, test_df = train_test_split(patients_df, test_size=0.25)
     # m = DataExpansionFitter()
     # m.fit(df=df.drop(['C', 'T'], axis=1))
     # m.print_summary()
 
     m2 = TwoStagesFitter()
-    m2.fit(df.drop(['C', 'T'], axis=1))
+    m2.fit(train_df.drop(['C', 'T'], axis=1))
     #m2.plot_all_events_alpha()
-    pred_df = m2.predict_hazard_all(test_df)
-
+    #pred_df = m2.predict_hazard_all(test_df)
+    #pred_df = m2.predict_overall_survival(test_df, t=5)
+    #pred_prob = m2.predict_prob_event_j_at_t(test_df, event=1, t=2)
+    m2.predict_event_cumulative_incident_function(test_df, event=1)
     # m2.predict(test_df)
     print('x')
 
