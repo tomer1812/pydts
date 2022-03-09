@@ -16,6 +16,7 @@ class BaseFitter:
         self.events = None
         self.covariates = None
         self.formula = None
+        self.times = None
 
     def fit(self, df: pd.DataFrame, event_type_col: str = 'J', duration_col: str = 'X', pid_col: str = 'pid',
             **kwargs) -> dict:

@@ -1,16 +1,19 @@
+import matplotlib.pyplot as plt
 import statsmodels.api as sm
 from pydts.base_fitters import ExpansionBasedFitter
 from sklearn.model_selection import train_test_split
-from scipy.special import expit
 from scipy.optimize import minimize
+from scipy.special import logit, expit
 import numpy as np
 import pandas as pd
 from lifelines.fitters.coxph_fitter import CoxPHFitter
 from pandarallel import pandarallel
 from typing import Optional, List, Union
+from matplotlib import colors as mcolors
 
 
 DEFAULT_MODELS_KWARGS = dict(family=sm.families.Binomial())
+COLORS = list(mcolors.TABLEAU_COLORS.keys())
 
 
 class DataExpansionFitter(ExpansionBasedFitter):
@@ -182,6 +185,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
         self.event_type_col = event_type_col
         self.duration_col = duration_col
         self.pid_col = pid_col
+        self.times = sorted(df[duration_col].astype(float).unique())
 
         expanded_df = self._expand_data(df=df, event_type_col=event_type_col, duration_col=duration_col,
                                         pid_col=pid_col)
@@ -226,19 +230,187 @@ class TwoStagesFitter(ExpansionBasedFitter):
                 print(f'Not {summary_func} function in event {event} model')
             print(model[1])
 
+    def plot_event_alpha(self, event: Union[str, int], ax: plt.Axes = None, scatter_kwargs: dict = {},
+                         show=True, title=None, xlabel='t', ylabel=r'$\alpha_{jt}$', fontsize=18,
+                         color: str = None, label: str = None) -> plt.Axes:
+        """
+        This function plots a scatter plot of the $\alpha_{jt}$ coefficients of a specific event.
+        Args:
+            event (Union[str, int]): event name
+            ax (matplotlib.pyplot.Axes, Optional): ax to use
+            scatter_kwargs (dict, Optional): keywords to pass to the scatter function
+            show (bool, Optional): if to use plt.show()
+            title (str, Optional): axes title
+            xlabel (str, Optional): axes xlabel
+            ylabel (str, Optional): axes ylabel
+            fontsize (int, Optional): axes title, xlabel, ylabel fontsize
+            color (str, Optional): color name to use
+            label (str, Optional): label name
+        Returns:
+            ax (matplotlib.pyplot.Axes): output figure
+        """
+
+        if ax is None:
+            fig, ax = plt.subplots(1, 1)
+        title = r'$\alpha_{jt}$' + f' for event {event}' if title is None else title
+        label = f'{event}' if label is None else label
+        color = 'tab:blue' if color is None else color
+        alpha_df = self.event_models[event][1]
+        ax.scatter(alpha_df[self.duration_col].values, alpha_df['alpha_jt'].values, label=label,
+                   color=color, **scatter_kwargs)
+        ax.set_title(title, fontsize=fontsize)
+        ax.set_xlabel(xlabel, fontsize=fontsize)
+        ax.set_ylabel(ylabel, fontsize=fontsize)
+        if show:
+            plt.show()
+        return ax
+
+    def plot_all_events_alpha(self, ax: plt.Axes = None, scatter_kwargs: dict = {}, colors: list = COLORS,
+                              show: bool = True, title: Union[str, None] = None, xlabel: str = 't',
+                              ylabel: str = r'$\alpha_{jt}$', fontsize: int = 18) -> plt.Axes:
+        """
+        This function plots a scatter plot of the $\alpha_{jt}$ coefficients of all the events.
+        Args:
+            ax (matplotlib.pyplot.Axes, Optional): ax to use
+            scatter_kwargs (dict, Optional): keywords to pass to the scatter function
+            colors (list, Optional): colors names
+            show (bool, Optional): if to use plt.show()
+            title (str, Optional): axes title
+            xlabel (str, Optional): axes xlabel
+            ylabel (str, Optional): axes ylabel
+            fontsize (int, Optional): axes title, xlabel, ylabel fontsize
+
+        Returns:
+            ax (matplotlib.pyplot.Axes): output figure
+        """
+        if ax is None:
+            fig, ax = plt.subplots(1, 1)
+        title = r'$\alpha_{jt}$' + f' for all events' if title is None else title
+        for idx, (event, model) in enumerate(self.event_models.items()):
+            label = f'{event}'
+            color = colors[idx % len(colors)]
+            self.plot_event_alpha(event=event, ax=ax, scatter_kwargs=scatter_kwargs, show=False, title=title,
+                                  ylabel=ylabel, xlabel=xlabel, fontsize=fontsize, label=label, color=color)
+        ax.legend()
+        if show:
+            plt.show()
+        return ax
+
+    def predict_hazard_jt(self, df: pd.DataFrame, event: Union[str, int],  t: np.array) -> pd.DataFrame:
+        '''
+        This function calculates the hazard for the given event at the given time values if they were included in
+        the training set of the event.
+
+        Args:
+            df (pd.DataFrame): samples to predict for
+            event (Union[str, int]): event name
+            t (np.array): times to calculate the hazard for
+
+        Returns:
+            df (pd.DataFrame): samples with the prediction columns
+        '''
+
+        if f'{self.duration_col}_copy' not in df.columns:
+            drop = True
+            df[f'{self.duration_col}_copy'] = df[self.duration_col]
+        else:
+            drop = False
+
+        model = self.event_models[event]
+        beta_j_x = (df[self.covariates] * model[0].params_).sum(axis=1)
+        alpha_df = model[1].set_index(self.duration_col)
+        _t = np.array([t_i for t_i in t if t_i in alpha_df.index])
+        if len(_t) > 1:
+            beta_j_x = pd.concat([beta_j_x] * len(_t), ignore_index=True, axis=1)
+        alpha_jt_t = pd.concat([alpha_df.loc[_t, 'alpha_jt'] * _t] * len(beta_j_x), axis=1).T
+        alpha_jt_t.index = beta_j_x.index
+        alpha_jt_t.columns = [f'j{event}_t{c}' for c in alpha_jt_t.columns]
+        if drop:
+            df.drop(f'{self.duration_col}_copy', axis=1, inplace=True)
+        df = pd.concat([df, self.hazard_inverse_transformation(alpha_jt_t + beta_j_x.values)], axis=1)
+        return df
+
+    def predict_hazard_t(self, df: pd.DataFrame, t: np.array) -> pd.DataFrame:
+        '''
+        This function calculates the hazard for all the events at the requested time values if they were included in
+        the training set of each event.
+
+        Args:
+            df (pd.DataFrame): samples to predict for
+            t (np.array): times to calculate the hazard for
+
+        Returns:
+            df (pd.DataFrame): samples with the prediction columns
+        '''
+
+        df[f'{self.duration_col}_copy'] = df[self.duration_col]
+        for event, model in self.event_models.items():
+            df = self.predict_hazard_jt(df=df, event=event, t=t)
+        df.drop(f'{self.duration_col}_copy', axis=1, inplace=True)
+        return df
+
+    def predict_hazard_all(self, df: pd.DataFrame) -> pd.DataFrame:
+        '''
+        This function calculates the hazard for all the events at all time values included in the training set for each
+        event.
+
+        Args:
+            df (pd.DataFrame): samples to predict for
+
+        Returns:
+            df (pd.DataFrame): samples with the prediction columns
+
+        '''
+        df = self.predict_hazard_t(df, t=self.times)
+        return df
+
+    def hazard_transformation(self, a: Union[int, np.array, pd.Series, pd.DataFrame]) -> \
+            Union[int, np.array, pd.Series, pd.DataFrame]:
+        """
+        This function defines the transformation of the hazard function such that
+        $h ( \lambda_j (t | Z) ) = \alpha_{jt} + Z^{T} \beta_{j} $
+
+        Args:
+            a (Union[int, np.array, pd.Series, pd.DataFrame]):
+
+        Returns:
+            i (Union[int, np.array, pd.Series, pd.DataFrame]): the inverse function applied on a. $ h^{-1} (a)$
+        """
+
+        transform = logit(a)
+        return transform
+
+    def hazard_inverse_transformation(self, a: Union[int, np.array, pd.Series, pd.DataFrame]) -> \
+            Union[int, np.array, pd.Series, pd.DataFrame]:
+        """
+        This function defines the inverse transformation of the hazard function such that
+        $\lambda_j (t | Z) = h^{-1} ( \alpha_{jt} + Z^{T} \beta_{j} )$
+
+        Args:
+            a (Union[int, np.array, pd.Series, pd.DataFrame]):
+
+        Returns:
+            i (Union[int, np.array, pd.Series, pd.DataFrame]): the inverse function applied on a. $ h^{-1} (a)$
+        """
+        i = expit(a)
+        return i
+
 
 if __name__ == "__main__":
     from pydts.examples_utils.generate_simulations_data import generate_quick_start_df
-    n_patients = 2000
+    n_patients = 1000
     n_cov = 5
     patients_df = generate_quick_start_df(n_patients=n_patients, n_cov=n_cov, d_times=30, j_events=2,
                                           pid_col='pid', seed=0)
     df, test_df = train_test_split(patients_df, test_size=0.25)
-    m = DataExpansionFitter()
-    m.fit(df=df.drop(['C', 'T'], axis=1))
-    m.print_summary()
+    # m = DataExpansionFitter()
+    # m.fit(df=df.drop(['C', 'T'], axis=1))
+    # m.print_summary()
 
     m2 = TwoStagesFitter()
-    m2.fit(df)
-    m2.print_summary()
+    m2.fit(df.drop(['C', 'T'], axis=1))
+    #m2.plot_all_events_alpha()
+    pred_df = m2.predict_hazard_all(test_df)
+    # m2.predict(test_df)
+    print('x')
 

@@ -16,7 +16,7 @@ class TestFitters(unittest.TestCase):
 
     def test_e2e_TwoStagesFitter(cls):
         m2 = TwoStagesFitter()
-        m2.fit(cls.df)
+        m2.fit(cls.df.drop(['C', 'T'], axis=1))
         m2.print_summary()
 
 
