@@ -228,7 +228,8 @@ class TwoStagesFitter(ExpansionBasedFitter):
                 print(_summary_func(**summary_kwargs))
             else:
                 print(f'Not {summary_func} function in event {event} model')
-            print(model[1])
+            from IPython.display import display
+            display(model[1].drop('opt_res', axis=1).set_index([self.event_type_col, self.duration_col]))
 
     def plot_event_alpha(self, event: Union[str, int], ax: plt.Axes = None, scatter_kwargs: dict = {},
                          show=True, title=None, xlabel='t', ylabel=r'$\alpha_{jt}$', fontsize=18,
@@ -539,7 +540,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
         """
         for event in self.events:
             if f'cif_j{event}_at_t{self.times[-1]}' not in df.columns:
-                self.predict_event_cumulative_incident_function(df=df, event=event)
+                df = self.predict_event_cumulative_incident_function(df=df, event=event)
         return df
 
     def get_beta_SE(self):
@@ -600,6 +601,38 @@ class TwoStagesFitter(ExpansionBasedFitter):
         if show:
             plt.show()
         return ax
+
+    def predict_marginal_prob_event_j(self, df: pd.DataFrame, event: Union[str, int]) -> pd.DataFrame:
+        """
+        This function calculates the marginal probability of an event given the covariates.
+
+        Args:
+            df (pandas.DataFrame): dataframe with covariates columns included
+            event (Union[str, int]): event name
+
+        Returns:
+            df (pandas.DataFrame): dataframe with additional prediction columns
+        """
+        if f'prob_j{event}_at_t{self.times[-1]}' not in df.columns:
+            df = self.predict_prob_event_j_all(df=df, event=event)
+        cols = [f'prob_j{event}_at_t{_t}' for _t in self.times]
+        marginal_prob = df[cols].sum(axis=1)
+        marginal_prob.name = f'marginal_prob_j{event}'
+        return pd.concat([df, marginal_prob], axis=1)
+
+    def predict_marginal_prob_all_events(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        This function calculates the marginal probability per event given the covariates for all the events.
+
+        Args:
+            df (pandas.DataFrame): dataframe with covariates columns included
+
+        Returns:
+            df (pandas.DataFrame): dataframe with additional prediction columns
+        """
+        for event in self.events:
+            df = self.predict_marginal_prob_event_j(df=df, event=event)
+        return df
 
 
 if __name__ == "__main__":
