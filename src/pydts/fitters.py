@@ -12,7 +12,7 @@ from typing import Optional, List, Union
 from matplotlib import colors as mcolors
 
 
-DEFAULT_MODELS_KWARGS = dict(family=sm.families.Binomial())
+# DEFAULT_MODELS_KWARGS = dict(family=sm.families.Binomial())
 COLORS = list(mcolors.TABLEAU_COLORS.keys())
 
 
@@ -33,8 +33,25 @@ class DataExpansionFitter(ExpansionBasedFitter):
         [1] "On the Analysis of Discrete Time Competing Risks Data", Lee et al., Biometrics, 2018, DOI: 10.1111/biom.12881
     """
 
-    def _fit_event(self, df, formula, models_kwargs=DEFAULT_MODELS_KWARGS, model_fit_kwargs={}):
-        model = sm.GLM.from_formula(formula=formula, data=df, **models_kwargs)
+    def __init__(self):
+        self.formula = None
+        self.expanded_df = None
+        self.events = None
+        self.covariates = None
+        self.models_kwargs = dict(family=sm.families.Binomial())
+        self.event_models = dict()
+
+    def _fit_event(self, model_fit_kwargs={}):
+        """
+        This method fits a model for a GLM model for a specific event.
+
+        Args:
+            model_fit_kwargs (dict, Optional): Keyword arguments to pass to model.fit() method.
+
+        Returns:
+            fitted GLM model
+        """
+        model = sm.GLM.from_formula(formula=self.formula, data=self.expanded_df, **self.models_kwargs)
         return model.fit(**model_fit_kwargs)
 
     def fit(self,
@@ -43,7 +60,7 @@ class DataExpansionFitter(ExpansionBasedFitter):
             duration_col: str = 'X',
             pid_col: str = 'pid',
             formula: Optional[str] = None,
-            models_kwargs: Optional[dict] = DEFAULT_MODELS_KWARGS,
+            models_kwargs: Optional[dict] = None,
             model_fit_kwargs: Optional[dict] = {}) -> dict:
         """
         This method fits a model to the discrete data.
@@ -62,20 +79,21 @@ class DataExpansionFitter(ExpansionBasedFitter):
             event_models (dict): Fitted models dictionary. Keys - event names, Values - fitted models for the event.
         """
 
+        if models_kwargs is not None:
+            self.models_kwargs = models_kwargs
         if 'C' in df.columns:
             raise ValueError('C is an invalid column name, to avoid errors with categorical symbol C() in formula')
         self.events = [c for c in sorted(df[event_type_col].unique()) if c != 0]
         self.covariates = [col for col in df if col not in [event_type_col, duration_col, pid_col]]
 
         self.expanded_df = self._expand_data(df=df, event_type_col=event_type_col, duration_col=duration_col,
-                                        pid_col=pid_col)
+                                             pid_col=pid_col)
         for event in self.events:
             cov = ' + '.join(self.covariates)
             _formula = f'j_{event} ~ {formula}' if formula is not None else \
                 f'j_{event} ~ {cov} + C({duration_col}) -1 '
             self.formula = _formula
-            self.event_models[event] = self._fit_event(df=self.expanded_df, formula=self.formula,
-                    models_kwargs=models_kwargs, model_fit_kwargs=model_fit_kwargs)
+            self.event_models[event] = self._fit_event(model_fit_kwargs=model_fit_kwargs)
         return self.event_models
 
     def print_summary(self,
@@ -119,6 +137,12 @@ class TwoStagesFitter(ExpansionBasedFitter):
         super().__init__()
         self.alpha_df = pd.DataFrame()
         self.beta_models = {}
+        self.events = None
+        self.covariates = None
+        self.event_type_col = None
+        self.duration_col = None
+        self.pid_col = None
+        self.times = None
 
     def _alpha_jt(self, x, df, y_t, beta_j, n_jt, t):
         partial_df = df[df[self.duration_col] >= t]
@@ -138,7 +162,8 @@ class TwoStagesFitter(ExpansionBasedFitter):
         beta_models = {}
         for event in events:
             beta_models[event] = self._fit_event_beta(expanded_df=expanded_df, event=event,
-                model=model, model_kwargs=model_kwargs, model_fit_kwargs=model_fit_kwargs)
+                                                      model=model, model_kwargs=model_kwargs,
+                                                      model_fit_kwargs=model_fit_kwargs)
         return beta_models
 
     def fit(self,
@@ -154,13 +179,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
 
         Args:
             df (pd.DataFrame): training data for fitting the model
-
-            formula (str, Optional): Model formula to be fitted. Patsy format string.
-            models_kwargs (dict, Optional): Keyword arguments to pass to model instance initiation.
-            model_fit_kwargs (dict, Optional): Keyword arguments to pass to model.fit() method.
-
-            df (pd.DataFrame): training data for fitting the model
-            covariates:
+            covariates (list): list of covariates to be used in fitting the beta model
             event_type_col (str): The event type column name (must be a column in df),
                                   Right censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
             duration_col (str): Last follow up time column name (must be a column in df).
@@ -350,7 +369,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
         return df
 
     def predict_hazard_t(self, df: pd.DataFrame, t: np.array) -> pd.DataFrame:
-        '''
+        """
         This function calculates the hazard for all the events at the requested time values if they were included in
         the training set of each event.
 
@@ -360,7 +379,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
 
         Returns:
             df (pd.DataFrame): samples with the prediction columns
-        '''
+        """
 
         if f'{self.duration_col}_copy' not in df.columns:
             df[f'{self.duration_col}_copy'] = df[self.duration_col]
@@ -371,7 +390,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
         return df
 
     def predict_hazard_all(self, df: pd.DataFrame) -> pd.DataFrame:
-        '''
+        """
         This function calculates the hazard for all the events at all time values included in the training set for each
         event.
 
@@ -381,7 +400,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
         Returns:
             df (pd.DataFrame): samples with the prediction columns
 
-        '''
+        """
         df = self.predict_hazard_t(df, t=self.times)
         return df
 
@@ -597,7 +616,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
         ax.set_ylabel(ylabel, fontsize=fontsize)
         ax.grid()
         plt.gca().invert_yaxis()
-        ax.legend()
+        ax.legend();
         if show:
             plt.show()
         return ax
