@@ -74,6 +74,11 @@ def plot_second_model_coefs(alpha_df, beta_models, times, n_cov=5):
     fig.tight_layout()
 
 
+def plot_models_coef(alpha_df, beta_df, times, n_cov=5):
+    # todo: add general model, take from general coef model. needed for making bootstrap
+    raise NotImplemented
+
+
 def plot_LOS_simulation_figure1(data_df):
     text_sz = 16
 
@@ -240,3 +245,55 @@ def plot_LOS_simulation_figure3(data_df):
     ax.set_title(missingness_titles[0], fontsize=title_sz)
     ax.set_ylim([0, 1100])
     fig.tight_layout()
+
+
+# todo: move from here
+def compare_beta_models_for_example(first_models: dict, second_models: dict, n_cov: int = 5) -> dict:
+    """
+
+    Args:
+        first_models:
+        second_models:
+        n_cov:
+
+    Returns:
+
+    """
+    from pydts.utils import compare_models_coef_per_event
+    models_dict = {
+        "alpha": {},
+        "beta": {}
+    }
+    real_coef_dict = {
+        "alpha": {
+            1: lambda t: -1 - 0.3 * np.log(t),
+            2: lambda t: -1.75 - 0.15 * np.log(t)
+        },
+        "beta": {
+            1: -np.log([0.8, 3, 3, 2.5, 2]),
+            2: -np.log([1, 3, 4, 3, 2])
+        }
+    }
+    for event in first_models.keys():
+        for model_type in models_dict.keys():
+            if model_type == "alpha":
+                first_slicing = slice(-n_cov)    # for alpha, similar to [:-n_cov]
+                first_model = first_models[event].params[first_slicing].copy()
+                first_model.index = first_model.index.str.replace(r"\D+", "", regex=True)
+                first_model = first_model.add_prefix("a")
+                second_model = second_models[event][1][["X", "alpha_jt"]].copy()
+                second_model = second_model.set_index("X")["alpha_jt"].add_prefix("a")
+                real_coef = real_coef_dict[model_type][event](np.arange(1, first_model.index.shape[0] + 1))
+            else:
+                first_slicing = slice(-n_cov, None)  # for beta, similar to [-n_cov:]
+                first_model = first_models[event].params[first_slicing].copy()
+                second_model = second_models[event][0].params_ # beta
+                real_coef = real_coef_dict[model_type][event]
+            models_dict[model_type][event] = compare_models_coef_per_event(first_model=first_model,
+                                                                           second_model=second_model,
+                                                                           real_values=real_coef,
+                                                                           event=event,
+                                                                           first_model_label="lee",
+                                                                           second_model_label="fast"
+                                                                           )
+    return models_dict
