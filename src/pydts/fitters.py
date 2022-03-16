@@ -146,7 +146,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
 
     def _alpha_jt(self, x, df, y_t, beta_j, n_jt, t):
         partial_df = df[df[self.duration_col] >= t]
-        expit_add = (partial_df[self.covariates] * beta_j).sum(axis=1)
+        expit_add = np.dot(partial_df[self.covariates], beta_j)
         return ((1 / y_t) * np.sum(expit(x + expit_add)) - (n_jt / y_t)) ** 2
 
     def _fit_event_beta(self, expanded_df, event, model=CoxPHFitter, model_kwargs={}, model_fit_kwargs={}):
@@ -211,7 +211,13 @@ class TwoStagesFitter(ExpansionBasedFitter):
 
         self.beta_models = self._fit_beta(expanded_df, self.events, **fit_beta_kwargs)
 
-        y_t = len(df[duration_col]) - df[duration_col].value_counts().sort_index().cumsum()
+        # y_t = len(df[duration_col]) - df[duration_col].value_counts().sort_index().cumsum()
+        y_t = (df[duration_col]
+               .value_counts()
+               .sort_index(ascending=False)  # each event count for its occurring time and the times before
+               .cumsum()
+               .sort_index()
+               )
         n_jt = df.groupby([event_type_col, duration_col]).size().to_frame().reset_index()
         n_jt.columns = [event_type_col, duration_col, 'n_jt']
 
@@ -222,6 +228,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
                                     row[duration_col])), axis=1)
             n_et['success'] = n_et['opt_res'].parallel_apply(lambda val: val.success)
             n_et['alpha_jt'] = n_et['opt_res'].parallel_apply(lambda val: val.x[0])
+            assert_fit(n_et)
             self.event_models[event] = [self.beta_models[event], n_et]
             self.alpha_df = pd.concat([self.alpha_df, n_et], ignore_index=True)
 
@@ -652,6 +659,18 @@ class TwoStagesFitter(ExpansionBasedFitter):
         for event in self.events:
             df = self.predict_marginal_prob_event_j(df=df, event=event)
         return df
+
+
+def assert_fit(event_df):
+    if not event_df['success'].all():
+        problematic_times = event_df.loc[~event_df['success'], "X"].tolist()
+        event = event_df['J'].max()  # all the events in the dataframe are the same
+        print(f"In event J={event}, The method did not converged in D={problematic_times}."
+              f" Consider changing the "
+              f"problem definition. \n See TBD for more details.")
+        # todo: add user example
+        # raise RuntimeError("")
+
 
 
 if __name__ == "__main__":
