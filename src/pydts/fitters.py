@@ -251,7 +251,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
             _summary_func = getattr(model[0], summary_func, None)
             if _summary_func is not None:
                 print(f'\n\nModel summary for event: {event}')
-                print(_summary_func(**summary_kwargs))
+                _summary_func(**summary_kwargs)
             else:
                 print(f'Not {summary_func} function in event {event} model')
             from IPython.display import display
@@ -623,7 +623,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
         ax.set_ylabel(ylabel, fontsize=fontsize)
         ax.grid()
         plt.gca().invert_yaxis()
-        ax.legend();
+        ax.legend()
         if show:
             plt.show()
         return ax
