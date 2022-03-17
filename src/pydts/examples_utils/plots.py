@@ -297,3 +297,60 @@ def compare_beta_models_for_example(first_models: dict, second_models: dict, n_c
                                                                            second_model_label="fast"
                                                                            )
     return models_dict
+
+
+def plot_boot_alpha_res(boot_dict: dict, return_summary: bool = True):
+    """
+
+    Args:
+        boot_dict:
+        return_summary:
+
+    Returns:
+
+    """
+    # todo: use mean as well
+    fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+    coef_types = list(boot_dict[0].keys())  # alpha, beta
+    event_types = boot_dict[0][coef_types[0]].keys()
+    mapping = {t: i for i, t in enumerate(coef_types)}
+    res_dict = {coef: {event_type: None for event_type in event_types} for coef in coef_types}
+    for coef_type in coef_types:
+        for event_type in event_types:
+            ax = axes[mapping[coef_type]][event_type - 1]
+            df = pd.concat([dfs[coef_type][event_type] for dfs in boot_dict.values()])
+            temp_df = df.groupby(df.index).agg(["mean", "std"])
+            prefix = "a" if coef_type == "alpha" else "Z"
+            temp_df = temp_df.loc[[f"{prefix}{idx}_{event_type}" for idx in range(1, temp_df.shape[0]+1)]]
+            temp_df.columns = temp_df.columns.get_level_values(0) + "_" + temp_df.columns.get_level_values(1)
+            res_dict[coef_type][event_type] = temp_df.copy()
+            temp_df.plot(x="lee_std", y="fast_std", kind="scatter", ax=ax)
+            ax.plot([0, 1], [0, 1], "--", transform=ax.transAxes, alpha=0.3, color="tab:green");
+            ax.grid()
+            latter = "\\alpha" if coef_type == "alpha" else "\\beta"
+            ax.set_title(f"${latter}{event_type}$")
+    fig.tight_layout()
+    fig.show()
+    if return_summary:
+        return res_dict
+
+
+def plot_times(times_dict:dict) -> None:
+    """
+
+    Args:
+        times_dict:
+
+    Returns:
+
+    """
+    ax = pd.DataFrame.from_dict(times_dict).boxplot(figsize=(10, 10), boxprops={"lw": 1.5, "color": "tab:blue"},
+                                                    medianprops={"lw": 2, "color": "tab:green"})
+
+    # ax.set_ylim(0, 15)
+    ax.set_ylabel("Time in seconds", fontdict={"weight": 'bold', "size": 16})
+    ax.set_xlabel("Model types", fontdict={"weight": 'bold', "size": 16})
+
+    ax.tick_params(labelsize=14, grid_lw=0.5, grid_alpha=0.6)
+    plt.tight_layout()
+    plt.show()
