@@ -228,10 +228,9 @@ class TwoStagesFitter(ExpansionBasedFitter):
                                     row[duration_col])), axis=1)
             n_et['success'] = n_et['opt_res'].parallel_apply(lambda val: val.success)
             n_et['alpha_jt'] = n_et['opt_res'].parallel_apply(lambda val: val.x[0])
-            assert_fit(n_et)
+            assert_fit(n_et, self.times)
             self.event_models[event] = [self.beta_models[event], n_et]
             self.alpha_df = pd.concat([self.alpha_df, n_et], ignore_index=True)
-
         return self.event_models
 
     def print_summary(self,
@@ -661,15 +660,20 @@ class TwoStagesFitter(ExpansionBasedFitter):
         return df
 
 
-def assert_fit(event_df):
+def assert_fit(event_df, times):
     if not event_df['success'].all():
         problematic_times = event_df.loc[~event_df['success'], "X"].tolist()
         event = event_df['J'].max()  # all the events in the dataframe are the same
-        print(f"In event J={event}, The method did not converged in D={problematic_times}."
-              f" Consider changing the "
-              f"problem definition. \n See TBD for more details.")
+        raise RuntimeError(f"In event J={event}, The method did not converged in D={problematic_times}."
+                           f" Consider changing the "
+                           f"problem definition. \n See TBD for more details.")
         # todo: add user example
-        # raise RuntimeError("")
+    if event_df.shape[0] != len(times):
+        event = event_df['J'].max()  # all the events in the dataframe are the same
+        problematic_times = pd.Index(event_df['X']).symmetric_difference(times)
+        raise RuntimeError(f"In event J={event}, The method didn't have events D={problematic_times}."
+                           f" Consider changing the "
+                           f"problem definition. \n See TBD for more details.")
 
 
 
