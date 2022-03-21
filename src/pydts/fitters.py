@@ -1,3 +1,5 @@
+from typing import Iterable
+
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
 from pydts.base_fitters import ExpansionBasedFitter
@@ -11,8 +13,6 @@ from pandarallel import pandarallel
 from typing import Optional, List, Union
 from matplotlib import colors as mcolors
 
-
-DEFAULT_MODELS_KWARGS = dict(family=sm.families.Binomial())
 COLORS = list(mcolors.TABLEAU_COLORS.keys())
 
 
@@ -33,8 +33,21 @@ class DataExpansionFitter(ExpansionBasedFitter):
         [1] "On the Analysis of Discrete Time Competing Risks Data", Lee et al., Biometrics, 2018, DOI: 10.1111/biom.12881
     """
 
-    def _fit_event(self, df, formula, models_kwargs=DEFAULT_MODELS_KWARGS, model_fit_kwargs={}):
-        model = sm.GLM.from_formula(formula=formula, data=df, **models_kwargs)
+    def __init__(self):
+        super().__init__()
+        self.models_kwargs = dict(family=sm.families.Binomial())
+
+    def _fit_event(self, model_fit_kwargs={}):
+        """
+        This method fits a model for a GLM model for a specific event.
+
+        Args:
+            model_fit_kwargs (dict, Optional): Keyword arguments to pass to model.fit() method.
+
+        Returns:
+            fitted GLM model
+        """
+        model = sm.GLM.from_formula(formula=self.formula, data=self.expanded_df, **self.models_kwargs)
         return model.fit(**model_fit_kwargs)
 
     def fit(self,
@@ -43,7 +56,7 @@ class DataExpansionFitter(ExpansionBasedFitter):
             duration_col: str = 'X',
             pid_col: str = 'pid',
             formula: Optional[str] = None,
-            models_kwargs: Optional[dict] = DEFAULT_MODELS_KWARGS,
+            models_kwargs: Optional[dict] = None,
             model_fit_kwargs: Optional[dict] = {}) -> dict:
         """
         This method fits a model to the discrete data.
@@ -62,20 +75,21 @@ class DataExpansionFitter(ExpansionBasedFitter):
             event_models (dict): Fitted models dictionary. Keys - event names, Values - fitted models for the event.
         """
 
+        if models_kwargs is not None:
+            self.models_kwargs = models_kwargs
         if 'C' in df.columns:
             raise ValueError('C is an invalid column name, to avoid errors with categorical symbol C() in formula')
         self.events = [c for c in sorted(df[event_type_col].unique()) if c != 0]
         self.covariates = [col for col in df if col not in [event_type_col, duration_col, pid_col]]
 
         self.expanded_df = self._expand_data(df=df, event_type_col=event_type_col, duration_col=duration_col,
-                                        pid_col=pid_col)
+                                             pid_col=pid_col)
         for event in self.events:
             cov = ' + '.join(self.covariates)
             _formula = f'j_{event} ~ {formula}' if formula is not None else \
                 f'j_{event} ~ {cov} + C({duration_col}) -1 '
             self.formula = _formula
-            self.event_models[event] = self._fit_event(df=self.expanded_df, formula=self.formula,
-                    models_kwargs=models_kwargs, model_fit_kwargs=model_fit_kwargs)
+            self.event_models[event] = self._fit_event(model_fit_kwargs=model_fit_kwargs)
         return self.event_models
 
     def print_summary(self,
@@ -122,7 +136,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
 
     def _alpha_jt(self, x, df, y_t, beta_j, n_jt, t):
         partial_df = df[df[self.duration_col] >= t]
-        expit_add = (partial_df[self.covariates] * beta_j).sum(axis=1)
+        expit_add = np.dot(partial_df[self.covariates], beta_j)
         return ((1 / y_t) * np.sum(expit(x + expit_add)) - (n_jt / y_t)) ** 2
 
     def _fit_event_beta(self, expanded_df, event, model=CoxPHFitter, model_kwargs={}, model_fit_kwargs={}):
@@ -138,7 +152,8 @@ class TwoStagesFitter(ExpansionBasedFitter):
         beta_models = {}
         for event in events:
             beta_models[event] = self._fit_event_beta(expanded_df=expanded_df, event=event,
-                model=model, model_kwargs=model_kwargs, model_fit_kwargs=model_fit_kwargs)
+                                                      model=model, model_kwargs=model_kwargs,
+                                                      model_fit_kwargs=model_fit_kwargs)
         return beta_models
 
     def fit(self,
@@ -154,13 +169,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
 
         Args:
             df (pd.DataFrame): training data for fitting the model
-
-            formula (str, Optional): Model formula to be fitted. Patsy format string.
-            models_kwargs (dict, Optional): Keyword arguments to pass to model instance initiation.
-            model_fit_kwargs (dict, Optional): Keyword arguments to pass to model.fit() method.
-
-            df (pd.DataFrame): training data for fitting the model
-            covariates:
+            covariates (list): list of covariates to be used in fitting the beta model
             event_type_col (str): The event type column name (must be a column in df),
                                   Right censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
             duration_col (str): Last follow up time column name (must be a column in df).
@@ -192,7 +201,12 @@ class TwoStagesFitter(ExpansionBasedFitter):
 
         self.beta_models = self._fit_beta(expanded_df, self.events, **fit_beta_kwargs)
 
-        y_t = len(df[duration_col]) - df[duration_col].value_counts().sort_index().cumsum()
+        y_t = (df[duration_col]
+               .value_counts()
+               .sort_index(ascending=False)  # each event count for its occurring time and the times before
+               .cumsum()
+               .sort_index()
+               )
         n_jt = df.groupby([event_type_col, duration_col]).size().to_frame().reset_index()
         n_jt.columns = [event_type_col, duration_col, 'n_jt']
 
@@ -203,9 +217,9 @@ class TwoStagesFitter(ExpansionBasedFitter):
                                     row[duration_col])), axis=1)
             n_et['success'] = n_et['opt_res'].parallel_apply(lambda val: val.success)
             n_et['alpha_jt'] = n_et['opt_res'].parallel_apply(lambda val: val.x[0])
+            assert_fit(n_et, self.times)
             self.event_models[event] = [self.beta_models[event], n_et]
             self.alpha_df = pd.concat([self.alpha_df, n_et], ignore_index=True)
-
         return self.event_models
 
     def print_summary(self,
@@ -225,7 +239,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
             _summary_func = getattr(model[0], summary_func, None)
             if _summary_func is not None:
                 print(f'\n\nModel summary for event: {event}')
-                print(_summary_func(**summary_kwargs))
+                _summary_func(**summary_kwargs)
             else:
                 print(f'Not {summary_func} function in event {event} model')
             from IPython.display import display
@@ -319,7 +333,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
 
         model = self.event_models[event]
 
-        beta_j_x = (df[self.covariates] * model[0].params_).sum(axis=1)
+        beta_j_x = df[self.covariates].dot(model[0].params_)
         alpha_df = model[1].set_index(self.duration_col)
         _t = np.array([t_i for t_i in t
                        if ((t_i in alpha_df.index) and (f'hazard_j{event}_t{t_i}' not in df.columns))])
@@ -336,21 +350,13 @@ class TwoStagesFitter(ExpansionBasedFitter):
 
         hazard_df = self.hazard_inverse_transformation(alpha_jt_t + beta_j_x.values)
 
-        # todo validate this hazard imputation!
-
-        for t_i in self.times[1:]:
-            if f'hazard_j{event}_t{t_i}' not in hazard_df.columns:
-                print(f'Imputing column hazard_j{event}_t{t_i}')
-                hazard_df[f'hazard_j{event}_t{t_i}'] = hazard_df[f'hazard_j{event}_t{t_i-1}']
-        hazard_df = hazard_df[[f'hazard_j{event}_t{t_i}' for t_i in self.times]]
-
         if drop:
             df.drop(f'{self.duration_col}_copy', axis=1, inplace=True)
         df = pd.concat([df, hazard_df], axis=1)
         return df
 
     def predict_hazard_t(self, df: pd.DataFrame, t: np.array) -> pd.DataFrame:
-        '''
+        """
         This function calculates the hazard for all the events at the requested time values if they were included in
         the training set of each event.
 
@@ -360,9 +366,10 @@ class TwoStagesFitter(ExpansionBasedFitter):
 
         Returns:
             df (pd.DataFrame): samples with the prediction columns
-        '''
+        """
 
         if f'{self.duration_col}_copy' not in df.columns:
+            # todo validate that self.duration_col exists
             df[f'{self.duration_col}_copy'] = df[self.duration_col]
 
         for event, model in self.event_models.items():
@@ -371,7 +378,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
         return df
 
     def predict_hazard_all(self, df: pd.DataFrame) -> pd.DataFrame:
-        '''
+        """
         This function calculates the hazard for all the events at all time values included in the training set for each
         event.
 
@@ -381,7 +388,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
         Returns:
             df (pd.DataFrame): samples with the prediction columns
 
-        '''
+        """
         df = self.predict_hazard_t(df, t=self.times)
         return df
 
@@ -634,10 +641,65 @@ class TwoStagesFitter(ExpansionBasedFitter):
             df = self.predict_marginal_prob_event_j(df=df, event=event)
         return df
 
+    def create_df_for_cif_plots(self, df: pd.DataFrame, field: str,
+                                vals: Optional[Iterable] = None,
+                                quantiles: Optional[Iterable] = None,
+                                zero_others: Optional[bool] = False
+                                ) -> pd.DataFrame:
+        """
+        This method creates df for cif plot, where it zeros
+
+        Args:
+            df (pd.DataFrame): Dataframe which we yield the statiscal propetrics (means, quantiles, etc) and stacture
+            field (str): The field which will represent the change
+            vals (Optional[Iterable]): The values to use for the field
+            quantiles (Optional[Iterable]): The quantiles to use as values for the field
+            zero_others (bool): Whether to zero the other covarites or to zero them
+
+        Returns:
+            df (pd.DataFrame): A dataframe that contains records per value for cif ploting
+        """
+        df_for_ploting = df.copy()
+        if vals is not None:
+            pass
+        elif quantiles is not None:
+            vals = df_for_ploting[field].quantile(quantiles).values
+        else:
+            raise NotImplemented("Only Quantiles or specific values is supported")
+        temp_series = []
+        template_s = df_for_ploting.iloc[0][self.covariates].copy()
+        if zero_others:
+            impute_val = 0
+        else:
+            impute_val = df_for_ploting[self.covariates].mean().values
+        for val in vals:
+            temp_s = template_s.copy()
+            temp_s[self.covariates] = impute_val
+            temp_s[field] = val
+            temp_series.append(temp_s)
+
+        return pd.concat(temp_series, axis=1).T
+
+
+def assert_fit(event_df, times):
+    if not event_df['success'].all():
+        problematic_times = event_df.loc[~event_df['success'], "X"].tolist()
+        event = event_df['J'].max()  # all the events in the dataframe are the same
+        raise RuntimeError(f"In event J={event}, The method did not converged in D={problematic_times}."
+                           f" Consider changing the "
+                           f"problem definition. \n See TBD for more details.")
+        # todo: add user example
+    if event_df.shape[0] != len(times):
+        event = event_df['J'].max()  # all the events in the dataframe are the same
+        problematic_times = pd.Index(event_df['X']).symmetric_difference(times)
+        raise RuntimeError(f"In event J={event}, The method didn't have events D={problematic_times}."
+                           f" Consider changing the "
+                           f"problem definition. \n See TBD for more details.")
+
 
 if __name__ == "__main__":
     from pydts.examples_utils.generate_simulations_data import generate_quick_start_df
-    n_patients = 1000
+    n_patients = 50000
     n_cov = 5
     patients_df = generate_quick_start_df(n_patients=n_patients, n_cov=n_cov, d_times=30, j_events=2,
                                           pid_col='pid', seed=0)
@@ -653,9 +715,11 @@ if __name__ == "__main__":
     #pred_df = m2.predict_overall_survival(test_df, t=5)
     #pred_prob = m2.predict_prob_event_j_at_t(test_df, event=1, t=2)
     #m2.predict_event_cumulative_incident_function(test_df, event=1)
-    # m2.predict_cumulative_incident_function(test_df)
+    tdf = test_df[[f'Z{i+1}' for i in range(n_cov)]]
+    tdf['X'] = np.nan
+    m2.predict_cumulative_incident_function(tdf)
     # m2.predict(test_df)
-    print(m2.get_beta_SE())
-    m2.plot_all_events_beta()
+    # print(m2.get_beta_SE())
+    # m2.plot_all_events_beta()
     print('x')
 

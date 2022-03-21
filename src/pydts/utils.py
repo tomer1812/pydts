@@ -1,5 +1,5 @@
 import pandas as pd
-
+import numpy as np
 
 def get_expanded_df(df, event_type_col='J', duration_col='X', pid_col='pid'):
     """
@@ -24,3 +24,42 @@ def get_expanded_df(df, event_type_col='J', duration_col='X', pid_col='pid'):
     result_df[[f'j_{e}' for e in events]] = result_df[[f'j_{e}' for e in events]].fillna(0)
     result_df[f'j_0'] = 1 - result_df[[f'j_{e}' for e in events if e > 0]].sum(axis=1)
     return result_df
+
+
+def compare_models_coef_per_event(first_model: pd.Series,
+                                  second_model: pd.Series,
+                                  real_values: np.array,
+                                  event: int,
+                                  first_model_label:str = "first",
+                                  second_model_label:str = "second"
+                                  ) -> pd.DataFrame:
+    """
+
+    Args:
+        first_model:
+        second_model:
+        real_values:
+        event:
+        first_model_label:
+        second_model_label:
+
+    Returns:
+
+    """
+    event_suffix = f"_{event}"
+    assert (first_model.index == second_model.index).all(), "All index should be the same"
+    models = pd.concat([first_model.to_frame(first_model_label),
+                        second_model.to_frame(second_model_label)], axis=1)
+    models.index += event_suffix
+    real_values_s = pd.Series(real_values, index=models.index)
+
+    return pd.concat([models, real_values_s.to_frame("real")], axis=1)
+
+
+#todo: move from here
+def present_coefs(res_dict):
+    from IPython.display import display
+    for coef_type, events_dict in res_dict.items():
+        print(f"for coef: {coef_type.capitalize()}")
+        df = pd.concat([temp_df for temp_df in events_dict.values()])
+        display(df)
