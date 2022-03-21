@@ -1,3 +1,5 @@
+from typing import Iterable
+
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
 from pydts.base_fitters import ExpansionBasedFitter
@@ -658,6 +660,45 @@ class TwoStagesFitter(ExpansionBasedFitter):
         for event in self.events:
             df = self.predict_marginal_prob_event_j(df=df, event=event)
         return df
+
+    def create_df_for_cif_plots(self, df: pd.DataFrame, field: str,
+                                vals: Optional[Iterable] = None,
+                                quantiles: Optional[Iterable] = None,
+                                zero_others: Optional[bool] = False
+                                ) -> pd.DataFrame:
+        """
+        This method creates df for cif plot, where it zeros
+
+        Args:
+            df (pd.DataFrame): Dataframe which we yield the statiscal propetrics (means, quantiles, etc) and stacture
+            field (str): The field which will represent the change
+            vals (Optional[Iterable]): The values to use for the field
+            quantiles (Optional[Iterable]): The quantiles to use as values for the field
+            zero_others (bool): Whether to zero the other covarites or to zero them
+
+        Returns:
+            df (pd.DataFrame): A dataframe that contains records per value for cif ploting
+        """
+        df_for_ploting = df.copy()
+        if vals is not None:
+            pass
+        elif quantiles is not None:
+            vals = df_for_ploting[field].quantile(quantiles).values
+        else:
+            raise NotImplemented("Only Quantiles or specific values is supported")
+        temp_series = []
+        template_s = df_for_ploting.iloc[0][self.covariates].copy()
+        if zero_others:
+            impute_val = 0
+        else:
+            impute_val = df_for_ploting[self.covariates].mean().values
+        for val in vals:
+            temp_s = template_s.copy()
+            temp_s[self.covariates] = impute_val
+            temp_s[field] = val
+            temp_series.append(temp_s)
+
+        return pd.concat(temp_series, axis=1).T
 
 
 def assert_fit(event_df, times):
