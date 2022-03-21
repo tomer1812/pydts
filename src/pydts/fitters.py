@@ -325,33 +325,25 @@ class TwoStagesFitter(ExpansionBasedFitter):
             df (pd.DataFrame): samples with the prediction columns
         '''
 
-        if f'{self.duration_col}_copy' not in df.columns:
-            drop = True
-            df[f'{self.duration_col}_copy'] = df[self.duration_col]
-        else:
-            drop = False
-
         model = self.event_models[event]
-
-        beta_j_x = df[self.covariates].dot(model[0].params_)
         alpha_df = model[1].set_index(self.duration_col)
-        _t = np.array([t_i for t_i in t
-                       if ((t_i in alpha_df.index) and (f'hazard_j{event}_t{t_i}' not in df.columns))])
+
+        t_i_not_fitted = [t_i for t_i in t if (t_i not in alpha_df.index)]
+        assert len(t_i_not_fitted) == 0, \
+            f"Cannot predict for times which were not included during .fit(): {t_i_not_fitted}"
+
+        _t = np.array([t_i for t_i in t if (f'hazard_j{event}_t{t_i}' not in df.columns)])
         if len(_t) == 0:
-            if drop:
-                df.drop(f'{self.duration_col}_copy', axis=1, inplace=True)
             return df
 
-        if len(_t) > 1:
-            beta_j_x = pd.concat([beta_j_x] * len(_t), ignore_index=True, axis=1)
+        beta_j_x = df[self.covariates].dot(model[0].params_)
+        beta_j_x = pd.concat([beta_j_x] * len(_t), ignore_index=True, axis=1)
         alpha_jt_t = pd.concat([alpha_df.loc[_t, 'alpha_jt'] * _t] * len(beta_j_x), axis=1).T
         alpha_jt_t.index = beta_j_x.index
         alpha_jt_t.columns = [f'hazard_j{event}_t{c}' for c in alpha_jt_t.columns]
 
         hazard_df = self.hazard_inverse_transformation(alpha_jt_t + beta_j_x.values)
 
-        if drop:
-            df.drop(f'{self.duration_col}_copy', axis=1, inplace=True)
         df = pd.concat([df, hazard_df], axis=1)
         return df
 
@@ -368,13 +360,8 @@ class TwoStagesFitter(ExpansionBasedFitter):
             df (pd.DataFrame): samples with the prediction columns
         """
 
-        if f'{self.duration_col}_copy' not in df.columns:
-            # todo validate that self.duration_col exists
-            df[f'{self.duration_col}_copy'] = df[self.duration_col]
-
         for event, model in self.event_models.items():
             df = self.predict_hazard_jt(df=df, event=event, t=t)
-        df.drop(f'{self.duration_col}_copy', axis=1, inplace=True)
         return df
 
     def predict_hazard_all(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -716,7 +703,6 @@ if __name__ == "__main__":
     #pred_prob = m2.predict_prob_event_j_at_t(test_df, event=1, t=2)
     #m2.predict_event_cumulative_incident_function(test_df, event=1)
     tdf = test_df[[f'Z{i+1}' for i in range(n_cov)]]
-    tdf['X'] = np.nan
     m2.predict_cumulative_incident_function(tdf)
     # m2.predict(test_df)
     # print(m2.get_beta_SE())
