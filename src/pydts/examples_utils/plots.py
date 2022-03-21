@@ -354,3 +354,34 @@ def plot_times(times_dict:dict) -> None:
     ax.tick_params(labelsize=14, grid_lw=0.5, grid_alpha=0.6)
     plt.tight_layout()
     plt.show()
+
+
+def plot_cif_plots(pred_df: pd.DataFrame, event: str) -> None:
+    """
+    this method plot cif given pred df with cif and event
+
+    Args:
+        pred_df:
+        event:
+
+    Returns:
+
+    """
+    import matplotlib.ticker as mtick
+
+    cif_cols = pred_df.columns[pred_df.columns.str.startswith("cif")]
+
+    event_cif_cols = cif_cols[cif_cols.str.contains(f"j{event}")]
+
+    event_x = event_cif_cols.str.extract(r"(t\d+)")[0].str.extract((r"(\d+)")).apply(pd.to_numeric).values.flatten()
+
+    ax = pred_df.head()[j1_cif_cols].T.plot(figsize=(10, 10))
+    ax.set_xticks(event_x)
+    ax.set_xticklabels(event_x)
+    ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
+    ax.set_ylim([0, 1])
+    ax.set_xlabel("t", fontdict={'size': 16, "weight": "bold"})
+    ax.set_ylabel(f"CIF of $J_{event}$", fontdict={'size': 16, "weight": "bold"})
+    ax.grid()
+    plt.tight_layout()
+    plt.show()
