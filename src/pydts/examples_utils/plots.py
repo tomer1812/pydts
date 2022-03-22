@@ -375,7 +375,7 @@ def plot_cif_plots(pred_df: pd.DataFrame, event: str) -> None:
 
     event_x = event_cif_cols.str.extract(r"(t\d+)")[0].str.extract((r"(\d+)")).apply(pd.to_numeric).values.flatten()
 
-    ax = pred_df.head()[j1_cif_cols].T.plot(figsize=(10, 10))
+    ax = pred_df.head()[event_cif_cols].T.plot(figsize=(10, 10))
     ax.set_xticks(event_x)
     ax.set_xticklabels(event_x)
     ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
