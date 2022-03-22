@@ -3,7 +3,7 @@
 [![documentation](https://img.shields.io/badge/docs-mkdocs%20material-blue.svg?style=flat)](https://tomer1812.github.io/pydts)
 
 # Discrete Time Survival Analysis  
-A Python package for discrete time survival data analysis.
+A Python package for discrete time survival data analysis with competing events.
 
 ![PyDTS](icon.png)  
 
