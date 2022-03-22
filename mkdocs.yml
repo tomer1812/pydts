@@ -42,6 +42,7 @@ nav:
     - Examples:
       - Simple Simulation Example: Simple Simulation.ipynb
       - Hospitalization LOS Simulation: SimulatedDataset.ipynb
+      - Use case for None convergance: User Story.ipynb
     - API:
       - 'api/two_stages_fitter.md'
       - 'api/data_expansion_fitter.md'
