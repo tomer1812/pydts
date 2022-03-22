@@ -1,4 +1,5 @@
-from typing import Iterable
+from typing import Iterable, Tuple
+from time import time
 
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
@@ -12,6 +13,9 @@ from lifelines.fitters.coxph_fitter import CoxPHFitter
 from pandarallel import pandarallel
 from typing import Optional, List, Union
 from matplotlib import colors as mcolors
+from tqdm import tqdm
+from pydts.examples_utils.generate_simulations_data import generate_quick_start_df
+
 
 COLORS = list(mcolors.TABLEAU_COLORS.keys())
 
@@ -685,6 +689,36 @@ def assert_fit(event_df, times):
         raise RuntimeError(f"In event J={event}, The method didn't have events D={problematic_times}."
                            f" Consider changing the "
                            f"problem definition. \n See TBD for more details.")
+
+
+def bootstrap_fitters(rep, n_patients, n_cov, d_times, j_events, pid_col, test_size,
+                      drop_cols: Iterable = ("C", "T"),
+                      model1=DataExpansionFitter,
+                      model1_name="lee",
+                      model2=TwoStagesFitter,
+                      model2_name="new",
+                      ) -> Tuple[dict, dict]:
+    from pydts.examples_utils.plots import compare_beta_models_for_example
+    boot_dict = {}
+    times = {model1_name: [], model2_name: []}
+    for samp in tqdm(range(rep)):
+        patients_df = generate_quick_start_df(n_patients=n_patients, n_cov=n_cov, d_times=d_times, j_events=j_events,
+                                              pid_col=pid_col, seed=samp)
+
+        train_df, test_df = train_test_split(patients_df, test_size=test_size)
+        drop_cols = pd.Index(drop_cols)
+        start = time()
+        fitter = model1()
+        fitter.fit(df=train_df.drop(drop_cols, axis=1))
+        times[model1_name].append(time() - start)
+        start = time()
+        new_fitter = model2()
+        new_fitter.fit(df=train_df.drop(drop_cols, axis=1))
+        times[model2_name].append(time() - start)
+        res_dict = compare_beta_models_for_example(fitter.event_models, new_fitter.event_models)
+        boot_dict[samp] = res_dict
+    return boot_dict, times
+
 
 
 if __name__ == "__main__":
