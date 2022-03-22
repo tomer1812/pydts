@@ -167,7 +167,9 @@ class TwoStagesFitter(ExpansionBasedFitter):
             duration_col: str = 'X',
             pid_col: str = 'pid',
             x0: Union[np.array, int] = 0,
-            fit_beta_kwargs: dict = {}) -> dict:
+            fit_beta_kwargs: dict = {},
+            verbose: int = 2
+            ) -> dict:
         """
         This method fits a model to the discrete data.
 
@@ -187,10 +189,11 @@ class TwoStagesFitter(ExpansionBasedFitter):
                                                     model_kwargs={},  # keywords arguments to pass on to the model instance initiation
                                                     model_fit_kwargs={}  # keywords arguments to pass on to model.fit() method
                                               }
+            verbose (int, Optional): The verbosity level of pandaallel
         Returns:
             event_models (dict): Fitted models dictionary. Keys - event names, Values - fitted models for the event.
         """
-        pandarallel.initialize()
+        pandarallel.initialize(verbose=verbose)
         self.events = [c for c in sorted(df[event_type_col].unique()) if c != 0]
         if covariates is None:
             covariates = [col for col in df if col not in [event_type_col, duration_col, pid_col]]
@@ -685,7 +688,7 @@ def assert_fit(event_df, times):
         # todo: add user example
     if event_df.shape[0] != len(times):
         event = event_df['J'].max()  # all the events in the dataframe are the same
-        problematic_times = pd.Index(event_df['X']).symmetric_difference(times)
+        problematic_times = pd.Index(event_df['X']).symmetric_difference(times).tolist()
         raise RuntimeError(f"In event J={event}, The method didn't have events D={problematic_times}."
                            f" Consider changing the "
                            f"problem definition. \n See TBD for more details.")
@@ -696,7 +699,8 @@ def bootstrap_fitters(rep, n_patients, n_cov, d_times, j_events, pid_col, test_s
                       model1=DataExpansionFitter,
                       model1_name="lee",
                       model2=TwoStagesFitter,
-                      model2_name="new",
+                      model2_name: str = "new",
+                      verbose: int = 2
                       ) -> Tuple[dict, dict]:
     from pydts.examples_utils.plots import compare_beta_models_for_example
     boot_dict = {}
@@ -713,12 +717,14 @@ def bootstrap_fitters(rep, n_patients, n_cov, d_times, j_events, pid_col, test_s
         times[model1_name].append(time() - start)
         start = time()
         new_fitter = model2()
-        new_fitter.fit(df=train_df.drop(drop_cols, axis=1))
+        if isintance(new_fitter, TwoStagesFitter):
+            new_fitter.fit(df=train_df.drop(drop_cols, axis=1), verbose=verbose)
+        else:
+            new_fitter.fit(df=train_df.drop(drop_cols, axis=1))
         times[model2_name].append(time() - start)
         res_dict = compare_beta_models_for_example(fitter.event_models, new_fitter.event_models)
         boot_dict[samp] = res_dict
     return boot_dict, times
-
 
 
 if __name__ == "__main__":
