@@ -1,3 +1,5 @@
+from typing import Iterable, Tuple
+
 import numpy as np
 from pydts.examples_utils.simulations_data_config import *
 from matplotlib import pyplot as plt
@@ -74,9 +76,73 @@ def plot_second_model_coefs(alpha_df, beta_models, times, n_cov=5):
     fig.tight_layout()
 
 
-def plot_models_coef(alpha_df, beta_df, times, n_cov=5):
-    # todo: add general model, take from general coef model. needed for making bootstrap
-    raise NotImplemented
+def plot_models_coefficients(alpha_dict: dict, beta_dict: dict, times: Iterable,
+                             njt_counts: Iterable,
+                             n_cov: int = 5,
+                             first_model_name: str = 'lee',
+                             second_model_name: str = 'new') -> None:
+    """
+    This method takes the bootstrap results and plotting the comparison between the methods coefs
+
+    Args:
+        alpha_dict (dict): a dict that contains for each event type (key) a dataframe of all the $\alpha_t$ (value)
+        beta_dict (dict): a dict that contains for each event type(key) a dataframe of all the $\beta_t$ (value)
+        times (Iterable): array like that contains all the unique times that were used
+        njt_counts (Iterable): an array-like which contains how many events per each time t (not including censorship)
+        n_cov (int): number of covariates (used to plot beta plot)
+        first_model_name (Optional[str]): the name of the first model
+        second_model_name (Optional[str]): the name of the second model
+
+    Returns:
+        None
+    """
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+    ax = axes[0]
+    ax.set_title(r'$\alpha_{jt}$', fontsize=26)
+    tmp_ajt = alpha_dict[1]
+    ax.scatter(times, tmp_ajt[f'{first_model_name}_mean'].values,
+               label=f'J=1 ({first_model_name} Pred)', color='tab:blue', marker='o', alpha=0.4, s=40)
+    ax.scatter(times, tmp_ajt[f'{second_model_name}_mean'].values,
+               label=f'J=1 ({second_model_name} Pred)', color='navy', marker='*', alpha=0.7, s=40)
+    ax.plot(times, tmp_ajt['real_mean'].values, label='J=1 (True)', ls='--', color='tab:blue')
+    tmp_ajt = alpha_dict[2]
+    ax.scatter(times, tmp_ajt[f'{first_model_name}_mean'].values,
+               label=f'J=2 ({first_model_name} Pred)', color='tab:green', alpha=0.4, s=30)
+    ax.scatter(times, tmp_ajt[f'{second_model_name}_mean'].values,
+               label=f'J=2 ({second_model_name} Pred)', color='darkgreen', marker='*', alpha=0.7, s=30)
+    ax.plot(times, tmp_ajt['real_mean'].values, label='J=2 (True)', ls='--', color='tab:green')
+    ax.set_ylabel(r'$\alpha_{t}$', fontsize=20)
+    ax.legend(loc='upper center', fontsize=14)
+    ax.set_ylim([-3, 0.5])
+    ax2 = ax.twinx()
+    ax2.bar(times, njt_counts, color='r', alpha=0.3)
+    ax2.set_ylabel('N patients', fontsize=16, color='red')
+    ax2.tick_params(axis='y', colors='red')
+
+    ax = axes[1]
+    ax.set_title(r'$\beta_{j}$', fontsize=26)
+    beta_j = beta_dict[1]
+    ax.bar(np.arange(1, n_cov + 1), beta_j['real_mean'].values, label='J=1 (True)', width=0.3, alpha=0.4,
+           color='tab:blue')
+    ax.scatter(-0.2 + np.arange(1, n_cov + 1), beta_j[f'{first_model_name}_mean'].values,
+               color='tab:blue', label=f'J=1 ({first_model_name} Pred)', marker="4", s=130)
+    ax.scatter(-0.2 + np.arange(1, n_cov + 1), beta_j[f'{second_model_name}_mean'].values,
+               color='navy', label=f'J=1 ({second_model_name} Pred)', marker=">", s=130, alpha=0.4)
+
+    beta_j = beta_dict[2]
+    ax.bar(np.arange(1, n_cov + 1), beta_j['real_mean'].values, color='tab:green', label='J=2 (True)', align='edge',
+           width=0.3, alpha=0.4)
+    ax.scatter(0.35 + np.arange(1, n_cov + 1), beta_j[f'{first_model_name}_mean'].values,
+               color='tab:green', label=f'J=2 ({first_model_name} Pred)', marker="3",
+               s=130)
+    ax.scatter(0.35 + np.arange(1, n_cov + 1), beta_j[f'{second_model_name}_mean'].values,
+               color='darkgreen', label=f'J=2 ({second_model_name} Pred)', marker="<",
+               s=130, alpha=0.4)
+    ax.legend(loc='upper center', fontsize=14)
+    ax.set_ylim([-1.5, 1])
+    fig.tight_layout()
+    ax.legend(loc='upper center', fontsize=14)
+    fig.tight_layout()
 
 
 def plot_LOS_simulation_figure1(data_df):
@@ -294,7 +360,7 @@ def compare_beta_models_for_example(first_models: dict, second_models: dict, n_c
                                                                            real_values=real_coef,
                                                                            event=event,
                                                                            first_model_label="lee",
-                                                                           second_model_label="fast"
+                                                                           second_model_label="new"
                                                                            )
     return models_dict
 
@@ -324,7 +390,7 @@ def plot_boot_alpha_res(boot_dict: dict, return_summary: bool = True):
             temp_df = temp_df.loc[[f"{prefix}{idx}_{event_type}" for idx in range(1, temp_df.shape[0]+1)]]
             temp_df.columns = temp_df.columns.get_level_values(0) + "_" + temp_df.columns.get_level_values(1)
             res_dict[coef_type][event_type] = temp_df.copy()
-            temp_df.plot(x="lee_std", y="fast_std", kind="scatter", ax=ax)
+            temp_df.plot(x="lee_std", y="new_std", kind="scatter", ax=ax)
             ax.plot([0, 1], [0, 1], "--", transform=ax.transAxes, alpha=0.3, color="tab:green");
             ax.grid()
             latter = "\\alpha" if coef_type == "alpha" else "\\beta"
