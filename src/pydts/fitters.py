@@ -705,11 +705,13 @@ def bootstrap_fitters(rep, n_patients, n_cov, d_times, j_events, pid_col, test_s
     from pydts.examples_utils.plots import compare_beta_models_for_example
     boot_dict = {}
     times = {model1_name: [], model2_name: []}
+    counts_df_list = []
     for samp in tqdm(range(rep)):
         patients_df = generate_quick_start_df(n_patients=n_patients, n_cov=n_cov, d_times=d_times, j_events=j_events,
                                               pid_col=pid_col, seed=samp)
 
         train_df, test_df = train_test_split(patients_df, test_size=test_size)
+        counts_df_list.append(train_df.groupby(['J', 'X']).size().to_frame(samp))
         drop_cols = pd.Index(drop_cols)
         start = time()
         fitter = model1()
@@ -717,14 +719,15 @@ def bootstrap_fitters(rep, n_patients, n_cov, d_times, j_events, pid_col, test_s
         times[model1_name].append(time() - start)
         start = time()
         new_fitter = model2()
-        if isintance(new_fitter, TwoStagesFitter):
+        if isinstance(new_fitter, TwoStagesFitter):
             new_fitter.fit(df=train_df.drop(drop_cols, axis=1), verbose=verbose)
         else:
             new_fitter.fit(df=train_df.drop(drop_cols, axis=1))
         times[model2_name].append(time() - start)
         res_dict = compare_beta_models_for_example(fitter.event_models, new_fitter.event_models)
         boot_dict[samp] = res_dict
-    return boot_dict, times
+    ret_df = pd.concat(counts_df_list, axis=1).fillna(0).mean(axis=1).apply(np.ceil).to_frame()
+    return boot_dict, times, ret_df
 
 
 if __name__ == "__main__":
