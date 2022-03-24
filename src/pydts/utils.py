@@ -14,6 +14,7 @@ def get_expanded_df(df, event_type_col='J', duration_col='X', pid_col='pid'):
 
     :return: result_df: expanded dataframe
     """
+    # todo: consider dealing with highly not continues cases
     unique_times = df[duration_col].sort_values().unique()
     result_df = df.reindex(df.index.repeat(df[duration_col]))
     result_df[duration_col] = result_df.groupby(pid_col).cumcount() + 1
