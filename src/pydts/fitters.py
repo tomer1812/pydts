@@ -14,6 +14,7 @@ from pandarallel import pandarallel
 from typing import Optional, List, Union
 from matplotlib import colors as mcolors
 from tqdm import tqdm
+from joblib import Parallel, delayed
 from pydts.examples_utils.generate_simulations_data import generate_quick_start_df
 
 
@@ -570,6 +571,27 @@ def bootstrap_fitters(rep, n_patients, n_cov, d_times, j_events, pid_col, test_s
         boot_dict[samp] = res_dict
     ret_df = pd.concat(counts_df_list, axis=1).fillna(0).mean(axis=1).apply(np.ceil).to_frame()
     return boot_dict, times, ret_df
+
+
+def get_real_hazard(df, real_coef_dict, times, events):
+    """
+
+    Args:
+        df:
+        real_coef_dict:
+        times:
+        events:
+
+    Returns:
+
+    """
+    a_t = {event: {t: real_coef_dict['alpha'][event](t) for t in times} for event in events}
+    b = pd.concat([df.dot(real_coef_dict['beta'][j]) for j in events], axis=1, keys=events)
+
+    for j in events:
+        df[[f'hazard_j{j}_t{t}' for t in times]] = pd.concat([expit(a_t[j][t] + b[j]) for t in times],
+                                                             axis=1).values
+    return df
 
 
 if __name__ == "__main__":
