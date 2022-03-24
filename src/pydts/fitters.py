@@ -1,4 +1,4 @@
-from typing import Iterable, Tuple
+from typing import Iterable, Tuple, Union
 from time import time
 
 import matplotlib.pyplot as plt
@@ -85,6 +85,7 @@ class DataExpansionFitter(ExpansionBasedFitter):
             raise ValueError('C is an invalid column name, to avoid errors with categorical symbol C() in formula')
         self.events = [c for c in sorted(df[event_type_col].unique()) if c != 0]
         self.covariates = [col for col in df if col not in [event_type_col, duration_col, pid_col]]
+        self.times = sorted(df[duration_col].unique())
 
         self.expanded_df = self._expand_data(df=df, event_type_col=event_type_col, duration_col=duration_col,
                                              pid_col=pid_col)
@@ -116,6 +117,37 @@ class DataExpansionFitter(ExpansionBasedFitter):
                 print(_summary_func(**summary_kwargs))
             else:
                 print(f'Not {summary_func} function in event {event} model')
+
+    def predict_hazard_jt(self, df: pd.DataFrame, event: Union[str, int], t: Union[Iterable, int]) -> pd.DataFrame:
+        """
+        This method calculates the hazard for the given event at the given time values if they were included in
+        the training set of the event.
+
+        Args:
+            df (pd.DataFrame): samples to predict for
+            event (Union[str, int]): event name
+            t (np.array): times to calculate the hazard for
+
+        Returns:
+            df (pd.DataFrame): samples with the prediction columns
+        """
+        # todo : make it more general for both classes
+        if isinstance(t, int):
+            t = np.array([t])
+        t_i_not_fitted = [t_i for t_i in t if (t_i not in self.times)]
+        assert len(t_i_not_fitted) == 0, \
+            f"Cannot predict for times which were not included during .fit(): {t_i_not_fitted}"
+
+        _t = np.array([t_i for t_i in t if (f'hazard_j{event}_t{t_i}' not in df.columns)])
+        if len(_t) == 0:
+            return df
+
+        temp_df = df.copy()
+        model = self.event_models[event]
+        res = Parallel(n_jobs=-1)(delayed(model.predict)(df[self.covariates].assign(X=c)) for c in t)
+        temp_hazard_df = pd.concat(res, axis=1)
+        temp_df[[f'hazard_j{event}_t{c_}' for c_ in t]] = temp_hazard_df.values
+        return temp_df
 
 
 class TwoStagesFitter(ExpansionBasedFitter):
@@ -318,24 +350,25 @@ class TwoStagesFitter(ExpansionBasedFitter):
             plt.show()
         return ax
 
-    def predict_hazard_jt(self, df: pd.DataFrame, event: Union[str, int],  t: np.array) -> pd.DataFrame:
-        '''
-        This function calculates the hazard for the given event at the given time values if they were included in
+    def predict_hazard_jt(self, df: pd.DataFrame, event: Union[str, int], t: Union[Iterable, int]) -> pd.DataFrame:
+        """
+        This method calculates the hazard for the given event at the given time values if they were included in
         the training set of the event.
 
         Args:
             df (pd.DataFrame): samples to predict for
             event (Union[str, int]): event name
-            t (np.array): times to calculate the hazard for
+            t (Union[Iterable, int]): times to calculate the hazard for
 
         Returns:
             df (pd.DataFrame): samples with the prediction columns
-        '''
-
+        """
+        if isinstance(t, int):
+            t = np.array([t])
         model = self.event_models[event]
         alpha_df = model[1].set_index(self.duration_col)
 
-        t_i_not_fitted = [t_i for t_i in t if (t_i not in alpha_df.index)]
+        t_i_not_fitted = [t_i for t_i in t if (t_i not in self.times)]
         assert len(t_i_not_fitted) == 0, \
             f"Cannot predict for times which were not included during .fit(): {t_i_not_fitted}"
 
@@ -352,38 +385,6 @@ class TwoStagesFitter(ExpansionBasedFitter):
         hazard_df = self.hazard_inverse_transformation(alpha_jt_t + beta_j_x.values)
 
         df = pd.concat([df, hazard_df], axis=1)
-        return df
-
-    def predict_hazard_t(self, df: pd.DataFrame, t: np.array) -> pd.DataFrame:
-        """
-        This function calculates the hazard for all the events at the requested time values if they were included in
-        the training set of each event.
-
-        Args:
-            df (pd.DataFrame): samples to predict for
-            t (np.array): times to calculate the hazard for
-
-        Returns:
-            df (pd.DataFrame): samples with the prediction columns
-        """
-
-        for event, model in self.event_models.items():
-            df = self.predict_hazard_jt(df=df, event=event, t=t)
-        return df
-
-    def predict_hazard_all(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        This function calculates the hazard for all the events at all time values included in the training set for each
-        event.
-
-        Args:
-            df (pd.DataFrame): samples to predict for
-
-        Returns:
-            df (pd.DataFrame): samples with the prediction columns
-
-        """
-        df = self.predict_hazard_t(df, t=self.times)
         return df
 
     def hazard_transformation(self, a: Union[int, np.array, pd.Series, pd.DataFrame]) -> \
@@ -416,133 +417,6 @@ class TwoStagesFitter(ExpansionBasedFitter):
         """
         i = expit(a)
         return i
-
-    def predict_overall_survival(self, df: pd.DataFrame, t: int = None, return_hazards: bool = False) -> pd.DataFrame:
-        """
-        This function adds columns of the overall survival until time t.
-        Args:
-            df (pandas.DataFrame): dataframe with covariates columns
-            t (int): time
-            return_hazards (bool): if to keep the hazard columns
-
-        Returns:
-            df (pandas.DataFrame): dataframe with the additional overall survival columns
-
-        """
-        all_hazards = self.predict_hazard_all(df)
-        _times = self.times if t is None else [_t for _t in self.times if _t <= t]
-        overall = pd.DataFrame()
-        for t_i in _times:
-            cols = [f'hazard_j{e}_t{t_i}' for e in self.events]
-            t_i_hazard = 1 - all_hazards[cols].sum(axis=1)
-            t_i_hazard.name = f'overall_survival_t{t_i}'
-            overall = pd.concat([overall, t_i_hazard], axis=1)
-        overall = pd.concat([df, overall.cumprod(axis=1)], axis=1)
-        if return_hazards:
-            overall = pd.concat([overall, all_hazards[[c for c in all_hazards.columns
-                                                       if c[:7] == 'hazard_']]], axis=1)
-        return overall
-
-    def predict_prob_event_j_at_t(self, df: pd.DataFrame, event: Union[str, int], t: int) -> pd.DataFrame:
-        """
-        This function adds a column with probability of occurance of a specific event at a specific a time.
-
-        Args:
-            df (pandas.DataFrame): dataframe with covariates columns
-            event (Union[str, int]): event name
-            t (int): time
-
-        Returns:
-            df (pandas.DataFrame): dataframe an additional probability column
-
-        """
-
-        if f'prob_j{event}_at_t{t}' not in df.columns:
-            if t == 1:
-                if f'hazard_j{event}_t{t}' not in df.columns:
-                    df = self.predict_hazard_jt(df=df, event=event, t=t)
-                df[f'prob_j{event}_at_t{t}'] = df[f'hazard_j{event}_t{t}']
-                return df
-            elif not f'overall_survival_t{t - 1}' in df.columns:
-                df = self.predict_overall_survival(df, t=t, return_hazards=True)
-            elif not f'hazard_j{event}_t{t}' in df.columns:
-                df = self.predict_hazard_t(df, t=np.array([_t for _t in self.times if _t <= t]))
-            df[f'prob_j{event}_at_t{t}'] = df[f'overall_survival_t{t - 1}'] * df[f'hazard_j{event}_t{t}']
-        return df
-
-    def predict_prob_event_j_all(self, df: pd.DataFrame, event: Union[str, int]) -> pd.DataFrame:
-        """
-        This function adds columns of a specific event occurance probabilities.
-
-        Args:
-            df (pandas.DataFrame): dataframe with covariates columns
-            event (Union[str, int]): event name
-
-        Returns:
-            df (pandas.DataFrame): dataframe with probabilities columns
-
-        """
-
-        if f'overall_survival_t{self.times[-1]}' not in df.columns:
-            df = self.predict_overall_survival(df, return_hazards=True)
-        for t in self.times:
-            if f'prob_j{event}_at_t{t}' not in df.columns:
-                df = self.predict_prob_event_j_at_t(df=df, event=event, t=t)
-        return df
-
-    def predict_prob_events(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        This function adds columns of all the events occurance probabilities.
-        Args:
-            df (pandas.DataFrame): dataframe with covariates columns
-
-        Returns:
-            df (pandas.DataFrame): dataframe with probabilities columns
-
-        """
-
-        for event in self.events:
-            df = self.predict_prob_event_j_all(df=df, event=event)
-        return df
-
-    def predict_event_cumulative_incident_function(self, df: pd.DataFrame, event: Union[str, int]) -> pd.DataFrame:
-        """
-        This function adds a specific event columns of the predicted hazard function, overall survival, probabilities
-        of event occurance and cumulative incident function (CIF) to the given dataframe.
-
-        Args:
-            df (pandas.DataFrame): dataframe with covariates columns included
-            event (Union[str, int]): event name
-
-        Returns:
-            df (pandas.DataFrame): dataframe with additional prediction columns
-
-        """
-
-        if f'prob_j{event}_at_t{self.times[-1]}' not in df.columns:
-            df = self.predict_prob_events(df=df)
-        cols = [f'prob_j{event}_at_t{t}' for t in self.times]
-        cif_df = df[cols].cumsum(axis=1)
-        cif_df.columns = [f'cif_j{event}_at_t{t}' for t in self.times]
-        df = pd.concat([df, cif_df], axis=1)
-        return df
-
-    def predict_cumulative_incident_function(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        This function adds columns of the predicted hazard function, overall survival, probabilities of event occurance
-        and cumulative incident function (CIF) to the given dataframe.
-
-        Args:
-            df (pandas.DataFrame): dataframe with covariates columns included
-
-        Returns:
-            df (pandas.DataFrame): dataframe with additional prediction columns
-
-        """
-        for event in self.events:
-            if f'cif_j{event}_at_t{self.times[-1]}' not in df.columns:
-                df = self.predict_event_cumulative_incident_function(df=df, event=event)
-        return df
 
     def get_beta_SE(self):
         """
@@ -603,38 +477,6 @@ class TwoStagesFitter(ExpansionBasedFitter):
             plt.show()
         return ax
 
-    def predict_marginal_prob_event_j(self, df: pd.DataFrame, event: Union[str, int]) -> pd.DataFrame:
-        """
-        This function calculates the marginal probability of an event given the covariates.
-
-        Args:
-            df (pandas.DataFrame): dataframe with covariates columns included
-            event (Union[str, int]): event name
-
-        Returns:
-            df (pandas.DataFrame): dataframe with additional prediction columns
-        """
-        if f'prob_j{event}_at_t{self.times[-1]}' not in df.columns:
-            df = self.predict_prob_event_j_all(df=df, event=event)
-        cols = [f'prob_j{event}_at_t{_t}' for _t in self.times]
-        marginal_prob = df[cols].sum(axis=1)
-        marginal_prob.name = f'marginal_prob_j{event}'
-        return pd.concat([df, marginal_prob], axis=1)
-
-    def predict_marginal_prob_all_events(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        This function calculates the marginal probability per event given the covariates for all the events.
-
-        Args:
-            df (pandas.DataFrame): dataframe with covariates columns included
-
-        Returns:
-            df (pandas.DataFrame): dataframe with additional prediction columns
-        """
-        for event in self.events:
-            df = self.predict_marginal_prob_event_j(df=df, event=event)
-        return df
-
 
 def create_df_for_cif_plots(df: pd.DataFrame, field: str,
                             covariates: Iterable,
@@ -679,19 +521,19 @@ def create_df_for_cif_plots(df: pd.DataFrame, field: str,
 
 
 def assert_fit(event_df, times):
+    # todo: split to 2: one generic, one for new model
     if not event_df['success'].all():
         problematic_times = event_df.loc[~event_df['success'], "X"].tolist()
         event = event_df['J'].max()  # all the events in the dataframe are the same
         raise RuntimeError(f"In event J={event}, The method did not converged in D={problematic_times}."
-                           f" Consider changing the "
-                           f"problem definition. \n See TBD for more details.")
-        # todo: add user example
+                           f" Consider changing the problem definition."
+                           f"\n See https://tomer1812.github.io/pydts/User%20Story/ for more details.")
     if event_df.shape[0] != len(times):
         event = event_df['J'].max()  # all the events in the dataframe are the same
         problematic_times = pd.Index(event_df['X']).symmetric_difference(times).tolist()
         raise RuntimeError(f"In event J={event}, The method didn't have events D={problematic_times}."
-                           f" Consider changing the "
-                           f"problem definition. \n See TBD for more details.")
+                           f" Consider changing the problem definition."
+                           f"\n See https://tomer1812.github.io/pydts/User%20Story/ for more details.")
 
 
 def bootstrap_fitters(rep, n_patients, n_cov, d_times, j_events, pid_col, test_size,
