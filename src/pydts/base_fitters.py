@@ -71,7 +71,7 @@ class ExpansionBasedFitter(BaseFitter):
         Returns:
             df (pd.DataFrame): samples with the prediction columns
         """
-        raise
+        raise NotImplemented
 
     def predict_hazard_t(self, df: pd.DataFrame, t: np.array) -> pd.DataFrame:
         """
@@ -126,9 +126,12 @@ class ExpansionBasedFitter(BaseFitter):
             t_i_hazard.name = f'overall_survival_t{t_i}'
             overall = pd.concat([overall, t_i_hazard], axis=1)
         overall = pd.concat([df, overall.cumprod(axis=1)], axis=1)
+
         if return_hazards:
-            overall = pd.concat([overall, all_hazards[[c for c in all_hazards.columns
-                                                       if c[:7] == 'hazard_']]], axis=1)
+            cols = all_hazards.columns[all_hazards.columns.str.startswith("hazard_")]
+            cols = cols.difference(overall.columns)
+            if len(cols) > 0:
+                overall = pd.concat([overall, all_hazards[cols]], axis=1)
         return overall
 
     def predict_prob_event_j_at_t(self, df: pd.DataFrame, event: Union[str, int], t: int) -> pd.DataFrame:
@@ -206,7 +209,6 @@ class ExpansionBasedFitter(BaseFitter):
             df (pandas.DataFrame): dataframe with additional prediction columns
 
         """
-
         if f'prob_j{event}_at_t{self.times[-1]}' not in df.columns:
             df = self.predict_prob_events(df=df)
         cols = [f'prob_j{event}_at_t{t}' for t in self.times]
