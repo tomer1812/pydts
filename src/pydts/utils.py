@@ -14,8 +14,11 @@ def get_expanded_df(df, event_type_col='J', duration_col='X', pid_col='pid'):
 
     :return: result_df: expanded dataframe
     """
+    unique_times = df[duration_col].sort_values().unique()
     result_df = df.reindex(df.index.repeat(df[duration_col]))
     result_df[duration_col] = result_df.groupby(pid_col).cumcount() + 1
+    # drop times that didn't happen
+    result_df.drop(index=result_df.loc[~result_df[duration_col].isin(unique_times)].index, inplace=True)
     result_df.reset_index(drop=True, inplace=True)
     last_idx = result_df.drop_duplicates(subset=[pid_col], keep='last').index
     events = sorted(df[event_type_col].unique())
