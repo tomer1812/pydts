@@ -5,20 +5,30 @@ from pydts.examples_utils.simulations_data_config import *
 from matplotlib import pyplot as plt
 import seaborn as sns
 from lifelines import KaplanMeierFitter
+from pydts.config import *
+import os
 import warnings
 warnings.filterwarnings('ignore')
 
 
-def plot_first_model_coefs(models, times, expanded_train_df, n_cov=5):
+def add_panel_text(ax, text, xplace=-0.15, fsz=17):
+    ax.text(xplace, 1.1, text, transform=ax.transAxes, fontsize=fsz,
+            fontweight='bold', va='top', ha='right')
+
+
+def plot_first_model_coefs(models, times, expanded_train_df, n_cov=5, filename=None):
     fig, axes = plt.subplots(1, 2, figsize=(14, 6))
     ax = axes[0]
+    ax.tick_params(axis='both', which='major', labelsize=15)
+    ax.tick_params(axis='both', which='minor', labelsize=15)
+    add_panel_text(ax=ax, text='a')
     ax.set_title(r'$\alpha_{jt}$', fontsize=26)
     ax.scatter(times, models[1].params[:len(times)].values, label='J=1 (Pred)', color='tab:blue')
     ax.plot(times, -1 -0.3*np.log(times), label='J=1 (True)', ls='--', color='tab:blue')
     ax.scatter(times, models[2].params[:len(times)].values, label='J=2 (Pred)', color='tab:green')
     ax.plot(times, -1.75 -0.15*np.log(times), label='J=2 (True)', ls='--', color='tab:green')
-    ax.set_xlabel(r'Time', fontsize=16)
-    ax.set_ylabel(r'$\alpha_{t}$', fontsize=20)
+    ax.set_xlabel(r'Time', fontsize=18)
+    ax.set_ylabel(r'$\alpha_{t}$', fontsize=18)
     ax.legend(loc='upper center', fontsize=14)
     ax.set_ylim([-3, 0.5])
     ax2 = ax.twinx()
@@ -27,7 +37,12 @@ def plot_first_model_coefs(models, times, expanded_train_df, n_cov=5):
     ax2.tick_params(axis='y', colors='red')
 
     ax = axes[1]
+    ax.tick_params(axis='both', which='major', labelsize=15)
+    ax.tick_params(axis='both', which='minor', labelsize=15)
+    add_panel_text(ax=ax, text='b')
     ax.set_title(r'$\beta_{j}$', fontsize=26)
+    ax.set_xlabel(r'Covariate', fontsize=18)
+    ax.set_ylabel(r'$\beta}$', fontsize=18)
     ax.bar(np.arange(1, n_cov+1), models[1].params[-n_cov:], label='J=1 (Pred)', width=0.3, alpha=0.4, color='tab:blue')
     ax.scatter(-0.2+np.arange(1, n_cov+1), -np.log([0.8, 3, 3, 2.5, 2]), color='tab:blue', label='J=1 (True)',
                marker="4", s=130)
@@ -38,11 +53,16 @@ def plot_first_model_coefs(models, times, expanded_train_df, n_cov=5):
     ax.legend(loc='upper center', fontsize=14)
     ax.set_ylim([-1.5, 1])
     fig.tight_layout()
+    if filename is not None:
+        fig.savefig(os.path.join(OUTPUT_DIR, filename), dpi=300)
 
 
-def plot_second_model_coefs(alpha_df, beta_models, times, n_cov=5):
+def plot_second_model_coefs(alpha_df, beta_models, times, n_cov=5, filename=None):
     fig, axes = plt.subplots(1, 2, figsize=(14, 6))
     ax = axes[0]
+    ax.tick_params(axis='both', which='major', labelsize=15)
+    ax.tick_params(axis='both', which='minor', labelsize=15)
+    add_panel_text(ax=ax, text='a')
     ax.set_title(r'$\alpha_{jt}$', fontsize=26)
     tmp_ajt = alpha_df[alpha_df['J'] == 1]
     ax.scatter(tmp_ajt['X'].values, tmp_ajt['alpha_jt'].values, label='J=1 (Pred)', color='tab:blue')
@@ -50,8 +70,8 @@ def plot_second_model_coefs(alpha_df, beta_models, times, n_cov=5):
     tmp_ajt = alpha_df[alpha_df['J'] == 2]
     ax.scatter(tmp_ajt['X'].values, tmp_ajt['alpha_jt'].values, label='J=2 (Pred)', color='tab:green')
     ax.plot(times, -1.75 -0.15*np.log(times), label='J=2 (True)', ls='--', color='tab:green')
-    ax.set_xlabel(r'Time', fontsize=16)
-    ax.set_ylabel(r'$\alpha_{t}$', fontsize=20)
+    ax.set_xlabel(r'Time', fontsize=18)
+    ax.set_ylabel(r'$\alpha_{t}$', fontsize=18)
     ax.legend(loc='upper center', fontsize=14)
     ax.set_ylim([-3, 0.5])
     ax2 = ax.twinx()
@@ -60,6 +80,9 @@ def plot_second_model_coefs(alpha_df, beta_models, times, n_cov=5):
     ax2.tick_params(axis='y', colors='red')
 
     ax = axes[1]
+    ax.tick_params(axis='both', which='major', labelsize=15)
+    ax.tick_params(axis='both', which='minor', labelsize=15)
+    add_panel_text(ax=ax, text='b')
     ax.set_title(r'$\beta_{j}$', fontsize=26)
     ax.bar(np.arange(1, n_cov+1), beta_models[1].params_.values, label='J=1 (Pred)', width=0.3, alpha=0.4,
            color='tab:blue')
@@ -70,17 +93,22 @@ def plot_second_model_coefs(alpha_df, beta_models, times, n_cov=5):
     ax.scatter(0.35+np.arange(1, n_cov+1), -np.log([1, 3, 4, 3, 2]), color='tab:green', label='J=2 (True)', marker="3",
                s=130)
     ax.legend(loc='upper center', fontsize=14)
+    ax.set_xlabel('Covariate', fontsize=18)
+    ax.set_ylabel(r'$\beta}$', fontsize=18)
     ax.set_ylim([-1.5, 1])
     fig.tight_layout()
     ax.legend(loc='upper center', fontsize=14)
     fig.tight_layout()
+    if filename is not None:
+        fig.savefig(os.path.join(OUTPUT_DIR, filename), dpi=300)
 
 
 def plot_models_coefficients(alpha_dict: dict, beta_dict: dict, times: Iterable,
                              njt_counts: Iterable,
                              n_cov: int = 5,
-                             first_model_name: str = 'lee',
-                             second_model_name: str = 'new') -> None:
+                             first_model_name: str = 'Lee',
+                             second_model_name: str = 'Ours',
+                             filename: str = None) -> None:
     """
     This method takes the bootstrap results and plotting the comparison between the methods coefs
 
@@ -98,6 +126,9 @@ def plot_models_coefficients(alpha_dict: dict, beta_dict: dict, times: Iterable,
     """
     fig, axes = plt.subplots(1, 2, figsize=(14, 6))
     ax = axes[0]
+    ax.tick_params(axis='both', which='major', labelsize=15)
+    ax.tick_params(axis='both', which='minor', labelsize=15)
+    add_panel_text(ax=ax, text='a')
     ax.set_title(r'$\alpha_{jt}$', fontsize=26)
     tmp_ajt = alpha_dict[1]
     ax.scatter(times, tmp_ajt[f'{first_model_name}_mean'].values,
@@ -111,7 +142,8 @@ def plot_models_coefficients(alpha_dict: dict, beta_dict: dict, times: Iterable,
     ax.scatter(times, tmp_ajt[f'{second_model_name}_mean'].values,
                label=f'J=2 ({second_model_name} Pred)', color='darkgreen', marker='*', alpha=0.7, s=30)
     ax.plot(times, tmp_ajt['real_mean'].values, label='J=2 (True)', ls='--', color='tab:green')
-    ax.set_ylabel(r'$\alpha_{t}$', fontsize=20)
+    ax.set_xlabel(r'Time', fontsize=18)
+    ax.set_ylabel(r'$\alpha_{t}$', fontsize=18)
     ax.legend(loc='upper center', fontsize=14)
     ax.set_ylim([-3, 0.5])
     ax2 = ax.twinx()
@@ -120,7 +152,10 @@ def plot_models_coefficients(alpha_dict: dict, beta_dict: dict, times: Iterable,
     ax2.tick_params(axis='y', colors='red')
 
     ax = axes[1]
+    ax.tick_params(axis='both', which='major', labelsize=15)
+    ax.tick_params(axis='both', which='minor', labelsize=15)
     ax.set_title(r'$\beta_{j}$', fontsize=26)
+    add_panel_text(ax=ax, text='b')
     beta_j = beta_dict[1]
     ax.bar(np.arange(1, n_cov + 1), beta_j['real_mean'].values, label='J=1 (True)', width=0.3, alpha=0.4,
            color='tab:blue')
@@ -138,11 +173,13 @@ def plot_models_coefficients(alpha_dict: dict, beta_dict: dict, times: Iterable,
     ax.scatter(0.35 + np.arange(1, n_cov + 1), beta_j[f'{second_model_name}_mean'].values,
                color='darkgreen', label=f'J=2 ({second_model_name} Pred)', marker="<",
                s=130, alpha=0.4)
+    ax.set_xlabel('Covariate', fontsize=18)
+    ax.set_ylabel(r'$\beta}$', fontsize=18)
     ax.legend(loc='upper center', fontsize=14)
     ax.set_ylim([-1.5, 1])
     fig.tight_layout()
-    ax.legend(loc='upper center', fontsize=14)
-    fig.tight_layout()
+    if filename is not None:
+        fig.savefig(os.path.join(OUTPUT_DIR, filename), dpi=300)
 
 
 def plot_LOS_simulation_figure1(data_df):
@@ -359,8 +396,8 @@ def compare_beta_models_for_example(first_models: dict, second_models: dict, n_c
                                                                            second_model=second_model,
                                                                            real_values=real_coef,
                                                                            event=event,
-                                                                           first_model_label="lee",
-                                                                           second_model_label="new"
+                                                                           first_model_label="Lee",
+                                                                           second_model_label="Ours"
                                                                            )
     return models_dict
 
@@ -390,7 +427,7 @@ def plot_boot_alpha_res(boot_dict: dict, return_summary: bool = True):
             temp_df = temp_df.loc[[f"{prefix}{idx}_{event_type}" for idx in range(1, temp_df.shape[0]+1)]]
             temp_df.columns = temp_df.columns.get_level_values(0) + "_" + temp_df.columns.get_level_values(1)
             res_dict[coef_type][event_type] = temp_df.copy()
-            temp_df.plot(x="lee_std", y="new_std", kind="scatter", ax=ax)
+            temp_df.plot(x="Lee_std", y="Ours_std", kind="scatter", ax=ax)
             ax.plot([0, 1], [0, 1], "--", transform=ax.transAxes, alpha=0.3, color="tab:green");
             ax.grid()
             latter = "\\alpha" if coef_type == "alpha" else "\\beta"
@@ -401,7 +438,8 @@ def plot_boot_alpha_res(boot_dict: dict, return_summary: bool = True):
         return res_dict
 
 
-def plot_times(times_dict:dict) -> None:
+def plot_times(times_dict: dict,
+               filename: str = None) -> None:
     """
 
     Args:
@@ -410,16 +448,20 @@ def plot_times(times_dict:dict) -> None:
     Returns:
 
     """
-    ax = pd.DataFrame.from_dict(times_dict).boxplot(figsize=(10, 10), boxprops={"lw": 1.5, "color": "tab:blue"},
+    ax = pd.DataFrame.from_dict(times_dict).boxplot(figsize=(8, 6), boxprops={"lw": 1.5, "color": "tab:blue"},
                                                     medianprops={"lw": 2, "color": "tab:green"})
 
     # ax.set_ylim(0, 15)
-    ax.set_ylabel("Time in seconds", fontdict={"weight": 'bold', "size": 16})
-    ax.set_xlabel("Model types", fontdict={"weight": 'bold', "size": 16})
+    ax.tick_params(axis='both', which='major', labelsize=15)
+    ax.tick_params(axis='both', which='minor', labelsize=15)
+    ax.set_ylabel("Fitting Time [seconds]", fontdict={"size": 18}) # "weight": 'bold',
+    ax.set_xlabel("Model type", fontdict={"size": 18}) # "weight": 'bold',
 
-    ax.tick_params(labelsize=14, grid_lw=0.5, grid_alpha=0.6)
+    #ax.tick_params(labelsize=14, grid_lw=0.5, grid_alpha=0.6)
     plt.tight_layout()
     plt.show()
+    if filename is not None:
+        ax.figure.savefig(os.path.join(OUTPUT_DIR, filename), dpi=300)
 
 
 def plot_cif_plots(pred_df: pd.DataFrame, event: str) -> None:

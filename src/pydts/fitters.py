@@ -540,9 +540,9 @@ def assert_fit(event_df, times):
 def bootstrap_fitters(rep, n_patients, n_cov, d_times, j_events, pid_col, test_size,
                       drop_cols: Iterable = ("C", "T"),
                       model1=DataExpansionFitter,
-                      model1_name="lee",
+                      model1_name="Lee",
                       model2=TwoStagesFitter,
-                      model2_name: str = "new",
+                      model2_name: str = "Ours",
                       verbose: int = 2
                       ) -> Tuple[dict, dict]:
     from pydts.examples_utils.plots import compare_beta_models_for_example
