@@ -367,7 +367,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
         if isinstance(t, int):
             t = np.array([t])
         model = self.event_models[event]
-        alpha_df = model[1].set_index(self.duration_col)
+        alpha_df = model[1].set_index(self.duration_col)['alpha_jt'].copy()
 
         t_i_not_fitted = [t_i for t_i in t if (t_i not in self.times)]
         assert len(t_i_not_fitted) == 0, \
@@ -376,17 +376,12 @@ class TwoStagesFitter(ExpansionBasedFitter):
         _t = np.array([t_i for t_i in t if (f'hazard_j{event}_t{t_i}' not in df.columns)])
         if len(_t) == 0:
             return df
+        temp_df = df.copy()
+        beta_j_x = temp_df[self.covariates].dot(model[0].params_)
+        temp_df[[f'hazard_j{event}_t{c}' for c in _t]] = pd.concat(
+            [self.hazard_inverse_transformation(alpha_df[t] + beta_j_x) for t in times], axis=1).values
 
-        beta_j_x = df[self.covariates].dot(model[0].params_)
-        beta_j_x = pd.concat([beta_j_x] * len(_t), ignore_index=True, axis=1)
-        alpha_jt_t = pd.concat([alpha_df.loc[_t, 'alpha_jt'] * _t] * len(beta_j_x), axis=1).T
-        alpha_jt_t.index = beta_j_x.index
-        alpha_jt_t.columns = [f'hazard_j{event}_t{c}' for c in alpha_jt_t.columns]
-
-        hazard_df = self.hazard_inverse_transformation(alpha_jt_t + beta_j_x.values)
-
-        df = pd.concat([df, hazard_df], axis=1)
-        return df
+        return temp_df
 
     def hazard_transformation(self, a: Union[int, np.array, pd.Series, pd.DataFrame]) -> \
             Union[int, np.array, pd.Series, pd.DataFrame]:
