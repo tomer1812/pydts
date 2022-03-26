@@ -379,7 +379,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
         temp_df = df.copy()
         beta_j_x = temp_df[self.covariates].dot(model[0].params_)
         temp_df[[f'hazard_j{event}_t{c}' for c in _t]] = pd.concat(
-            [self.hazard_inverse_transformation(alpha_df[t] + beta_j_x) for t in times], axis=1).values
+            [self.hazard_inverse_transformation(alpha_df[c] + beta_j_x) for c in _t], axis=1).values
 
         return temp_df
 
