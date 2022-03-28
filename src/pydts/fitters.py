@@ -397,8 +397,6 @@ class TwoStagesFitter(ExpansionBasedFitter):
         t = self._validate_t(t, return_iter=True)
         assert event in self.events, \
             f"Cannot predict for event {event} - it was not included during .fit()"
-        assert self.duration_col in df.columns, \
-            f"Cannot predict - required duration_col is missing from df: {self.duration_col}"
 
         model = self.event_models[event]
         alpha_df = model[1].set_index(self.duration_col)['alpha_jt'].copy()
