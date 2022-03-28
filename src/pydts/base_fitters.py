@@ -36,7 +36,7 @@ class BaseFitter:
         raise NotImplemented
 
     def _validate_t(self, t, return_iter=True):
-        _t = np.array([t]) if isinstance(t, int) else t
+        _t = np.array([t]) if not isinstance(t, Iterable) else t
         t_i_not_fitted = [t_i for t_i in _t if (t_i not in self.times)]
         assert len(t_i_not_fitted) == 0, \
             f"Cannot predict for times which were not included during .fit(): {t_i_not_fitted}"
