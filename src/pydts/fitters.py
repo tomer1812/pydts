@@ -88,9 +88,7 @@ class DataExpansionFitter(ExpansionBasedFitter):
 
         if 'C' in df.columns:
             raise ValueError('C is an invalid column name, to avoid errors with categorical symbol C() in formula')
-        assert event_type_col in df.columns, f'Event type column is missing from df: {event_type_col}'
-        assert duration_col in df.columns, f'Duration column is missing from df: {duration_col}'
-        assert pid_col in df.columns, f'Observation ID column is missing from df: {pid_col}'
+        self._validate_cols(df, event_type_col, duration_col, pid_col)
         if covariates is not None:
             cov_not_in_df = [cov for cov in covariates if cov not in df.columns]
             if len(cov_not_in_df) > 0:
@@ -150,16 +148,10 @@ class DataExpansionFitter(ExpansionBasedFitter):
             df (pd.DataFrame): samples with the prediction columns
         """
         # todo : make it more general for both classes
-        if isinstance(t, int):
-            t = np.array([t])
-        t_i_not_fitted = [t_i for t_i in t if (t_i not in self.times)]
-        assert len(t_i_not_fitted) == 0, \
-            f"Cannot predict for times which were not included during .fit(): {t_i_not_fitted}"
+        t = self._validate_t(t, return_iter=True)
         assert event in self.events, \
             f"Cannot predict for event {event} - it was not included during .fit()"
-        cov_not_fitted = [cov for cov in self.covariates if cov not in df.columns]
-        assert len(cov_not_fitted) == 0, \
-            f"Cannot predict - required covariates are missing from df: {cov_not_fitted}"
+        self._validate_covariates_in_df(df.head())
 
         _t = np.array([t_i for t_i in t if (f'hazard_j{event}_t{t_i}' not in df.columns)])
         if len(_t) == 0:
@@ -252,9 +244,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
             event_models (dict): Fitted models dictionary. Keys - event names, Values - fitted models for the event.
         """
 
-        assert event_type_col in df.columns, f'Event type column is missing from df: {event_type_col}'
-        assert duration_col in df.columns, f'Duration column is missing from df: {duration_col}'
-        assert pid_col in df.columns, f'Observation ID column is missing from df: {pid_col}'
+        self._validate_cols(df, event_type_col, duration_col, pid_col)
         if covariates is not None:
             cov_not_in_df = [cov for cov in covariates if cov not in df.columns]
             if len(cov_not_in_df) > 0:
@@ -403,18 +393,10 @@ class TwoStagesFitter(ExpansionBasedFitter):
         Returns:
             df (pd.DataFrame): samples with the prediction columns
         """
-
-        if isinstance(t, int):
-            t = np.array([t])
-
-        t_i_not_fitted = [t_i for t_i in t if (t_i not in self.times)]
-        assert len(t_i_not_fitted) == 0, \
-            f"Cannot predict for times which were not included during .fit(): {t_i_not_fitted}"
+        self._validate_covariates_in_df(df.head())
+        t = self._validate_t(t, return_iter=True)
         assert event in self.events, \
             f"Cannot predict for event {event} - it was not included during .fit()"
-        cov_not_fitted = [cov for cov in self.covariates if cov not in df.columns]
-        assert len(cov_not_fitted) == 0, \
-            f"Cannot predict - required covariates are missing from df: {cov_not_fitted}"
         assert self.duration_col in df.columns, \
             f"Cannot predict - required duration_col is missing from df: {self.duration_col}"
 
