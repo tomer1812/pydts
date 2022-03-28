@@ -60,6 +60,7 @@ class DataExpansionFitter(ExpansionBasedFitter):
             event_type_col: str = 'J',
             duration_col: str = 'X',
             pid_col: str = 'pid',
+            covariates: Optional[list] = None,
             formula: Optional[str] = None,
             models_kwargs: Optional[dict] = None,
             model_fit_kwargs: Optional[dict] = {}) -> dict:
@@ -72,6 +73,8 @@ class DataExpansionFitter(ExpansionBasedFitter):
                                   Right censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
             duration_col (str): Last follow up time column name (must be a column in df).
             pid_col (str): Sample ID column name (must be a column in df).
+            covariates (list, Optional): A list of covariates, all must be columns in df.
+                                         Defaults to all the columns of df except event_type_col, duration_col, and pid_col.
             formula (str, Optional): Model formula to be fitted. Patsy format string.
             models_kwargs (dict, Optional): Keyword arguments to pass to model instance initiation.
             model_fit_kwargs (dict, Optional): Keyword arguments to pass to model.fit() method.
@@ -82,10 +85,20 @@ class DataExpansionFitter(ExpansionBasedFitter):
 
         if models_kwargs is not None:
             self.models_kwargs = models_kwargs
+
         if 'C' in df.columns:
             raise ValueError('C is an invalid column name, to avoid errors with categorical symbol C() in formula')
+        assert event_type_col in df.columns, f'Event type column is missing from df: {event_type_col}'
+        assert duration_col in df.columns, f'Duration column is missing from df: {duration_col}'
+        assert pid_col in df.columns, f'Observation ID column is missing from df: {pid_col}'
+        if covariates is not None:
+            cov_not_in_df = [cov for cov in covariates if cov not in df.columns]
+            if len(cov_not_in_df) > 0:
+                raise ValueError(f"Error during fit - missing covariates from df: {cov_not_in_df}")
+
         self.events = [c for c in sorted(df[event_type_col].unique()) if c != 0]
-        self.covariates = [col for col in df if col not in [event_type_col, duration_col, pid_col]]
+        self.covariates = [col for col in df if col not in [event_type_col, duration_col, pid_col]] \
+                          if covariates is None else covariates
         self.times = sorted(df[duration_col].unique())
 
         self.expanded_df = self._expand_data(df=df, event_type_col=event_type_col, duration_col=duration_col,
@@ -119,7 +132,11 @@ class DataExpansionFitter(ExpansionBasedFitter):
             else:
                 print(f'Not {summary_func} function in event {event} model')
 
-    def predict_hazard_jt(self, df: pd.DataFrame, event: Union[str, int], t: Union[Iterable, int]) -> pd.DataFrame:
+    def predict_hazard_jt(self,
+                          df: pd.DataFrame,
+                          event: Union[str, int],
+                          t: Union[Iterable, int],
+                          n_jobs: int = -1) -> pd.DataFrame:
         """
         This method calculates the hazard for the given event at the given time values if they were included in
         the training set of the event.
@@ -128,7 +145,7 @@ class DataExpansionFitter(ExpansionBasedFitter):
             df (pd.DataFrame): samples to predict for
             event (Union[str, int]): event name
             t (np.array): times to calculate the hazard for
-
+            n_jobs: number of CPUs to use, defualt to every available CPU
         Returns:
             df (pd.DataFrame): samples with the prediction columns
         """
@@ -138,14 +155,19 @@ class DataExpansionFitter(ExpansionBasedFitter):
         t_i_not_fitted = [t_i for t_i in t if (t_i not in self.times)]
         assert len(t_i_not_fitted) == 0, \
             f"Cannot predict for times which were not included during .fit(): {t_i_not_fitted}"
+        assert event in self.events, \
+            f"Cannot predict for event {event} - it was not included during .fit()"
+        cov_not_fitted = [cov for cov in self.covariates if cov not in df.columns]
+        assert len(cov_not_fitted) == 0, \
+            f"Cannot predict - required covariates are missing from df: {cov_not_fitted}"
 
         _t = np.array([t_i for t_i in t if (f'hazard_j{event}_t{t_i}' not in df.columns)])
         if len(_t) == 0:
             return df
 
-        temp_df = df.copy()
+        temp_df = df.copy()  # todo make sure .copy() is required
         model = self.event_models[event]
-        res = Parallel(n_jobs=-1)(delayed(model.predict)(df[self.covariates].assign(X=c)) for c in t)
+        res = Parallel(n_jobs=n_jobs)(delayed(model.predict)(df[self.covariates].assign(X=c)) for c in t)
         temp_hazard_df = pd.concat(res, axis=1)
         temp_df[[f'hazard_j{event}_t{c_}' for c_ in t]] = temp_hazard_df.values
         return temp_df
@@ -172,11 +194,13 @@ class TwoStagesFitter(ExpansionBasedFitter):
         self.beta_models = {}
 
     def _alpha_jt(self, x, df, y_t, beta_j, n_jt, t):
+        # Alpha_jt optimization objective
         partial_df = df[df[self.duration_col] >= t]
         expit_add = np.dot(partial_df[self.covariates], beta_j)
         return ((1 / y_t) * np.sum(expit(x + expit_add)) - (n_jt / y_t)) ** 2
 
     def _fit_event_beta(self, expanded_df, event, model=CoxPHFitter, model_kwargs={}, model_fit_kwargs={}):
+        # Model fitting for conditional estimation of Beta_j for specific event
         strata_df = expanded_df[self.covariates + [f'j_{event}', self.duration_col]]
         strata_df[f'{self.duration_col}_copy'] = expanded_df[self.duration_col]
         beta_j_model = model(**model_kwargs)
@@ -186,6 +210,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
         return beta_j_model
 
     def _fit_beta(self, expanded_df, events, model=CoxPHFitter, model_kwargs={}, model_fit_kwargs={}):
+        # Model fitting for conditional estimation of Beta_j for all events
         beta_models = {}
         for event in events:
             beta_models[event] = self._fit_event_beta(expanded_df=expanded_df, event=event,
@@ -226,6 +251,15 @@ class TwoStagesFitter(ExpansionBasedFitter):
         Returns:
             event_models (dict): Fitted models dictionary. Keys - event names, Values - fitted models for the event.
         """
+
+        assert event_type_col in df.columns, f'Event type column is missing from df: {event_type_col}'
+        assert duration_col in df.columns, f'Duration column is missing from df: {duration_col}'
+        assert pid_col in df.columns, f'Observation ID column is missing from df: {pid_col}'
+        if covariates is not None:
+            cov_not_in_df = [cov for cov in covariates if cov not in df.columns]
+            if len(cov_not_in_df) > 0:
+                raise ValueError(f"Error during fit - missing covariates from df: {cov_not_in_df}")
+
         pandarallel.initialize(verbose=verbose)
         self.events = [c for c in sorted(df[event_type_col].unique()) if c != 0]
         if covariates is None:
@@ -257,7 +291,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
                                     row[duration_col])), axis=1)
             n_et['success'] = n_et['opt_res'].parallel_apply(lambda val: val.success)
             n_et['alpha_jt'] = n_et['opt_res'].parallel_apply(lambda val: val.x[0])
-            assert_fit(n_et, self.times)
+            assert_fit(n_et, self.times)  # todo move basic input validation before any optimization
             self.event_models[event] = [self.beta_models[event], n_et]
             self.alpha_df = pd.concat([self.alpha_df, n_et], ignore_index=True)
         return self.event_models
@@ -305,6 +339,8 @@ class TwoStagesFitter(ExpansionBasedFitter):
             ax (matplotlib.pyplot.Axes): output figure
         """
 
+        assert event in self.events, f"Cannot plot event {event} alpha - it was not included during .fit()"
+
         if ax is None:
             fig, ax = plt.subplots(1, 1)
         title = r'$\alpha_{jt}$' + f' for event {event}' if title is None else title
@@ -351,7 +387,10 @@ class TwoStagesFitter(ExpansionBasedFitter):
             plt.show()
         return ax
 
-    def predict_hazard_jt(self, df: pd.DataFrame, event: Union[str, int], t: Union[Iterable, int]) -> pd.DataFrame:
+    def predict_hazard_jt(self,
+                          df: pd.DataFrame,
+                          event: Union[str, int],
+                          t: Union[Iterable, int]) -> pd.DataFrame:
         """
         This method calculates the hazard for the given event at the given time values if they were included in
         the training set of the event.
@@ -364,26 +403,34 @@ class TwoStagesFitter(ExpansionBasedFitter):
         Returns:
             df (pd.DataFrame): samples with the prediction columns
         """
+
         if isinstance(t, int):
             t = np.array([t])
-        model = self.event_models[event]
-        alpha_df = model[1].set_index(self.duration_col)['alpha_jt'].copy()
 
         t_i_not_fitted = [t_i for t_i in t if (t_i not in self.times)]
         assert len(t_i_not_fitted) == 0, \
             f"Cannot predict for times which were not included during .fit(): {t_i_not_fitted}"
+        assert event in self.events, \
+            f"Cannot predict for event {event} - it was not included during .fit()"
+        cov_not_fitted = [cov for cov in self.covariates if cov not in df.columns]
+        assert len(cov_not_fitted) == 0, \
+            f"Cannot predict - required covariates are missing from df: {cov_not_fitted}"
+        assert self.duration_col in df.columns, \
+            f"Cannot predict - required duration_col is missing from df: {self.duration_col}"
+
+        model = self.event_models[event]
+        alpha_df = model[1].set_index(self.duration_col)['alpha_jt'].copy()
 
         _t = np.array([t_i for t_i in t if (f'hazard_j{event}_t{t_i}' not in df.columns)])
         if len(_t) == 0:
             return df
-        temp_df = df.copy()
+        temp_df = df.copy()  # todo make sure .copy() is required
         beta_j_x = temp_df[self.covariates].dot(model[0].params_)
         temp_df[[f'hazard_j{event}_t{c}' for c in _t]] = pd.concat(
-            [self.hazard_inverse_transformation(alpha_df[c] + beta_j_x) for c in _t], axis=1).values
-
+            [self._hazard_inverse_transformation(alpha_df[c] + beta_j_x) for c in _t], axis=1).values
         return temp_df
 
-    def hazard_transformation(self, a: Union[int, np.array, pd.Series, pd.DataFrame]) -> \
+    def _hazard_transformation(self, a: Union[int, np.array, pd.Series, pd.DataFrame]) -> \
             Union[int, np.array, pd.Series, pd.DataFrame]:
         """
         This function defines the transformation of the hazard function such that
@@ -399,7 +446,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
         i = logit(a)
         return i
 
-    def hazard_inverse_transformation(self, a: Union[int, np.array, pd.Series, pd.DataFrame]) -> \
+    def _hazard_inverse_transformation(self, a: Union[int, np.array, pd.Series, pd.DataFrame]) -> \
             Union[int, np.array, pd.Series, pd.DataFrame]:
         """
         This function defines the inverse transformation of the hazard function such that
@@ -494,7 +541,13 @@ def create_df_for_cif_plots(df: pd.DataFrame, field: str,
     Returns:
         df (pd.DataFrame): A dataframe that contains records per value for cif ploting
     """
-    df_for_ploting = df.copy()
+
+    cov_not_fitted = [cov for cov in covariates if cov not in df.columns]
+    assert len(cov_not_fitted) == 0, \
+        f"Required covariates are missing from df: {cov_not_fitted}"
+    # todo add assertions
+
+    df_for_ploting = df.copy()  # todo make sure .copy() is required
     if vals is not None:
         pass
     elif quantiles is not None:
@@ -540,6 +593,10 @@ def bootstrap_fitters(rep, n_patients, n_cov, d_times, j_events, pid_col, test_s
                       model2_name: str = "Ours",
                       verbose: int = 2
                       ) -> Tuple[dict, dict]:
+    # todo docstrings
+    # todo assertions
+    # todo move to utils?
+
     from pydts.examples_utils.plots import compare_beta_models_for_example
     boot_dict = {}
     times = {model1_name: [], model2_name: []}
@@ -580,6 +637,10 @@ def get_real_hazard(df, real_coef_dict, times, events):
     Returns:
 
     """
+    # todo docstrings
+    # todo assertions
+    # todo move to utils?
+
     a_t = {event: {t: real_coef_dict['alpha'][event](t) for t in times} for event in events}
     b = pd.concat([df.dot(real_coef_dict['beta'][j]) for j in events], axis=1, keys=events)
 
