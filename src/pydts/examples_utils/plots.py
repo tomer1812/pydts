@@ -464,13 +464,15 @@ def plot_times(times_dict: dict,
         ax.figure.savefig(os.path.join(OUTPUT_DIR, filename), dpi=300)
 
 
-def plot_cif_plots(pred_df: pd.DataFrame, event: str) -> None:
+def plot_cif_plots(pred_df: pd.DataFrame, event: str, return_ax: bool = False, ax: plt.Axes = None) -> None:
     """
     this method plot cif given pred df with cif and event
 
     Args:
         pred_df:
         event:
+        return_ax (bool): Whether to return the ax object
+        ax (plt.Axes): Axes
 
     Returns:
 
@@ -482,8 +484,10 @@ def plot_cif_plots(pred_df: pd.DataFrame, event: str) -> None:
     event_cif_cols = cif_cols[cif_cols.str.contains(f"j{event}")]
 
     event_x = event_cif_cols.str.extract(r"(t\d+)")[0].str.extract((r"(\d+)")).apply(pd.to_numeric).values.flatten()
-
-    ax = pred_df.head()[event_cif_cols].T.plot(figsize=(10, 10))
+    if ax is None:
+        ax = pred_df.head()[event_cif_cols].T.plot(figsize=(10, 10))
+    else:
+        pred_df.head()[event_cif_cols].T.plot(ax=ax)
     ax.set_xticks(event_x)
     ax.set_xticklabels(event_x)
     ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
@@ -491,5 +495,8 @@ def plot_cif_plots(pred_df: pd.DataFrame, event: str) -> None:
     ax.set_xlabel("t", fontdict={'size': 16, "weight": "bold"})
     ax.set_ylabel(f"CIF of $J_{event}$", fontdict={'size': 16, "weight": "bold"})
     ax.grid()
-    plt.tight_layout()
-    plt.show()
+    if return_ax:
+        return ax
+    else:
+        plt.tight_layout()
+        plt.show()
