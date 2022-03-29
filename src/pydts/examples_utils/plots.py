@@ -464,7 +464,8 @@ def plot_times(times_dict: dict,
         ax.figure.savefig(os.path.join(OUTPUT_DIR, filename), dpi=300)
 
 
-def plot_cif_plots(pred_df: pd.DataFrame, event: str, return_ax: bool = False, ax: plt.Axes = None) -> None:
+def plot_cif_plots(pred_df: pd.DataFrame, event: str, return_ax: bool = False, ax: plt.Axes = None,
+                   pad: float = 0.15, scale: int = 5) -> None:
     """
     this method plot cif given pred df with cif and event
 
@@ -473,6 +474,8 @@ def plot_cif_plots(pred_df: pd.DataFrame, event: str, return_ax: bool = False, a
         event:
         return_ax (bool): Whether to return the ax object
         ax (plt.Axes): Axes
+        pad (float): the pad to the y-axis
+        scale (int): the scaling of the y-axis pad
 
     Returns:
 
@@ -485,13 +488,14 @@ def plot_cif_plots(pred_df: pd.DataFrame, event: str, return_ax: bool = False, a
 
     event_x = event_cif_cols.str.extract(r"(t\d+)")[0].str.extract((r"(\d+)")).apply(pd.to_numeric).values.flatten()
     if ax is None:
-        ax = pred_df.head()[event_cif_cols].T.plot(figsize=(10, 10))
+        ax = pred_df[event_cif_cols].T.plot(figsize=(10, 10))
     else:
-        pred_df.head()[event_cif_cols].T.plot(ax=ax)
+        pred_df[event_cif_cols].T.plot(ax=ax)
     ax.set_xticks(event_x)
     ax.set_xticklabels(event_x)
-    ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
-    ax.set_ylim([0, 1])
+    # ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
+    y_min, y_max = get_y_perc_limits(pred_df, event_cif_cols, pad=pad, scale=scale)
+    ax.set_ylim([y_min, y_max])
     ax.set_xlabel("t", fontdict={'size': 16, "weight": "bold"})
     ax.set_ylabel(f"CIF of $J_{event}$", fontdict={'size': 16, "weight": "bold"})
     ax.grid()
@@ -500,3 +504,38 @@ def plot_cif_plots(pred_df: pd.DataFrame, event: str, return_ax: bool = False, a
     else:
         plt.tight_layout()
         plt.show()
+
+
+def scale_perc_limits(num: float, scale: int, up: bool = False):
+    """
+
+    Args:
+        num:
+        scale:
+        up:
+
+    Returns:
+
+    """
+    func = np.ceil if up else np.floor
+    return (func((num * 100) / scale) * scale) / 100
+
+
+def get_y_perc_limits(df: pd.DataFrame, cols: Iterable, pad: float = 0.15, scale: int = 5) -> Tuple[float, float]:
+    """
+
+    Args:
+        df (pd.DataFrame):
+        cols (Iterable):
+        pad (float):
+        scale (int):
+
+    Returns:
+
+    """
+    y_min = max(df[cols].min().min() - pad, 0)
+    y_min = scale_perc_limits(y_min, scale=scale, up=False)
+
+    y_max = min(df[cols].max().max() + pad, 1)
+    y_max = scale_perc_limits(y_max, scale=scale, up=True)
+    return y_min, y_max
