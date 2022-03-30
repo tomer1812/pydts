@@ -110,7 +110,7 @@ def plot_models_coefficients(alpha_dict: dict, beta_dict: dict, times: Iterable,
                              second_model_name: str = 'Ours',
                              filename: str = None) -> None:
     """
-    This method takes the bootstrap results and plotting the comparison between the methods coefs
+    This method takes the repetitive runs results and plotting the comparison between the methods coefs
 
     Args:
         alpha_dict (dict): a dict that contains for each event type (key) a dataframe of all the $\alpha_t$ (value)
@@ -402,26 +402,27 @@ def compare_beta_models_for_example(first_models: dict, second_models: dict, n_c
     return models_dict
 
 
-def plot_boot_alpha_res(boot_dict: dict, return_summary: bool = True):
+def plot_reps_coef_std(rep_dict: dict, return_summary: bool = True):
     """
 
     Args:
-        boot_dict:
+        rep_dict:
         return_summary:
 
     Returns:
 
     """
     # todo: use mean as well
+    # todo: split to different functions
     fig, axes = plt.subplots(2, 2, figsize=(12, 10))
-    coef_types = list(boot_dict[0].keys())  # alpha, beta
-    event_types = boot_dict[0][coef_types[0]].keys()
+    coef_types = list(rep_dict[0].keys())  # alpha, beta
+    event_types = rep_dict[0][coef_types[0]].keys()
     mapping = {t: i for i, t in enumerate(coef_types)}
     res_dict = {coef: {event_type: None for event_type in event_types} for coef in coef_types}
     for coef_type in coef_types:
         for event_type in event_types:
             ax = axes[mapping[coef_type]][event_type - 1]
-            df = pd.concat([dfs[coef_type][event_type] for dfs in boot_dict.values()])
+            df = pd.concat([dfs[coef_type][event_type] for dfs in rep_dict.values()])
             temp_df = df.groupby(df.index).agg(["mean", "std"])
             prefix = "a" if coef_type == "alpha" else "Z"
             temp_df = temp_df.loc[[f"{prefix}{idx}_{event_type}" for idx in range(1, temp_df.shape[0]+1)]]

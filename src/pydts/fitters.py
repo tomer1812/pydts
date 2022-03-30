@@ -565,20 +565,21 @@ def assert_fit(event_df, times):
                            f"\n See https://tomer1812.github.io/pydts/User%20Story/ for more details.")
 
 
-def bootstrap_fitters(rep, n_patients, n_cov, d_times, j_events, pid_col, test_size,
-                      drop_cols: Iterable = ("C", "T"),
-                      model1=DataExpansionFitter,
-                      model1_name="Lee",
-                      model2=TwoStagesFitter,
-                      model2_name: str = "Ours",
-                      verbose: int = 2
-                      ) -> Tuple[dict, dict]:
+def repetitive_fitters(rep, n_patients, n_cov, d_times, j_events, pid_col, test_size,
+                       drop_cols: Iterable = ("C", "T"),
+                       model1=DataExpansionFitter,
+                       model1_name="Lee",
+                       model2=TwoStagesFitter,
+                       model2_name: str = "Ours",
+                       verbose: int = 2
+                       ) -> Tuple[dict, dict]:
     # todo docstrings
     # todo assertions
     # todo move to utils?
+    # todo try catch
 
     from pydts.examples_utils.plots import compare_beta_models_for_example
-    boot_dict = {}
+    rep_dict = {}
     times = {model1_name: [], model2_name: []}
     counts_df_list = []
     for samp in tqdm(range(rep)):
@@ -600,9 +601,9 @@ def bootstrap_fitters(rep, n_patients, n_cov, d_times, j_events, pid_col, test_s
             new_fitter.fit(df=train_df.drop(drop_cols, axis=1))
         times[model2_name].append(time() - start)
         res_dict = compare_beta_models_for_example(fitter.event_models, new_fitter.event_models)
-        boot_dict[samp] = res_dict
+        rep_dict[samp] = res_dict
     ret_df = pd.concat(counts_df_list, axis=1).fillna(0).mean(axis=1).apply(np.ceil).to_frame()
-    return boot_dict, times, ret_df
+    return rep_dict, times, ret_df
 
 
 def get_real_hazard(df, real_coef_dict, times, events):
