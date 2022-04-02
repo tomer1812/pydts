@@ -458,7 +458,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
 
     def plot_all_events_beta(self, ax: plt.Axes = None, colors: list = COLORS, show: bool = True,
                              title: Union[str, None] = None, xlabel: str = 't',  ylabel: str = r'$\beta_{j}$',
-                             fontsize: int = 18) -> plt.Axes:
+                             fontsize: int = 18, ticklabelsize: int = 15) -> plt.Axes:
         """
         This function plots the $ beta_{j} $ coefficients and standard errors of all the events.
         Args:
@@ -469,14 +469,15 @@ class TwoStagesFitter(ExpansionBasedFitter):
             xlabel (str, Optional): axes xlabel
             ylabel (str, Optional): axes ylabel
             fontsize (int, Optional): axes title, xlabel, ylabel fontsize
-
+            ticklabelsize (int, Optional): axes xticklabels, yticklabels fontsize
         Returns:
             ax (matplotlib.pyplot.Axes): output figure
         """
         if ax is None:
             fig, ax = plt.subplots(1, 1)
         title = r'$\beta_{j}$' + f' for all events' if title is None else title
-
+        ax.tick_params(axis='both', which='major', labelsize=ticklabelsize)
+        ax.tick_params(axis='both', which='minor', labelsize=ticklabelsize)
         se_df = self.get_beta_SE()
 
         for idx, col in enumerate(se_df.columns):

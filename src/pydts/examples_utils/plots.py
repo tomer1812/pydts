@@ -422,6 +422,8 @@ def plot_reps_coef_std(rep_dict: dict, return_summary: bool = True):
     for coef_type in coef_types:
         for event_type in event_types:
             ax = axes[mapping[coef_type]][event_type - 1]
+            ax.tick_params(axis='both', which='major', labelsize=15)
+            ax.tick_params(axis='both', which='minor', labelsize=15)
             df = pd.concat([dfs[coef_type][event_type] for dfs in rep_dict.values()])
             temp_df = df.groupby(df.index).agg(["mean", "std"])
             prefix = "a" if coef_type == "alpha" else "Z"
@@ -429,10 +431,12 @@ def plot_reps_coef_std(rep_dict: dict, return_summary: bool = True):
             temp_df.columns = temp_df.columns.get_level_values(0) + "_" + temp_df.columns.get_level_values(1)
             res_dict[coef_type][event_type] = temp_df.copy()
             temp_df.plot(x="Lee_std", y="Ours_std", kind="scatter", ax=ax)
+            ax.set_xlabel("Lee_std", fontsize=18)
+            ax.set_ylabel("Ours_std", fontsize=18)
             ax.plot([0, 1], [0, 1], "--", transform=ax.transAxes, alpha=0.3, color="tab:green");
             ax.grid()
             latter = "\\alpha" if coef_type == "alpha" else "\\beta"
-            ax.set_title(f"${latter}{event_type}$")
+            ax.set_title(f"${latter}{event_type}$", fontsize=18)
     fig.tight_layout()
     fig.show()
     if return_summary:
@@ -492,13 +496,15 @@ def plot_cif_plots(pred_df: pd.DataFrame, event: str, return_ax: bool = False, a
         ax = pred_df[event_cif_cols].T.plot(figsize=(10, 10))
     else:
         pred_df[event_cif_cols].T.plot(ax=ax)
+    ax.tick_params(axis='both', which='major', labelsize=15)
+    ax.tick_params(axis='both', which='minor', labelsize=15)
     ax.set_xticks(event_x)
     ax.set_xticklabels(event_x)
     # ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
     y_min, y_max = get_y_perc_limits(pred_df, event_cif_cols, pad=pad, scale=scale)
     ax.set_ylim([y_min, y_max])
-    ax.set_xlabel("t", fontdict={'size': 16, "weight": "bold"})
-    ax.set_ylabel(f"CIF of $J_{event}$", fontdict={'size': 16, "weight": "bold"})
+    ax.set_xlabel("t", fontdict={'size': 18})  # , "weight": "bold"
+    ax.set_ylabel(f"CIF of $J_{event}$", fontdict={'size': 18})  # , "weight": "bold"
     ax.grid()
     if return_ax:
         return ax
