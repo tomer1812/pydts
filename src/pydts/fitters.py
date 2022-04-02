@@ -571,6 +571,7 @@ def repetitive_fitters(rep, n_patients, n_cov, d_times, j_events, pid_col, test_
                        model1_name="Lee",
                        model2=TwoStagesFitter,
                        model2_name: str = "Ours",
+                       allow_fails: int = 20,
                        verbose: int = 2
                        ) -> Tuple[dict, dict]:
     # todo docstrings
@@ -582,26 +583,36 @@ def repetitive_fitters(rep, n_patients, n_cov, d_times, j_events, pid_col, test_
     rep_dict = {}
     times = {model1_name: [], model2_name: []}
     counts_df_list = []
-    for samp in tqdm(range(rep)):
-        patients_df = generate_quick_start_df(n_patients=n_patients, n_cov=n_cov, d_times=d_times, j_events=j_events,
-                                              pid_col=pid_col, seed=samp)
-
-        train_df, test_df = train_test_split(patients_df, test_size=test_size)
-        counts_df_list.append(train_df.groupby(['J', 'X']).size().to_frame(samp))
-        drop_cols = pd.Index(drop_cols)
-        start = time()
-        fitter = model1()
-        fitter.fit(df=train_df.drop(drop_cols, axis=1))
-        times[model1_name].append(time() - start)
-        start = time()
-        new_fitter = model2()
-        if isinstance(new_fitter, TwoStagesFitter):
-            new_fitter.fit(df=train_df.drop(drop_cols, axis=1), verbose=verbose)
-        else:
-            new_fitter.fit(df=train_df.drop(drop_cols, axis=1))
-        times[model2_name].append(time() - start)
-        res_dict = compare_beta_models_for_example(fitter.event_models, new_fitter.event_models)
-        rep_dict[samp] = res_dict
+    final = 0
+    for samp in tqdm(range(rep+allow_fails)):
+        try:
+            patients_df = generate_quick_start_df(n_patients=n_patients, n_cov=n_cov, d_times=d_times, j_events=j_events,
+                                                  pid_col=pid_col, seed=samp)
+            train_df, test_df = train_test_split(patients_df, test_size=test_size)
+            counts_df_list.append(train_df.groupby(['J', 'X']).size().to_frame(samp))
+            drop_cols = pd.Index(drop_cols)
+            start_1 = time()
+            fitter = model1()
+            fitter.fit(df=train_df.drop(drop_cols, axis=1))
+            end_1 = time()
+            start_2 = time()
+            new_fitter = model2()
+            if isinstance(new_fitter, TwoStagesFitter):
+                new_fitter.fit(df=train_df.drop(drop_cols, axis=1), verbose=verbose)
+            else:
+                new_fitter.fit(df=train_df.drop(drop_cols, axis=1))
+            end_2 = time()
+            times[model1_name].append(end_1 - start_1)
+            times[model2_name].append(end_2 - start_2)
+            res_dict = compare_beta_models_for_example(fitter.event_models, new_fitter.event_models)
+            rep_dict[samp] = res_dict
+            final += 1
+            if final == rep:
+                break
+        except:
+            print(f'Failed to fit sample {samp}')
+            continue
+    print(f'final: {final}')
     ret_df = pd.concat(counts_df_list, axis=1).fillna(0).mean(axis=1).apply(np.ceil).to_frame()
     return rep_dict, times, ret_df
 
