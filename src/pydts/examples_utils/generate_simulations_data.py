@@ -3,6 +3,8 @@ from pydts.examples_utils.simulations_data_config import *
 from pydts.config import *
 import pandas as pd
 from scipy.special import expit
+from pandarallel import pandarallel
+
 
 def sample_los(new_patient, age_mean, age_std, bmi_mean, bmi_std, coefs=COEFS, baseline_hazard_scale=8,
                los_bounds=[1, 150]):
@@ -153,12 +155,13 @@ def default_sampling_logic(Z, d_times):
 
 
 def generate_quick_start_df(n_patients=10000, d_times=30, j_events=2, n_cov=5, seed=0, pid_col='pid',
-                            sampling_logic=default_sampling_logic):
+                            sampling_logic=default_sampling_logic, verbose=2):
+    pandarallel.initialize(verbose=verbose)
     np.random.seed(seed)
     covariates = [f'Z{i + 1}' for i in range(n_cov)]
     patients_df = pd.DataFrame(data=np.random.uniform(low=0.0, high=1.0, size=[n_patients, n_cov]),
                                columns=covariates)
-    sampled = patients_df.apply(lambda row: sampling_logic(Z=row, d_times=d_times), axis=1)
+    sampled = patients_df.parallel_apply(lambda row: sampling_logic(Z=row, d_times=d_times), axis=1)
     patients_df = pd.concat([patients_df, pd.DataFrame.from_records(sampled, columns=['J', 'T'])], axis=1)
     patients_df.index.name = pid_col
     patients_df['C'] = np.random.randint(low=1, high=d_times+1, size=n_patients)

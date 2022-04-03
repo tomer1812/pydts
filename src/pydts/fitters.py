@@ -585,12 +585,15 @@ def repetitive_fitters(rep, n_patients, n_cov, d_times, j_events, pid_col, test_
     times = {model1_name: [], model2_name: []}
     counts_df_list = []
     final = 0
+    failed = 0
     for samp in tqdm(range(rep+allow_fails)):
         try:
             patients_df = generate_quick_start_df(n_patients=n_patients, n_cov=n_cov, d_times=d_times, j_events=j_events,
-                                                  pid_col=pid_col, seed=samp)
+                                                  pid_col=pid_col, seed=samp, verbose=verbose)
             train_df, test_df = train_test_split(patients_df, test_size=test_size)
-            counts_df_list.append(train_df.groupby(['J', 'X']).size().to_frame(samp))
+            counts_df = train_df.groupby(['J', 'X']).size().to_frame(samp)
+            assert not (counts_df.reset_index()['X'].value_counts() < (j_events + 1)).any(), "Not enough events"
+            counts_df_list.append(counts_df)
             drop_cols = pd.Index(drop_cols)
             start_1 = time()
             fitter = model1()
@@ -611,7 +614,8 @@ def repetitive_fitters(rep, n_patients, n_cov, d_times, j_events, pid_col, test_
             if final == rep:
                 break
         except:
-            print(f'Failed to fit sample {samp}')
+            failed += 1
+            print(f'Failed to fit sample {samp+1}, fail #{failed}')
             continue
     print(f'final: {final}')
     ret_df = pd.concat(counts_df_list, axis=1).fillna(0).mean(axis=1).apply(np.ceil).to_frame()
