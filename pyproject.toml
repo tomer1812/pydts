@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "pydts"
-version = "0.1.0"
-description = "Discrete timeline survival model"
+version = "0.2.0"
+description = "Discrete time survival analysis with competing risks"
 authors = ["Tomer Meir <tomer1812@gmail.com>", "Rom Gutman <rom.gutman1@gmail.com>", "Malka Gorfine <malkago12@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 homepage = "https://github.com/tomer1812/pydts"
 repository = "https://github.com/tomer1812/pydts"
-keywords = ["discrete timeline", "time to event" ,"survival analysis", "competing events"]
+keywords = ["Discrete Time", "Time to Event" ,"Survival Analysis", "Competing Events"]
 documentation = "https://tomer1812.github.io/pydts"
 
 [tool.poetry.dependencies]
