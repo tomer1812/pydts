@@ -154,17 +154,88 @@ def default_sampling_logic(Z, d_times):
     return j_i, T_i
 
 
+def calculate_jt(sum1, sum2, prob_j1t, prob_j2t, d_times):
+    """
+    
+    Args:
+        sum1: 
+        sum2: 
+        prob_j1t: 
+        prob_j2t: 
+        d_times: 
+
+    Returns:
+
+    """
+    temp_sums = pd.concat(
+        [1 - sum1 - sum2, sum1, sum2],
+        axis=1, keys=[0, 1, 2]
+    )
+    # sample J
+    j_df = (temp_sums.cumsum(1) > np.random.rand(temp_sums.shape[0])[:, None]).idxmax(axis=1).to_frame('J')
+
+    temp_ts = []
+    for j in [1, 2]:
+        rel_j = j_df.query("J==@j").index
+        prob_df = prob_j1t if j == 1 else prob_j2t  # the prob j to sample from
+        # sample T
+        temp_ts.append((prob_df.loc[rel_j].cumsum(1) >= np.random.rand(rel_j.shape[0])[:, None]).idxmax(axis=1))
+
+    temp_ts.append(pd.Series(d_times, index=j_df.query('J==0').index))
+
+    j_df["T"] = pd.concat(temp_ts).sort_index()
+    return j_df
+
+
+def new_sample_logic(patients_df: pd.DataFrame, j_events: int, d_times: int, real_coef_dict: dict) -> pd.DataFrame:
+    """
+    A quicker sample logic, that uses coefficients supplied by the user
+
+    Args:
+        patients_df:
+        j_events:
+        d_times:
+        real_coef_dict:
+
+    Returns:
+
+    """
+    events = range(1, j_events + 1)
+    # todo: Add tests
+    a_t = {event: {t: real_coef_dict['alpha'][event](t) for t in range(1, d_times+1)} for event in events}
+    b = pd.concat([patients_df.dot(real_coef_dict['beta'][j]) for j in events], axis=1, keys=events)
+
+    hazard1, hazard2 = [pd.concat([expit(a_t[j][t] + b[j]) for t in range(1, d_times+1)],
+                                  axis=1, keys=(range(1, d_times + 1))) for j in events]
+    surv_func = pd.concat([pd.Series(1, index=hazard1.index),
+                           (1 - hazard1 - hazard2).cumprod(axis=1).iloc[:, :-1]], axis=1)
+
+    surv_func.columns += 1
+
+    proba1 = hazard1 * surv_func
+    proba2 = hazard2 * surv_func
+    sum1 = proba1.sum(axis=1)
+    sum2 = proba2.sum(axis=1)
+    probj1t = proba1.div(sum1,axis=0)
+    probj2t = proba2.div(sum2,axis=0)
+
+    ret = calculate_jt(sum1, sum2, probj1t, probj2t, d_times)
+    return ret
+
+
 def generate_quick_start_df(n_patients=10000, d_times=30, j_events=2, n_cov=5, seed=0, pid_col='pid',
-                            sampling_logic=default_sampling_logic, verbose=2):
-    pandarallel.initialize(verbose=verbose)
+                            real_coef_dict: dict = None, sampling_logic=new_sample_logic, censoring_prob=1.):
     np.random.seed(seed)
+    assert real_coef_dict is not None, "The user should supply the coefficients of the experiment"
     covariates = [f'Z{i + 1}' for i in range(n_cov)]
     patients_df = pd.DataFrame(data=np.random.uniform(low=0.0, high=1.0, size=[n_patients, n_cov]),
                                columns=covariates)
-    sampled = patients_df.parallel_apply(lambda row: sampling_logic(Z=row, d_times=d_times), axis=1)
-    patients_df = pd.concat([patients_df, pd.DataFrame.from_records(sampled, columns=['J', 'T'])], axis=1)
+    sampled = sampling_logic(patients_df, j_events, d_times, real_coef_dict)
+    patients_df = pd.concat([patients_df, sampled], axis=1)
     patients_df.index.name = pid_col
-    patients_df['C'] = np.random.randint(low=1, high=d_times+1, size=n_patients)
+    patients_df['C'] = np.where(np.random.rand(n_patients) < censoring_prob,
+                                np.random.randint(low=1, high=d_times+1,
+                                                  size=n_patients), d_times)
     patients_df['X'] = patients_df[['T', 'C']].min(axis=1)
     patients_df.loc[patients_df['C'] < patients_df['T'], 'J'] = 0
     return patients_df.reset_index()
