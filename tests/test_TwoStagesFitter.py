@@ -19,7 +19,7 @@ class TestTwoStagesFitter(unittest.TestCase):
             }
         }
         self.df = generate_quick_start_df(n_patients=5000, n_cov=5, d_times=10, j_events=2, pid_col='pid', seed=0,
-                                          real_coef_dict=real_coef_dict)
+                                          real_coef_dict=self.real_coef_dict, censoring_prob=.8)
         self.m = TwoStagesFitter()
         self.fitted_model = TwoStagesFitter()
         self.fitted_model.fit(df=self.df.drop(['C', 'T'], axis=1))
