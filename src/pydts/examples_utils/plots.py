@@ -7,8 +7,10 @@ import seaborn as sns
 from lifelines import KaplanMeierFitter
 from pydts.config import *
 import os
+import string
 import warnings
 warnings.filterwarnings('ignore')
+
 
 
 def add_panel_text(ax, text, xplace=-0.15, fsz=17):
@@ -32,8 +34,8 @@ def plot_first_model_coefs(models, times, expanded_train_df, n_cov=5, filename=N
     ax.legend(loc='upper center', fontsize=14)
     ax.set_ylim([-3, 0.5])
     ax2 = ax.twinx()
-    ax2.hist(expanded_train_df['X'], color='r', alpha=0.3, bins=times)
-    ax2.set_ylabel('N patients', fontsize=16, color='red')
+    ax2.hist(expanded_train_df.groupby('X')['delta'].sum(), color='r', alpha=0.3, bins=times)
+    ax2.set_ylabel('N events', fontsize=16, color='red')
     ax2.tick_params(axis='y', colors='red')
 
     ax = axes[1]
@@ -76,7 +78,7 @@ def plot_second_model_coefs(alpha_df, beta_models, times, n_cov=5, filename=None
     ax.set_ylim([-3, 0.5])
     ax2 = ax.twinx()
     ax2.bar(alpha_df.groupby('X')['n_jt'].sum().index, alpha_df.groupby('X')['n_jt'].sum().values, color='r', alpha=0.3)
-    ax2.set_ylabel('N patients', fontsize=16, color='red')
+    ax2.set_ylabel('N events', fontsize=16, color='red')
     ax2.tick_params(axis='y', colors='red')
 
     ax = axes[1]
@@ -148,7 +150,7 @@ def plot_models_coefficients(alpha_dict: dict, beta_dict: dict, times: Iterable,
     ax.set_ylim([-3, 0.5])
     ax2 = ax.twinx()
     ax2.bar(times, njt_counts, color='r', alpha=0.3)
-    ax2.set_ylabel('N patients', fontsize=16, color='red')
+    ax2.set_ylabel('N events', fontsize=16, color='red')
     ax2.tick_params(axis='y', colors='red')
 
     ax = axes[1]
@@ -402,26 +404,28 @@ def compare_beta_models_for_example(first_models: dict, second_models: dict, n_c
     return models_dict
 
 
-def plot_reps_coef_std(rep_dict: dict, return_summary: bool = True):
+def plot_reps_coef_std(rep_dict: dict, return_summary: bool = True, filename: str = None):
     """
 
     Args:
         rep_dict:
         return_summary:
-
+        filename:
     Returns:
 
     """
     # todo: use mean as well
     # todo: split to different functions
     fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+    alphabet_list = list(string.ascii_lowercase)
     coef_types = list(rep_dict[0].keys())  # alpha, beta
     event_types = rep_dict[0][coef_types[0]].keys()
     mapping = {t: i for i, t in enumerate(coef_types)}
     res_dict = {coef: {event_type: None for event_type in event_types} for coef in coef_types}
-    for coef_type in coef_types:
-        for event_type in event_types:
+    for idct, coef_type in enumerate(coef_types):
+        for idet, event_type in enumerate(event_types):
             ax = axes[mapping[coef_type]][event_type - 1]
+            add_panel_text(ax=ax, text=alphabet_list[idct*len(event_types)+idet])
             ax.tick_params(axis='both', which='major', labelsize=15)
             ax.tick_params(axis='both', which='minor', labelsize=15)
             df = pd.concat([dfs[coef_type][event_type] for dfs in rep_dict.values()])
@@ -431,14 +435,27 @@ def plot_reps_coef_std(rep_dict: dict, return_summary: bool = True):
             temp_df.columns = temp_df.columns.get_level_values(0) + "_" + temp_df.columns.get_level_values(1)
             res_dict[coef_type][event_type] = temp_df.copy()
             temp_df.plot(x="Lee_std", y="Ours_std", kind="scatter", ax=ax)
-            ax.set_xlabel("Lee_std", fontsize=18)
-            ax.set_ylabel("Ours_std", fontsize=18)
+            ax.set_xlabel("Lee std", fontsize=18)
+            ax.set_ylabel("Ours std", fontsize=18)
             ax.plot([0, 1], [0, 1], "--", transform=ax.transAxes, alpha=0.3, color="tab:green");
             ax.grid()
+            # todo remove paper limits
+            if idct == 0:
+                ax.set_xlim([0, 0.6])
+                ax.set_ylim([0, 0.6])
+            elif ((idct == 1) and (idet == 0)):
+                ax.set_xlim([0.02, 0.04])
+                ax.set_ylim([0.02, 0.04])
+            elif ((idct == 1) and (idet == 1)):
+                ax.set_xlim([0.04, 0.06])
+                ax.set_ylim([0.04, 0.06])
             latter = "\\alpha" if coef_type == "alpha" else "\\beta"
             ax.set_title(f"${latter}{event_type}$", fontsize=18)
     fig.tight_layout()
     fig.show()
+    if filename is not None:
+        fig.savefig(os.path.join(OUTPUT_DIR, filename), dpi=300)
+
     if return_summary:
         return res_dict
 
@@ -449,7 +466,7 @@ def plot_times(times_dict: dict,
 
     Args:
         times_dict:
-
+        filename:
     Returns:
 
     """
