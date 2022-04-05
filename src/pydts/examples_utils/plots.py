@@ -34,7 +34,7 @@ def plot_first_model_coefs(models, times, expanded_train_df, n_cov=5, filename=N
     ax.legend(loc='upper center', fontsize=14)
     ax.set_ylim([-3, 0.5])
     ax2 = ax.twinx()
-    ax2.hist(expanded_train_df.groupby('X')['delta'].sum(), color='r', alpha=0.3, bins=times)
+    ax2.hist(expanded_train_df['X'], color='r', alpha=0.3, bins=times)
     ax2.set_ylabel('N events', fontsize=16, color='red')
     ax2.tick_params(axis='y', colors='red')
 
