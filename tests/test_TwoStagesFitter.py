@@ -2,12 +2,24 @@ import unittest
 import pandas as pd
 from pydts.examples_utils.generate_simulations_data import generate_quick_start_df
 from pydts.fitters import TwoStagesFitter
+import numpy as np
 
 
 class TestTwoStagesFitter(unittest.TestCase):
 
     def setUp(self):
-        self.df = generate_quick_start_df(n_patients=5000, n_cov=5, d_times=10, j_events=2, pid_col='pid', seed=0)
+        self.real_coef_dict = {
+            "alpha": {
+                1: lambda t: -1 - 0.3 * np.log(t),
+                2: lambda t: -1.75 - 0.15 * np.log(t)
+            },
+            "beta": {
+                1: -np.log([0.8, 3, 3, 2.5, 2]),
+                2: -np.log([1, 3, 4, 3, 2])
+            }
+        }
+        self.df = generate_quick_start_df(n_patients=5000, n_cov=5, d_times=10, j_events=2, pid_col='pid', seed=0,
+                                          real_coef_dict=self.real_coef_dict, censoring_prob=.8)
         self.m = TwoStagesFitter()
         self.fitted_model = TwoStagesFitter()
         self.fitted_model.fit(df=self.df.drop(['C', 'T'], axis=1))

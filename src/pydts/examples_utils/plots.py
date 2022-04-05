@@ -418,8 +418,9 @@ def plot_reps_coef_std(rep_dict: dict, return_summary: bool = True, filename: st
     # todo: split to different functions
     fig, axes = plt.subplots(2, 2, figsize=(12, 10))
     alphabet_list = list(string.ascii_lowercase)
-    coef_types = list(rep_dict[0].keys())  # alpha, beta
-    event_types = rep_dict[0][coef_types[0]].keys()
+    first_key = next(iter(rep_dict))    # deal with cases where there isn't 0 in samples
+    coef_types = list(rep_dict[first_key].keys())  # alpha, beta
+    event_types = rep_dict[first_key][coef_types[0]].keys()
     mapping = {t: i for i, t in enumerate(coef_types)}
     res_dict = {coef: {event_type: None for event_type in event_types} for coef in coef_types}
     for idct, coef_type in enumerate(coef_types):

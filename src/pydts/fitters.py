@@ -573,7 +573,9 @@ def repetitive_fitters(rep, n_patients, n_cov, d_times, j_events, pid_col, test_
                        model2=TwoStagesFitter,
                        model2_name: str = "Ours",
                        allow_fails: int = 20,
-                       verbose: int = 2
+                       verbose: int = 2,
+                       real_coef_dict: dict = None,
+                       censoring_prob: float = 1.
                        ) -> Tuple[dict, dict]:
     # todo docstrings
     # todo assertions
@@ -588,8 +590,10 @@ def repetitive_fitters(rep, n_patients, n_cov, d_times, j_events, pid_col, test_
     failed = 0
     for samp in tqdm(range(rep+allow_fails)):
         try:
-            patients_df = generate_quick_start_df(n_patients=n_patients, n_cov=n_cov, d_times=d_times, j_events=j_events,
-                                                  pid_col=pid_col, seed=samp, verbose=verbose)
+            patients_df = generate_quick_start_df(n_patients=n_patients, n_cov=n_cov, d_times=d_times,
+                                                  j_events=j_events,
+                                                  pid_col=pid_col, seed=samp, real_coef_dict=real_coef_dict,
+                                                  censoring_prob=censoring_prob )
             train_df, test_df = train_test_split(patients_df, test_size=test_size)
             counts_df = train_df.groupby(['J', 'X']).size().to_frame(samp)
             assert not (counts_df.reset_index()['X'].value_counts() < (j_events + 1)).any(), "Not enough events"
@@ -613,7 +617,8 @@ def repetitive_fitters(rep, n_patients, n_cov, d_times, j_events, pid_col, test_
             final += 1
             if final == rep:
                 break
-        except:
+        except Exception as e:
+            print(e)
             failed += 1
             print(f'Failed to fit sample {samp+1}, fail #{failed}')
             continue
