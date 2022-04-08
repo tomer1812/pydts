@@ -1,6 +1,9 @@
 # Methods
 
-Based on "PyDTS: A Python Package for Discrete Time Survival-analysis with Competing Risks" 
+Based on
+
+"PyDTS: A Python Package for Discrete Time Survival-analysis with Competing Risks"
+
 Tomer Meir\*, Rom Gutman\*, and Malka Gorfine (2022) [[1]](#1).
 
 ## Definitions
