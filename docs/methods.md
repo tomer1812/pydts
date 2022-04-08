@@ -27,10 +27,10 @@ $$
 $$
 and the cumulative incident function (CIF) of cause $j$ is given by
 $$
-\begin{eqnarray*}
-F_j(t|Z) = 	\Pr(T \leq t, J=j|Z)  & = & \sum_{m=1}^{t} \lambda_j(m|Z) S(m-1|Z) \\ 
-	& = & \sum_{m=1}^{t}\lambda_j(m|Z) \prod_{k=1}^{m-1} \left\lbrace 1-\sum_{j'=1}^M\lambda_{j'}(k|Z) \right\rbrace \, .
-\end{eqnarray*}
+\begin{aligned}
+F_j(t|Z) = 	\Pr(T \leq t, J=j|Z)  & = \sum_{m=1}^{t} \lambda_j(m|Z) S(m-1|Z) \\ 
+	& = \sum_{m=1}^{t}\lambda_j(m|Z) \prod_{k=1}^{m-1} \left\lbrace 1-\sum_{j'=1}^M\lambda_{j'}(k|Z) \right\rbrace \, .
+\end{aligned}
 $$
 Finally, the marginal probability of event type $j$ (marginally with respect to the time of event), given $Z$, equals
 $$
