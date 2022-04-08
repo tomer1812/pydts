@@ -75,19 +75,18 @@ $$
 Namely, each maximization $j$, $j=1,\ldots,M$, consists of  maximizing $d + p$ parameters simultaneously. 
 
 Alternatively, we propose the following simpler and faster estimation procedure, with a negligible efficiency loss, if any. Our idea exploits the close relationship between conditional logistic regression analysis and stratified Cox regression analysis [[5]](#5). We propose to estimate each $\beta_j$ separately, and given $\beta_j$, $\alpha_{jt}$, $t=1\ldots,d$, are separately estimated. In particular, the proposed estimating procedure consists of the following two speedy steps:
+#### Step 1.
+Use the expanded dataset and estimate each vector $\beta_j$, $j \in \{1,\ldots, M\}$, by a simple conditional logistic regression, conditioning on the event time $X$, using a stratified Cox analysis.
+
+#### Step 2.
+Given the estimators $\widehat{\beta}_j$ , $j \in \{1,\ldots, M\}$, of Step 1, use the original (un-expanded) data and estimate each $\alpha_{jt}$, $j \in \{1,\ldots,M\}$, $t=1,\ldots,d$, separately, by
 $$
-\begin{itemize}
-    \item[Step 1.] Use the expanded dataset and estimate each vector $\beta_j$, $j \in \{1,\ldots, M\}$, by a simple conditional logistic regression, conditioning on the event time $X$, using a stratified Cox analysis.
-    \item[Step 2.] Given the estimators $\widehat{\beta}_j$ , $j \in \{1,\ldots, M\}$, of Step 1, use the original (un-expanded) data and estimate each $\alpha_{jt}$, $j \in \{1,\ldots,M\}$, $t=1,\ldots,d$, separately, by
-    \begin{equation}
-        \label{eq:alpha}
-        \widehat{\alpha}_{jt} = 
-        \mbox{argmin}_{a} \left\{ \frac{1}{y_t} \sum_{i=1}^n I(X_i \geq t)\frac{\exp(a+Z_i^T\widehat{\beta}_j)}{1+\exp(a+Z_i^T\widehat{\beta}_j)} - \frac{n_{tj}}{y_t}\right\}^2
-    \end{equation}
-where $y_t=\sum_{i=1}^n I(X_i \geq t)$ and $n_{tj}=\sum_{i=1}^n I(X_i = t, J_i=j)$. 
-\end{itemize}
+\widehat{\alpha}_{jt} = \mbox{argmin}_{a} \left\lbrace \frac{1}{y_t} \sum_{i=1}^n I(X_i \geq t)\frac{\exp(a+Z_i^T\widehat{\beta}_j)}{1+\exp(a+Z_i^T\widehat{\beta}_j)} - \frac{n_{tj}}{y_t}\right\rbrace ^2
 $$
-Eq. $\ref{eq:alpha}$ consists minimizing the squared distance between the observed proportion of failures of type $j$ at time $t$ ($n_{tj}/y_t$) and the expected proportion of failures given Model \ref{eq:logis} and $\widehat{\beta}_j$. The simulation results of Section \ref{sec:PyDTS} reveals that the above two-step procedure performs well in terms of bias, and provides similar standard error of that of [[3]](#3). However, the improvement in computational time, by using our procedure, could be improved by a factor of 1.5-3.5 depending on d. Standard errors of $\widehat{\beta}_j$, $j \in \{1,\ldota,M\}$, can be derived directly from the stratified Cox analysis.
+where $y_t=\sum_{i=1}^n I(X_i \geq t)$ and $n_{tj}=\sum_{i=1}^n I(X_i = t, J_i=j)$.
+
+The above equation consists minimizing the squared distance between the observed proportion of failures of type $j$ at time $t$ ($n_{tj}/y_t$) and the expected proportion of failures given model defined above for $\lambda_j$ and $\widehat{\beta}_j$. 
+The simulation results of section Simple Simulation reveals that the above two-step procedure performs well in terms of bias, and provides similar standard error of that of [[3]](#3). However, the improvement in computational time, by using our procedure, could be improved by a factor of 1.5-3.5 depending on d. Standard errors of $\widehat{\beta}_j$, $j \in \{1,\ldots,M\}$, can be derived directly from the stratified Cox analysis.
 
 ## References
 <a id="1">[1]</a> 
