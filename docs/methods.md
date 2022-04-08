@@ -22,8 +22,8 @@ It should be noted that leaving $\alpha_{jt}$ unspecified is analogous to having
 
 Let $S(t|Z) = \Pr(T>t|Z)$ be the overall survival given $Z$. Then, the probability of experiencing event of type $j$ at time $t$ equals
 $$
-\Pr(T=t,J=j|Z)=\lambda_j(t|Z) \prod_{k=1}^{t-1} \left\{1-
-\sum_{j'=1}^M\lambda_{j'}(k|Z) \right\}  
+\Pr(T=t,J=j|Z)=\lambda_j(t|Z) \prod_{k=1}^{t-1} \left\lbrace 1-
+\sum_{j'=1}^M\lambda_{j'}(k|Z) \right\rbrace  
 $$
 and the cumulative incident function (CIF) of cause $j$ is given by
 \begin{eqnarray*}
