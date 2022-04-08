@@ -74,6 +74,7 @@ $$
 $$
 Namely, each maximization $j$, $j=1,\ldots,M$, consists of  maximizing $d + p$ parameters simultaneously. 
 
+### Proposed Estimators
 Alternatively, we propose the following simpler and faster estimation procedure, with a negligible efficiency loss, if any. Our idea exploits the close relationship between conditional logistic regression analysis and stratified Cox regression analysis [[5]](#5). We propose to estimate each $\beta_j$ separately, and given $\beta_j$, $\alpha_{jt}$, $t=1\ldots,d$, are separately estimated. In particular, the proposed estimating procedure consists of the following two speedy steps:
 #### Step 1.
 Use the expanded dataset and estimate each vector $\beta_j$, $j \in \{1,\ldots, M\}$, by a simple conditional logistic regression, conditioning on the event time $X$, using a stratified Cox analysis.
@@ -81,19 +82,15 @@ Use the expanded dataset and estimate each vector $\beta_j$, $j \in \{1,\ldots, 
 #### Step 2.
 Given the estimators $\widehat{\beta}_j$ , $j \in \{1,\ldots, M\}$, of Step 1, use the original (un-expanded) data and estimate each $\alpha_{jt}$, $j \in \{1,\ldots,M\}$, $t=1,\ldots,d$, separately, by
 $$ 
-\widehat{ \alpha }_{jt} 
+\widehat{ \alpha }_{jt} = \mbox{argmin}_{a}
 $$
 
 $$
-= \mbox{argmin}_{a} 
+\left\lbrace \frac{1}{y_t} \sum_{i=1}^n I(X_i \geq t) \right\rbrace
 $$
 
 $$
-\left\lbrace \frac{1}{y_t} \sum_{i=1}^n I(X_i \geq t) 
-$$
-
-$$
-\frac{ exp(a+Z_i^T \widehat{\beta}_j)}{1 + exp(a + Z_i^T \widehat{\beta}_j)} - \frac{n_{tj}}{y_t} \right\rbrace ^2 
+\left\lbrace \frac{ exp(a+Z_i^T \widehat{\beta}_j)}{1 + exp(a + Z_i^T \widehat{\beta}_j)} - \frac{n_{tj}}{y_t} \right\rbrace ^2 
 $$
 
 where $y_t=\sum_{i=1}^n I(X_i \geq t)$ and $n_{tj}=\sum_{i=1}^n I(X_i = t, J_i=j)$.
