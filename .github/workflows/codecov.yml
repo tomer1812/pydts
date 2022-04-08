@@ -34,6 +34,6 @@ jobs:
         path_to_write_report: ./coverage/codecov_report.txt
         verbose: true
         ignore:
-          pydts/src/pydts/examples_utils
-          pydts/src/pydts/utils.py
-          pydts/src/pydts/config.py
+          "pydts/examples_utils"
+          "pydts/utils.py"
+          "pydts/config.py"
