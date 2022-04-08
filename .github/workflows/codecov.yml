@@ -33,7 +33,7 @@ jobs:
         name: codecov-umbrella
         path_to_write_report: ./coverage/codecov_report.txt
         verbose: true
-        ignore:
+        gcov_ignore:
             - "pydts/examples_utils"
             - "pydts/utils.py"
             - "pydts/config.py"
