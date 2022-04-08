@@ -1,5 +1,15 @@
+from time import time
+from typing import Iterable, Optional, Tuple
+
 import pandas as pd
 import numpy as np
+from scipy.special import expit
+from sklearn.model_selection import train_test_split
+from tqdm import tqdm
+
+from pydts.examples_utils.generate_simulations_data import generate_quick_start_df
+from pydts.fitters import DataExpansionFitter, TwoStagesFitter
+
 
 def get_expanded_df(df, event_type_col='J', duration_col='X', pid_col='pid'):
     """
@@ -67,3 +77,137 @@ def present_coefs(res_dict):
         print(f"for coef: {coef_type.capitalize()}")
         df = pd.concat([temp_df for temp_df in events_dict.values()])
         display(df)
+
+
+def create_df_for_cif_plots(df: pd.DataFrame, field: str,
+                            covariates: Iterable,
+                            vals: Optional[Iterable] = None,
+                            quantiles: Optional[Iterable] = None,
+                            zero_others: Optional[bool] = False
+                            ) -> pd.DataFrame:
+    """
+    This method creates df for cif plot, where it zeros
+
+    Args:
+        df (pd.DataFrame): Dataframe which we yield the statiscal propetrics (means, quantiles, etc) and stacture
+        field (str): The field which will represent the change
+        covariates (Iterable): The covariates of the given model
+        vals (Optional[Iterable]): The values to use for the field
+        quantiles (Optional[Iterable]): The quantiles to use as values for the field
+        zero_others (bool): Whether to zero the other covarites or to zero them
+
+    Returns:
+        df (pd.DataFrame): A dataframe that contains records per value for cif ploting
+    """
+
+    cov_not_fitted = [cov for cov in covariates if cov not in df.columns]
+    assert len(cov_not_fitted) == 0, \
+        f"Required covariates are missing from df: {cov_not_fitted}"
+    # todo add assertions
+
+    df_for_ploting = df.copy()  # todo make sure .copy() is required
+    if vals is not None:
+        pass
+    elif quantiles is not None:
+        vals = df_for_ploting[field].quantile(quantiles).values
+    else:
+        raise NotImplemented("Only Quantiles or specific values is supported")
+    temp_series = []
+    template_s = df_for_ploting.iloc[0][covariates].copy()
+    if zero_others:
+        impute_val = 0
+    else:
+        impute_val = df_for_ploting[covariates].mean().values
+    for val in vals:
+        temp_s = template_s.copy()
+        temp_s[covariates] = impute_val
+        temp_s[field] = val
+        temp_series.append(temp_s)
+
+    return pd.concat(temp_series, axis=1).T
+
+
+def repetitive_fitters(rep, n_patients, n_cov, d_times, j_events, pid_col, test_size,
+                       drop_cols: Iterable = ("C", "T"),
+                       model1=DataExpansionFitter,
+                       model1_name="Lee",
+                       model2=TwoStagesFitter,
+                       model2_name: str = "Ours",
+                       allow_fails: int = 20,
+                       verbose: int = 2,
+                       real_coef_dict: dict = None,
+                       censoring_prob: float = 1.
+                       ) -> Tuple[dict, dict]:
+    # todo docstrings
+    # todo assertions
+    # todo move to utils?
+    # todo try catch
+
+    from pydts.examples_utils.plots import compare_beta_models_for_example
+    rep_dict = {}
+    times = {model1_name: [], model2_name: []}
+    counts_df_list = []
+    final = 0
+    failed = 0
+    for samp in tqdm(range(rep+allow_fails)):
+        try:
+            patients_df = generate_quick_start_df(n_patients=n_patients, n_cov=n_cov, d_times=d_times,
+                                                  j_events=j_events,
+                                                  pid_col=pid_col, seed=samp, real_coef_dict=real_coef_dict,
+                                                  censoring_prob=censoring_prob )
+            train_df, test_df = train_test_split(patients_df, test_size=test_size)
+            counts_df = train_df.groupby(['J', 'X']).size().to_frame(samp)
+            assert not (counts_df.reset_index()['X'].value_counts() < (j_events + 1)).any(), "Not enough events"
+            counts_df_list.append(counts_df)
+            drop_cols = pd.Index(drop_cols)
+            start_1 = time()
+            fitter = model1()
+            fitter.fit(df=train_df.drop(drop_cols, axis=1))
+            end_1 = time()
+            start_2 = time()
+            new_fitter = model2()
+            if isinstance(new_fitter, TwoStagesFitter):
+                new_fitter.fit(df=train_df.drop(drop_cols, axis=1), verbose=verbose)
+            else:
+                new_fitter.fit(df=train_df.drop(drop_cols, axis=1))
+            end_2 = time()
+            times[model1_name].append(end_1 - start_1)
+            times[model2_name].append(end_2 - start_2)
+            res_dict = compare_beta_models_for_example(fitter.event_models, new_fitter.event_models)
+            rep_dict[samp] = res_dict
+            final += 1
+            if final == rep:
+                break
+        except Exception as e:
+            print(e)
+            failed += 1
+            print(f'Failed to fit sample {samp+1}, fail #{failed}')
+            continue
+    print(f'final: {final}')
+    ret_df = pd.concat(counts_df_list, axis=1).fillna(0).mean(axis=1).apply(np.ceil).to_frame()
+    return rep_dict, times, ret_df
+
+
+def get_real_hazard(df, real_coef_dict, times, events):
+    """
+
+    Args:
+        df:
+        real_coef_dict:
+        times:
+        events:
+
+    Returns:
+
+    """
+    # todo docstrings
+    # todo assertions
+    # todo move to utils?
+
+    a_t = {event: {t: real_coef_dict['alpha'][event](t) for t in times} for event in events}
+    b = pd.concat([df.dot(real_coef_dict['beta'][j]) for j in events], axis=1, keys=events)
+
+    for j in events:
+        df[[f'hazard_j{j}_t{t}' for t in times]] = pd.concat([expit(a_t[j][t] + b[j]) for t in times],
+                                                             axis=1).values
+    return df
