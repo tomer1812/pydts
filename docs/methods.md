@@ -86,7 +86,8 @@ $$\widehat{ \alpha }_{jt} = argmin_{a} \left\lbrace \frac{1}{y_t} \sum_{i=1}^n I
 
 where $y_t=\sum_{i=1}^n I(X_i \geq t)$ and $n_{tj}=\sum_{i=1}^n I(X_i = t, J_i=j)$.
 
-The above equation consists minimizing the squared distance between the observed proportion of failures of type $j$ at time $t$ ($n_{tj}/y_t$) and the expected proportion of failures given model defined above for $\lambda_j$ and $\widehat{\beta}_j$. 
+The above equation consists minimizing the squared distance between the observed proportion of failures of type $j$ at time $t$ 
+($n_{tj}/y_t$) and the expected proportion of failures given model defined above for $\lambda_j$ and $\widehat{\beta}_j$. 
 The simulation results of section Simple Simulation reveals that the above two-step procedure performs well in terms of bias, and provides similar standard error of that of [[3]](#3). However, the improvement in computational time, by using our procedure, could be improved by a factor of 1.5-3.5 depending on d. Standard errors of $\widehat{\beta}_j$, $j \in \{1,\ldots,M\}$, can be derived directly from the stratified Cox analysis.
 
 ## References
