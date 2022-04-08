@@ -462,7 +462,8 @@ def plot_reps_coef_std(rep_dict: dict, return_summary: bool = True, filename: st
 
 
 def plot_times(times_dict: dict,
-               filename: str = None) -> None:
+               filename: str = None,
+               ax = None, color='tab:blue') -> None:
     """
 
     Args:
@@ -471,8 +472,16 @@ def plot_times(times_dict: dict,
     Returns:
 
     """
-    ax = pd.DataFrame.from_dict(times_dict).boxplot(figsize=(8, 6), boxprops={"lw": 1.5, "color": "tab:blue"},
-                                                    medianprops={"lw": 2, "color": "tab:green"})
+
+    if ax is None:
+
+        ax = pd.DataFrame.from_dict(times_dict).boxplot(figsize=(8, 6), boxprops={"lw": 1.5, "color": "tab:blue"},
+                                                        medianprops={"lw": 2, "color": "tab:green"},
+                                                        flierprops={'markeredgecolor': "tab:blue"})
+    else:
+        pd.DataFrame.from_dict(times_dict).boxplot(boxprops={"lw": 1.5, "color": color},
+                                                   flierprops={'markeredgecolor': color},
+                                                   medianprops={"lw": 2, "color": color}, ax=ax)
 
     # ax.set_ylim(0, 15)
     ax.tick_params(axis='both', which='major', labelsize=15)
@@ -485,6 +494,7 @@ def plot_times(times_dict: dict,
     plt.show()
     if filename is not None:
         ax.figure.savefig(os.path.join(OUTPUT_DIR, filename), dpi=300)
+    return ax
 
 
 def plot_cif_plots(pred_df: pd.DataFrame, event: str, return_ax: bool = False, ax: plt.Axes = None,
