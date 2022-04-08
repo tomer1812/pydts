@@ -26,13 +26,15 @@ $$
 \sum_{j'=1}^M\lambda_{j'}(k|Z) \right\rbrace  
 $$
 and the cumulative incident function (CIF) of cause $j$ is given by
+$$
 \begin{eqnarray*}
 F_j(t|Z) = 	\Pr(T \leq t, J=j|Z)  & = & \sum_{m=1}^{t} \lambda_j(m|Z) S(m-1|Z) \\ 
-	& = & \sum_{m=1}^{t}\lambda_j(m|Z) \prod_{k=1}^{m-1} \left\{1-\sum_{j'=1}^M\lambda_{j'}(k|Z) \right\} \, .
+	& = & \sum_{m=1}^{t}\lambda_j(m|Z) \prod_{k=1}^{m-1} \left\lbrace 1-\sum_{j'=1}^M\lambda_{j'}(k|Z) \right\rbrace \, .
 \end{eqnarray*}
+$$
 Finally, the marginal probability of event type $j$ (marginally with respect to the time of event), given $Z$, equals
 $$
-\Pr(J=j|Z) = \sum_{m=1}^{d} \lambda_j(m|Z) \prod_{k=1}^{m-1} \left\{1-\sum_{j'=1}^M\lambda_{j'}(k|Z) \right\} \, .
+\Pr(J=j|Z) = \sum_{m=1}^{d} \lambda_j(m|Z) \prod_{k=1}^{m-1} \left\lbrace 1-\sum_{j'=1}^M\lambda_{j'}(k|Z) \right\rbrace \, .
 $$
 In the next section we provide a fast estimation technique of the parameters $\{\alpha_{j1},\ldots,\alpha_{jd},\beta_j^T \, ; \, j=1,\ldots,M\}$.
 
