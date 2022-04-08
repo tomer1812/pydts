@@ -49,12 +49,13 @@ $$
 where $\delta_{jim}$ equals one if subject $i$ experienced event type $j$ at time $m$; and 0 otherwise. Clearly $L$ cannot be decomposed into separate likelihoods for each cause-specific
 hazard function $\lambda_j$.
 The log likelihood becomes
-\begin{eqnarray*}
-	\log L &=& \sum_{i=1}^n \left[\sum_{j=1}^2 \sum_{m=1}^{X_i} \left[ \delta_{jim} \log \lambda_j(m|Z_i) - \delta_{jim}\{1-\lambda_1(m|Z_i)-\lambda_2(m|Z_i)\}\right] \right. \\ 
-	&& +\left.\sum_{k=1}^{X_i}\log \{1-\lambda_1(k|Z_i)-\lambda_2(k|Z_i)\}\right] \\ 
-	&=& \sum_{i=1}^n \sum_{m=1}^{X_i} \left[  \delta_{1im} \log \lambda_1(m|Z_i)+\delta_{2im} \log \lambda_2(m|Z_i) \right. \\ 
-	&& +\left. \{ 1-\delta_{1im}-\delta_{2im}\}\log\{ 1-\lambda_1(m|Z_i)-\lambda_2(m|Z_i)\}\right] \, .
-\end{eqnarray*}
+$$
+\log L = \sum_{i=1}^n \left\[ \sum_{j=1}^2 \sum_{m=1}^{X_i} \left\[ \delta_{jim} \log \lambda_j(m|Z_i) - \delta_{jim}\{1-\lambda_1(m|Z_i)-\lambda_2(m|Z_i)\}\right\] \right\.  
++\left\.\sum_{k=1}^{X_i}\log \{1-\lambda_1(k|Z_i)-\lambda_2(k|Z_i)\}\right\]
+$$
+$$
+	= \sum_{i=1}^n \sum_{m=1}^{X_i} \left\[  \delta_{1im} \log \lambda_1(m|Z_i)+\delta_{2im} \log \lambda_2(m|Z_i) \right\. +\left\. \{ 1-\delta_{1im}-\delta_{2im}\}\log\{ 1-\lambda_1(m|Z_i)-\lambda_2(m|Z_i)\}\right\] \, .
+$$
 
 Instead of maximizing the $M(d+p)$ parameters simultaneously based on the above log-likelihood, the collapsed log-likelihood of Lee et al. [[4]](#4) can be adopted. Specifically, the data are expanded  such that for each observation $i$ the expanded dataset includes $X_i$ rows, one row for each time $t$, $t \leq X_i$. At each time point $t$ the expanded data are conditionally multinomial with one of three possible outcomes $\{\delta_{1it},\delta_{2it},1-\delta_{1it}-\delta_{2it}\}$. Then, for estimating $\{\alpha_{11},\ldots,\alpha_{1d},\beta_1^T\}$, we combine $\delta_{2it}$ and $1-\delta_{1it}-\delta_{2it}$, and the collapsed log-likelihood for cause $J=1$ based on a binary regression model with $\delta_{1it}$ as the outcome is given by
 $$
