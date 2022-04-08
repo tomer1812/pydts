@@ -80,9 +80,9 @@ Use the expanded dataset and estimate each vector $\beta_j$, $j \in \{1,\ldots, 
 
 #### Step 2.
 Given the estimators $\widehat{\beta}_j$ , $j \in \{1,\ldots, M\}$, of Step 1, use the original (un-expanded) data and estimate each $\alpha_{jt}$, $j \in \{1,\ldots,M\}$, $t=1,\ldots,d$, separately, by
-
-$$ \widehat{ \alpha }_{jt} = \mbox{argmin}_{a} \left\lbrace \frac{1}{y_t} \sum_{i=1}^n I(X_i \geq t) \frac{ exp(a+Z_i^T \widehat{\beta}_j)}{1 + exp(a + Z_i^T \widehat{\beta}_j)} - \frac{n_{tj}}{y_t} \right\rbrace ^2 $$
-
+$$ 
+\widehat{ \alpha }_{jt} = \mbox{argmin}_{a} \left\lbrace \frac{1}{y_t} \sum_{i=1}^n I(X_i \geq t) \frac{ exp(a+Z_i^T \widehat{\beta}_j)}{1 + exp(a + Z_i^T \widehat{\beta}_j)} - \frac{n_{tj}}{y_t} \right\rbrace ^2 
+$$
 where $y_t=\sum_{i=1}^n I(X_i \geq t)$ and $n_{tj}=\sum_{i=1}^n I(X_i = t, J_i=j)$.
 
 The above equation consists minimizing the squared distance between the observed proportion of failures of type $j$ at time $t$ ($n_{tj}/y_t$) and the expected proportion of failures given model defined above for $\lambda_j$ and $\widehat{\beta}_j$. 
