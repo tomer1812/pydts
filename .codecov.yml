@@ -58,3 +58,5 @@ ignore:
   - "scripts/"
   - "contrib"
   - "src/pydts/examples_utils"
+  - "src/pydts/utils.py"
+  - "src/pydts/config.py"
