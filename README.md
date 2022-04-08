@@ -1,7 +1,7 @@
 [![pypi version](https://img.shields.io/pypi/v/pydts)](https://pypi.org/project/pydts/)
 [![Tests](https://github.com/tomer1812/pydts/workflows/Tests/badge.svg)](https://github.com/tomer1812/pydts/actions?workflow=Tests)
 [![documentation](https://img.shields.io/badge/docs-mkdocs%20material-blue.svg?style=flat)](https://tomer1812.github.io/pydts)
-
+[![codecov](https://codecov.io/gh/tomer1812/pydts/branch/main/graph/badge.svg)](https://codecov.io/gh/tomer1812/pydts)
 # Discrete Time Survival Analysis  
 A Python package for discrete time survival data analysis with competing risks.
 

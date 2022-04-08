@@ -652,28 +652,3 @@ def get_real_hazard(df, real_coef_dict, times, events):
     return df
 
 
-if __name__ == "__main__":
-    from pydts.examples_utils.generate_simulations_data import generate_quick_start_df
-    n_patients = 50000
-    n_cov = 5
-    patients_df = generate_quick_start_df(n_patients=n_patients, n_cov=n_cov, d_times=30, j_events=2,
-                                          pid_col='pid', seed=0)
-    train_df, test_df = train_test_split(patients_df, test_size=0.25)
-    # m = DataExpansionFitter()
-    # m.fit(df=df.drop(['C', 'T'], axis=1))
-    # m.print_summary()
-
-    m2 = TwoStagesFitter()
-    m2.fit(train_df.drop(['C', 'T'], axis=1))
-    #m2.plot_all_events_alpha()
-    #pred_df = m2.predict_hazard_all(test_df)
-    #pred_df = m2.predict_overall_survival(test_df, t=5)
-    #pred_prob = m2.predict_prob_event_j_at_t(test_df, event=1, t=2)
-    #m2.predict_event_cumulative_incident_function(test_df, event=1)
-    tdf = test_df[[f'Z{i+1}' for i in range(n_cov)]]
-    m2.predict_cumulative_incident_function(tdf)
-    # m2.predict(test_df)
-    # print(m2.get_beta_SE())
-    # m2.plot_all_events_beta()
-    print('x')
-

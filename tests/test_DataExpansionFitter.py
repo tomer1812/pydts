@@ -109,6 +109,3 @@ class TestDataExpansionFitter(unittest.TestCase):
     def test_predict_cumulative_incident_function_case_successful_predict(self):
         self.fitted_model.predict_cumulative_incident_function(df=self.df.drop(['C', 'T'], axis=1))
 
-
-if __name__ == '__main__':
-    unittest.main()
