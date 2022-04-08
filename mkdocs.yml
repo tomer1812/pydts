@@ -38,7 +38,8 @@ extra_javascript:
 
 nav:
     - Home: 'index.md'
-    - Introduction and Methods: intro.md
+    - Introduction: intro.md
+    - Methods: methods.md
     - Examples:
       - Simple Simulation Example: Simple Simulation.ipynb
       - Hospitalization LOS Simulation: SimulatedDataset.ipynb
