@@ -59,11 +59,11 @@ $$
 
 Instead of maximizing the $M(d+p)$ parameters simultaneously based on the above log-likelihood, the collapsed log-likelihood of Lee et al. [[4]](#4) can be adopted. Specifically, the data are expanded  such that for each observation $i$ the expanded dataset includes $X_i$ rows, one row for each time $t$, $t \leq X_i$. At each time point $t$ the expanded data are conditionally multinomial with one of three possible outcomes $\{\delta_{1it},\delta_{2it},1-\delta_{1it}-\delta_{2it}\}$. Then, for estimating $\{\alpha_{11},\ldots,\alpha_{1d},\beta_1^T\}$, we combine $\delta_{2it}$ and $1-\delta_{1it}-\delta_{2it}$, and the collapsed log-likelihood for cause $J=1$ based on a binary regression model with $\delta_{1it}$ as the outcome is given by
 $$
-\log L_1 = \sum_{i=1}^n \sum_{m=1}^{X_i}\left[ \delta_{1im} \log \lambda_1(m|Z_i)+(1-\delta_{1im})\log \{1-\lambda_1(m|Z_i)\} \right] \, .
+\log L_1 = \sum_{i=1}^n \sum_{m=1}^{X_i}\left\[ \delta_{1im} \log \lambda_1(m|Z_i)+(1-\delta_{1im})\log \lbrace 1-\lambda_1(m|Z_i)\rbrace \right\] \, .
 $$
 Similarly, the collapsed log-likelihood for cause $J=2$ based on a binary regression model with $\delta_{2it}$ as the outcome becomes
 $$
-\log L_2 = \sum_{i=1}^n \sum_{m=1}^{X_i}\left[ \delta_{2im} \log \lambda_2(m|Z_i)+(1-\delta_{2im})\log \{1-\lambda_2(m|Z_i)\} \right]
+\log L_2 = \sum_{i=1}^n \sum_{m=1}^{X_i}\left\[ \delta_{2im} \log \lambda_2(m|Z_i)+(1-\delta_{2im})\log \lbrace 1-\lambda_2(m|Z_i)\rbrace \right\]
 $$
 and one can fit the two models, separately.  
 
@@ -75,6 +75,7 @@ $$
 Namely, each maximization $j$, $j=1,\ldots,M$, consists of  maximizing $d + p$ parameters simultaneously. 
 
 Alternatively, we propose the following simpler and faster estimation procedure, with a negligible efficiency loss, if any. Our idea exploits the close relationship between conditional logistic regression analysis and stratified Cox regression analysis [[5]](#5). We propose to estimate each $\beta_j$ separately, and given $\beta_j$, $\alpha_{jt}$, $t=1\ldots,d$, are separately estimated. In particular, the proposed estimating procedure consists of the following two speedy steps:
+$$
 \begin{itemize}
     \item[Step 1.] Use the expanded dataset and estimate each vector $\beta_j$, $j \in \{1,\ldots, M\}$, by a simple conditional logistic regression, conditioning on the event time $X$, using a stratified Cox analysis.
     \item[Step 2.] Given the estimators $\widehat{\beta}_j$ , $j \in \{1,\ldots, M\}$, of Step 1, use the original (un-expanded) data and estimate each $\alpha_{jt}$, $j \in \{1,\ldots,M\}$, $t=1,\ldots,d$, separately, by
@@ -85,7 +86,8 @@ Alternatively, we propose the following simpler and faster estimation procedure,
     \end{equation}
 where $y_t=\sum_{i=1}^n I(X_i \geq t)$ and $n_{tj}=\sum_{i=1}^n I(X_i = t, J_i=j)$. 
 \end{itemize}
-Eq.~\ref{eq:alpha} consists minimizing the squared distance between the observed proportion of failures of type $j$ at time $t$ ($n_{tj}/y_t$) and the expected proportion of failures given Model \ref{eq:logis} and $\widehat{\beta}_j$. The simulation results of Section \ref{sec:PyDTS} reveals that the above two-step procedure performs well in terms of bias, and provides similar standard error of that of [[3]](#3). However, the improvement in computational time, by using our procedure, could be improved by a factor of 1.5-3.5 depending on d. Standard errors of $\widehat{\beta}_j$, $j \in \{1,\ldota,M\}$, can be derived directly from the stratified Cox analysis.
+$$
+Eq. $\ref{eq:alpha}$ consists minimizing the squared distance between the observed proportion of failures of type $j$ at time $t$ ($n_{tj}/y_t$) and the expected proportion of failures given Model \ref{eq:logis} and $\widehat{\beta}_j$. The simulation results of Section \ref{sec:PyDTS} reveals that the above two-step procedure performs well in terms of bias, and provides similar standard error of that of [[3]](#3). However, the improvement in computational time, by using our procedure, could be improved by a factor of 1.5-3.5 depending on d. Standard errors of $\widehat{\beta}_j$, $j \in \{1,\ldota,M\}$, can be derived directly from the stratified Cox analysis.
 
 ## References
 <a id="1">[1]</a> 
