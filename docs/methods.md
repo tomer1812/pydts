@@ -1,7 +1,7 @@
 # Methods
 
 Based on "PyDTS: A Python Package for Discrete Time Survival-analysis with Competing Risks" 
-Tomer Meir*, Rom Gutman*, and Malka Gorfine (2022) [[1]](#1).
+Tomer Meir\*, Rom Gutman\*, and Malka Gorfine (2022) [[1]](#1).
 
 ## Definitions
 
@@ -91,7 +91,7 @@ Eq.~\ref{eq:alpha} consists minimizing the squared distance between the observed
 
 ## References
 <a id="1">[1]</a> 
-Tomer Meir*, Rom Gutman*, and Malka Gorfine 
+Tomer Meir\*, Rom Gutman\*, and Malka Gorfine 
 "PyDTS: A Python Package for Discrete Time Survival-analysis with Competing Risks"
 (2022)
 

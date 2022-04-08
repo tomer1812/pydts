@@ -1,7 +1,7 @@
 # Introduction
 
 Based on "PyDTS: A Python Package for Discrete Time Survival-analysis with Competing Risks" 
-Tomer Meir*, Rom Gutman*, and Malka Gorfine (2022) [[1]](#1).
+Tomer Meir\*, Rom Gutman\*, and Malka Gorfine (2022) [[1]](#1).
 
 ## Discrete-data survival analysis
 Discrete-data survival analysis refers to the case where data can only take values over a discrete grid. Sometimes, events can only occur at regular, discrete points in time. For example, in the United States a change in party controlling the presidency only occurs quadrennially in the month of January [[2]](#2). In other situations events may occur at any point in time, but available data record only the particular interval of time in which each event occurs. For example, death from cancer measured by months since time of diagnosis [[3]](#3), or length of stay in hospital recorded on a daily basis. It is well-known that naively using standard continuous-time models (even after correcting for ties) with discrete-time data may result in biased estimators for the discrete time models.
@@ -16,7 +16,7 @@ PyDTS is an open source Python package which implements tools for discrete-time 
 
 ## References
 <a id="1">[1]</a> 
-Tomer Meir*, Rom Gutman*, and Malka Gorfine 
+Tomer Meir\*, Rom Gutman\*, and Malka Gorfine 
 "PyDTS: A Python Package for Discrete Time Survival-analysis with Competing Risks"
 (2022)
 
