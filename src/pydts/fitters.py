@@ -557,13 +557,13 @@ def assert_fit(event_df, times):
         event = event_df['J'].max()  # all the events in the dataframe are the same
         raise RuntimeError(f"In event J={event}, The method did not converged in D={problematic_times}."
                            f" Consider changing the problem definition."
-                           f"\n See https://tomer1812.github.io/pydts/User%20Story/ for more details.")
+                           f"\n See https://tomer1812.github.io/pydts/UsageExample-RegroupingData/ for more details.")
     if event_df.shape[0] != len(times):
         event = event_df['J'].max()  # all the events in the dataframe are the same
         problematic_times = pd.Index(event_df['X']).symmetric_difference(times).tolist()
         raise RuntimeError(f"In event J={event}, The method didn't have events D={problematic_times}."
                            f" Consider changing the problem definition."
-                           f"\n See https://tomer1812.github.io/pydts/User%20Story/ for more details.")
+                           f"\n See https://tomer1812.github.io/pydts/UsageExample-RegroupingData/ for more details.")
 
 
 def repetitive_fitters(rep, n_patients, n_cov, d_times, j_events, pid_col, test_size,
