@@ -23,7 +23,7 @@ from pydts.fitters import TwoStagesFitter
 from pydts.examples_utils.generate_simulations_data import generate_quick_start_df
 from sklearn.model_selection import train_test_split
 
-patients_df = generate_quick_start_df(n_patients=10000, n_cov=5, d_times=30, j_events=2, pid_col='pid', seed=0)
+patients_df = generate_quick_start_df(n_patients=10000, n_cov=5, d_times=14, j_events=2, pid_col='pid', seed=0)
 train_df, test_df = train_test_split(patients_df, test_size=0.25)
 
 fitter = TwoStagesFitter()
@@ -33,5 +33,5 @@ fitter.print_summary()
 ```
 
 ## Other Examples
-1. [Simple Example](https://tomer1812.github.io/pydts/Simple%20Simulation/)
+1. [Usage Example](https://tomer1812.github.io/pydts/UsageExample-Intro/)
 2. [Hospital Length of Stay Simulation Example](https://tomer1812.github.io/pydts/SimulatedDataset/)
