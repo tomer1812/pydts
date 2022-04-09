@@ -41,9 +41,13 @@ nav:
     - Introduction: intro.md
     - Methods: methods.md
     - Examples:
-      - Simple Simulation Example: Simple Simulation.ipynb
+      - Usage Example:
+        - Introduction: UsageExample-Intro.ipynb
+        - Data Preparation: UsageExample-DataPreparation.ipynb
+        - Fitting Two Stages Fitter: UsageExample-FittingTwoStagesFitter.ipynb
+        - Fitting Data Expansion Fitter: UsageExample-FittingDataExpansionFitter.ipynb
+      - Data Regrouping Example: UsageExample-RegroupingData.ipynb
       - Hospitalization LOS Simulation: SimulatedDataset.ipynb
-      - Use case for None convergance: User Story.ipynb
     - API:
       - 'api/two_stages_fitter.md'
       - 'api/data_expansion_fitter.md'

@@ -18,7 +18,7 @@ def add_panel_text(ax, text, xplace=-0.15, fsz=17):
             fontweight='bold', va='top', ha='right')
 
 
-def plot_first_model_coefs(models, times, expanded_train_df, n_cov=5, filename=None):
+def plot_first_model_coefs(models, times, train_df, n_cov=5, filename=None):
     fig, axes = plt.subplots(1, 2, figsize=(14, 6))
     ax = axes[0]
     ax.tick_params(axis='both', which='major', labelsize=15)
@@ -34,7 +34,7 @@ def plot_first_model_coefs(models, times, expanded_train_df, n_cov=5, filename=N
     ax.legend(loc='upper center', fontsize=14)
     ax.set_ylim([-3, 0.5])
     ax2 = ax.twinx()
-    ax2.hist(expanded_train_df['X'], color='r', alpha=0.3, bins=times)
+    ax2.hist(train_df[train_df['J'] != 0]['X'], color='r', alpha=0.3, bins=times)
     ax2.set_ylabel('N events', fontsize=16, color='red')
     ax2.tick_params(axis='y', colors='red')
 
