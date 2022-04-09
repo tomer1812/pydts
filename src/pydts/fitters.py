@@ -281,7 +281,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
                                     row[duration_col])), axis=1)
             n_et['success'] = n_et['opt_res'].parallel_apply(lambda val: val.success)
             n_et['alpha_jt'] = n_et['opt_res'].parallel_apply(lambda val: val.x[0])
-            assert_fit(n_et, self.times)  # todo move basic input validation before any optimization
+            assert_fit(n_et, self.times, event_type_col=event_type_col, duration_col=duration_col)  # todo move basic input validation before any optimization
             self.event_models[event] = [self.beta_models[event], n_et]
             self.alpha_df = pd.concat([self.alpha_df, n_et], ignore_index=True)
         return self.event_models
@@ -550,17 +550,17 @@ def create_df_for_cif_plots(df: pd.DataFrame, field: str,
     return pd.concat(temp_series, axis=1).T
 
 
-def assert_fit(event_df, times):
+def assert_fit(event_df, times, event_type_col='J', duration_col='X'):
     # todo: split to 2: one generic, one for new model
     if not event_df['success'].all():
-        problematic_times = event_df.loc[~event_df['success'], "X"].tolist()
-        event = event_df['J'].max()  # all the events in the dataframe are the same
+        problematic_times = event_df.loc[~event_df['success'], duration_col].tolist()
+        event = event_df[event_type_col].max()  # all the events in the dataframe are the same
         raise RuntimeError(f"In event J={event}, The method did not converged in D={problematic_times}."
                            f" Consider changing the problem definition."
                            f"\n See https://tomer1812.github.io/pydts/UsageExample-RegroupingData/ for more details.")
     if event_df.shape[0] != len(times):
-        event = event_df['J'].max()  # all the events in the dataframe are the same
-        problematic_times = pd.Index(event_df['X']).symmetric_difference(times).tolist()
+        event = event_df[event_type_col].max()  # all the events in the dataframe are the same
+        problematic_times = pd.Index(event_df[duration_col]).symmetric_difference(times).tolist()
         raise RuntimeError(f"In event J={event}, The method didn't have events D={problematic_times}."
                            f" Consider changing the problem definition."
                            f"\n See https://tomer1812.github.io/pydts/UsageExample-RegroupingData/ for more details.")
