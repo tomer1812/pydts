@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 DEFAULT_N_PATIENTS = 10000
 
@@ -53,3 +54,14 @@ font_sz = 14
 title_sz = 18
 AGE_BINS = list(range(0, 125, 5))
 AGE_LABELS = [f'{AGE_BINS[a]}' for a in range(len(AGE_BINS)-1)]
+
+DEFAULT_REAL_COEF_DICT = {
+    "alpha": {
+        1: lambda t: -1 - 0.3 * np.log(t),
+        2: lambda t: -1.75 - 0.15 * np.log(t)
+    },
+    "beta": {
+        1: -np.log([0.8, 3, 3, 2.5, 2]),
+        2: -np.log([1, 3, 4, 3, 2])
+    }
+}

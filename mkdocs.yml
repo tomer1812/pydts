@@ -47,6 +47,7 @@ nav:
         - Fitting Two Stages Fitter: UsageExample-FittingTwoStagesFitter.ipynb
         - Fitting Data Expansion Fitter: UsageExample-FittingDataExpansionFitter.ipynb
       - Data Regrouping Example: UsageExample-RegroupingData.ipynb
+      - Models Comparison: ModelsComparison.ipynb
       - Hospitalization LOS Simulation: SimulatedDataset.ipynb
     - API:
       - 'api/two_stages_fitter.md'

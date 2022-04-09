@@ -224,7 +224,8 @@ def new_sample_logic(patients_df: pd.DataFrame, j_events: int, d_times: int, rea
 
 
 def generate_quick_start_df(n_patients=10000, d_times=30, j_events=2, n_cov=5, seed=0, pid_col='pid',
-                            real_coef_dict: dict = None, sampling_logic=new_sample_logic, censoring_prob=1.):
+                            real_coef_dict: dict = DEFAULT_REAL_COEF_DICT, sampling_logic=new_sample_logic,
+                            censoring_prob=1.):
     np.random.seed(seed)
     assert real_coef_dict is not None, "The user should supply the coefficients of the experiment"
     covariates = [f'Z{i + 1}' for i in range(n_cov)]
