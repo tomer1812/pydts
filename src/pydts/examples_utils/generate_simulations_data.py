@@ -82,12 +82,6 @@ def main(seed=0, N_patients=DEFAULT_N_PATIENTS, output_dir=OUTPUT_DIR, filename=
         copd = np.random.binomial(n=1, p=pre_p + smk_coef * smoking)  # Chronic Obstructive Pulmonary Disease
         crf = np.random.binomial(n=1, p=pre_p)  # Chronic Renal Failure
 
-        # Sample outcome - in-hospital death based on gender, age, BMI, smoking status, and preconditions with limits
-        # on the value of p
-        dp = np.clip(0.25 * pre_p + 0.1 * (hypertension + diabetes + artfib + copd + crf),
-                     a_min=0.05, a_max=0.35)
-        inhospital_death = np.random.binomial(n=1, p=dp)
-
         new_patient = {
             PATIENT_NO_COL: p,
             AGE_COL: age,
@@ -104,26 +98,41 @@ def main(seed=0, N_patients=DEFAULT_N_PATIENTS, output_dir=OUTPUT_DIR, filename=
             ART_FIB_COL: artfib,
             COPD_COL: copd,
             CRF_COL: crf,
-            IN_HOSPITAL_DEATH_COL: inhospital_death
         }
 
         simulated_patients_df = simulated_patients_df.append(new_patient, ignore_index=True)
 
-    age_mean = simulated_patients_df[AGE_COL].mean()
-    age_std = simulated_patients_df[AGE_COL].std()
-    bmi_mean = simulated_patients_df[BMI_COL].mean()
-    bmi_std = simulated_patients_df[BMI_COL].std()
+    # [age, gender, ADMISSION_YEAR, FIRST_ADMISSION, ADMISSION_SERIAL, WEIGHT_COL, HEIGHT_COL, BMI, SMOKING_COL, 5*preconditions]
+    b1 = [0.02, -0.5, 0, 0, 0, -0.5, 0.01, 0.05, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
 
-    # Sample length of stay
-    tmp_df = simulated_patients_df.copy()
-    simulated_patients_df[[DISCHARGE_RELATIVE_COL, DEATH_RELATIVE_COL]] = tmp_df.apply(sample_los,
-        age_mean=age_mean, age_std=age_std,  bmi_mean=bmi_mean, bmi_std=bmi_std, axis=1, result_type='expand')
-    del tmp_df
+    real_coef_dict = {
+        "alpha": {
+            1: lambda t: -1.3 - 0.1 * np.log(t),
+            2: lambda t: -1 - 0.1 * np.log(t)
+        },
+        "beta": {
+            1: [0.07*b for b in b1],
+            2: [0.05*b for b in b1]
+        }
+    }
+
+    # Sample event type and relative time
+    events_df = new_sample_logic(simulated_patients_df.set_index(PATIENT_NO_COL), j_events=2, d_times=30,
+                                             real_coef_dict=real_coef_dict)
+    simulated_patients_df = pd.concat([simulated_patients_df, events_df], axis=1)
+
+    simulated_patients_df[DEATH_RELATIVE_COL] = np.nan
+    simulated_patients_df.loc[simulated_patients_df.J == 1, DEATH_RELATIVE_COL] = simulated_patients_df.loc[
+        simulated_patients_df.J == 1, 'T'].values
+    simulated_patients_df = simulated_patients_df.rename(columns={'T': DISCHARGE_RELATIVE_COL})
+    simulated_patients_df.loc[simulated_patients_df.J == 0, DISCHARGE_RELATIVE_COL] = 31
+    simulated_patients_df = simulated_patients_df.drop('J', axis=1)
 
     # Remove weight and bmi based on admission year
     simulated_patients_df = simulated_patients_df.apply(hide_weight_info, axis=1)
 
     simulated_patients_df[DEATH_MISSING_COL] = simulated_patients_df[DEATH_RELATIVE_COL].isnull().astype(int)
+    simulated_patients_df[IN_HOSPITAL_DEATH_COL] = simulated_patients_df[DEATH_RELATIVE_COL].notnull().astype(int)
     simulated_patients_df[RETURNING_PATIENT_COL] = pd.cut(simulated_patients_df[ADMISSION_SERIAL_COL],
                                                         bins=ADMISSION_SERIAL_BINS, labels=ADMISSION_SERIAL_LABELS)
 
@@ -243,5 +252,5 @@ def generate_quick_start_df(n_patients=10000, d_times=30, j_events=2, n_cov=5, s
 
 
 if __name__ == "__main__":
-    #main()
-    generate_quick_start_df(n_patients=2)
+    main(N_patients=10000)
+    #generate_quick_start_df(n_patients=2)

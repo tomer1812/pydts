@@ -190,6 +190,7 @@ def plot_LOS_simulation_figure1(data_df):
     fig, axes = plt.subplots(2, 2, figsize=(14, 8))
 
     ax = axes[0, 0]
+    add_panel_text(ax=ax, text='a')
     data_df.groupby([ADMISSION_YEAR_COL, DEATH_MISSING_COL]).size().unstack().plot(kind='bar', stacked=True, ax=ax)
     ax.set_ylabel('Number of patients', fontsize=font_sz)
     ax.set_xlabel('Year of admission', fontsize=font_sz)
@@ -197,6 +198,7 @@ def plot_LOS_simulation_figure1(data_df):
     ax.set_ylim([0, 1000])
 
     ax = axes[0, 1]
+    add_panel_text(ax=ax, text='b')
     tmp = data_df[[AGE_COL, GENDER_COL]]
     tmp[AGE_COL] = pd.cut(tmp[AGE_COL], bins=AGE_BINS, labels=AGE_LABELS)
     tmp.groupby([AGE_COL, GENDER_COL]).size().unstack().plot(kind='bar', ax=ax)
@@ -205,6 +207,7 @@ def plot_LOS_simulation_figure1(data_df):
     ax.set_xticklabels(AGE_LABELS, rotation=90)
 
     ax = axes[1, 0]
+    add_panel_text(ax=ax, text='c')
     ser = data_df.sort_values(by=[PATIENT_NO_COL, ADMISSION_SERIAL_COL]).drop_duplicates(
         subset=[PATIENT_NO_COL], keep='last')[ADMISSION_SERIAL_COL]
     sns.distplot(ser, kde=False, ax=ax)
@@ -223,6 +226,7 @@ def plot_LOS_simulation_figure1(data_df):
     ax.grid('both', 'both')
 
     ax = axes[1, 1]
+    add_panel_text(ax=ax, text='d')
     kmf = KaplanMeierFitter(label='In-hospital death censoring')
     T = data_df[DISCHARGE_RELATIVE_COL].values
     E = data_df[DEATH_RELATIVE_COL].isnull().astype(int).values
@@ -237,6 +241,7 @@ def plot_LOS_simulation_figure1(data_df):
 
     ax.set_ylabel('Population', fontsize=font_sz)
     ax.set_xlabel('Days from hospitalization', fontsize=font_sz)
+    ax.set_xlim([0, 30])
     ax.grid()
 
     fig.tight_layout()
@@ -246,7 +251,7 @@ def plot_LOS_simulation_figure2(data_df):
     tmp['binned_age'] = pd.cut(tmp[AGE_COL], bins=AGE_BINS, labels=AGE_LABELS)
     tmp['death_at_hosp_ind'] = tmp[DEATH_RELATIVE_COL].notnull().astype(int)
 
-    max_time = 130
+    max_time = 30
     total_ad = len(data_df)
     ihd = (tmp.groupby(DEATH_RELATIVE_COL).size() / total_ad).reindex(range(0, max_time + 1)).fillna(0)
     ihd = ihd.loc[:max_time].cumsum()
@@ -255,25 +260,27 @@ def plot_LOS_simulation_figure2(data_df):
     released = released.loc[:max_time].cumsum()
     o = np.ones_like(released)
 
-    fig, axes = plt.subplots(3, 2, figsize=(12, 10))
+    fig, axes = plt.subplots(2, 2, figsize=(12, 7))
 
     text_sz = 12
     every_nth = 5
 
     ax = axes[0, 0]
+    add_panel_text(ax=ax, text='a')
     ax.fill_between(x=released.index, y1=(o - released.values - ihd.values), color='b', alpha=0.4)
     ax.fill_between(x=released.index, y1=o, y2=(o - released.values), color='g', alpha=0.4)
     ax.fill_between(x=released.index, y1=(o - released.values), y2=(o - released.values - ihd.values), color='r',
                     alpha=0.4)
-    ax.text(x=1, y=0.025, s='Hospitalized', fontsize=text_sz)
-    ax.text(x=max_time - 30, y=0.8, s='Released', fontsize=text_sz)
-    ax.text(x=max_time - 30, y=0.05, s='Dead', fontsize=text_sz)
+    ax.text(x=1, y=0.2, s='Hospitalized', fontsize=text_sz)
+    ax.text(x=20, y=0.8, s='Released', fontsize=text_sz)
+    ax.text(x=20, y=0.3, s='Dead', fontsize=text_sz)
     ax.set_ylim([0, 1])
     ax.set_xlim([0, max_time])
     ax.set_xlabel('Days from hospitalization day', fontsize=font_sz)
     ax.set_ylabel('Patient status ratio', fontsize=font_sz)
 
     ax = axes[0, 1]
+    add_panel_text(ax=ax, text='b')
     tmp[tmp['death_at_hosp_ind'] == 1].groupby(['binned_age', GENDER_COL]).size().unstack().plot(kind='bar', ax=ax)
     ax.set_xlabel('Age [years]', fontsize=font_sz)
     ax.set_ylabel('Number of patients', fontsize=font_sz)
@@ -281,6 +288,7 @@ def plot_LOS_simulation_figure2(data_df):
     ax.set_title('In-hospital Death', fontsize=title_sz)
 
     ax = axes[1, 0]
+    add_panel_text(ax=ax, text='c')
     ser = tmp[tmp['death_at_hosp_ind'] != 1].groupby(DISCHARGE_RELATIVE_COL).size()
     ser = ser.reindex(range(0, max_time + 1)).fillna(0)
     ser.plot(kind='bar', ax=ax)
@@ -294,6 +302,7 @@ def plot_LOS_simulation_figure2(data_df):
             label.set_visible(False)
 
     ax = axes[1, 1]
+    add_panel_text(ax=ax, text='d')
     ser = tmp[tmp['death_at_hosp_ind'] == 1].groupby(DEATH_RELATIVE_COL).size()
     ser = ser.reindex(range(0, max_time + 1)).fillna(0)
     ser.plot(kind='bar', ax=ax)
@@ -306,33 +315,35 @@ def plot_LOS_simulation_figure2(data_df):
         if (idl % every_nth) > 0:
             label.set_visible(False)
 
-    ax = axes[2, 0]
-    ser = tmp[tmp['death_at_hosp_ind'] != 1].groupby(DISCHARGE_RELATIVE_COL).size()
-    ser = ser.reindex(range(0, max_time + 1)).fillna(0)
-    ser.plot(kind='bar', logy=True, ax=ax)
-    ax.set_xlim([0, max_time])
-    ax.set_ylabel('Released', fontsize=font_sz)
-    ax.set_xlabel('Days from Hospitalization', fontsize=font_sz)
-    ax.grid(axis='y')
-    ax.set_ylim([0, 1000])
-
-    for idl, label in enumerate(ax.xaxis.get_ticklabels()):
-        if (idl % every_nth) > 0:
-            label.set_visible(False)
-
-    ax = axes[2, 1]
-    ser = tmp[tmp['death_at_hosp_ind'] == 1].groupby(DEATH_RELATIVE_COL).size()
-    ser = ser.reindex(range(0, max_time + 1)).fillna(0)
-    ser.plot(kind='bar', logy=True, ax=ax)
-    ax.set_xlim([0, max_time])
-    ax.set_ylabel('Died', fontsize=font_sz)
-    ax.set_xlabel('Days from Hospitalization', fontsize=font_sz)
-    ax.grid(axis='y')
-    ax.set_ylim([0, 1000])
-
-    for idl, label in enumerate(ax.xaxis.get_ticklabels()):
-        if (idl % every_nth) > 0:
-            label.set_visible(False)
+    # ax = axes[2, 0]
+    # add_panel_text(ax=ax, text='e')
+    # ser = tmp[tmp['death_at_hosp_ind'] != 1].groupby(DISCHARGE_RELATIVE_COL).size()
+    # ser = ser.reindex(range(0, max_time + 1)).fillna(0)
+    # ser.plot(kind='bar', logy=True, ax=ax)
+    # ax.set_xlim([0, max_time])
+    # ax.set_ylabel('Released', fontsize=font_sz)
+    # ax.set_xlabel('Days from Hospitalization', fontsize=font_sz)
+    # ax.grid(axis='y')
+    # ax.set_ylim([0, 1000])
+    #
+    # for idl, label in enumerate(ax.xaxis.get_ticklabels()):
+    #     if (idl % every_nth) > 0:
+    #         label.set_visible(False)
+    #
+    # ax = axes[2, 1]
+    # add_panel_text(ax=ax, text='f')
+    # ser = tmp[tmp['death_at_hosp_ind'] == 1].groupby(DEATH_RELATIVE_COL).size()
+    # ser = ser.reindex(range(0, max_time + 1)).fillna(0)
+    # ser.plot(kind='bar', logy=True, ax=ax)
+    # ax.set_xlim([0, max_time])
+    # ax.set_ylabel('Died', fontsize=font_sz)
+    # ax.set_xlabel('Days from Hospitalization', fontsize=font_sz)
+    # ax.grid(axis='y')
+    # ax.set_ylim([0, 1000])
+    #
+    # for idl, label in enumerate(ax.xaxis.get_ticklabels()):
+    #     if (idl % every_nth) > 0:
+    #         label.set_visible(False)
 
     fig.tight_layout()
 
