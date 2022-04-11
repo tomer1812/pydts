@@ -364,13 +364,15 @@ def plot_LOS_simulation_figure3(data_df):
 
 
 # todo: move from here
-def compare_beta_models_for_example(first_models: dict, second_models: dict, n_cov: int = 5) -> dict:
+def compare_beta_models_for_example(first_models: dict, second_models: dict,
+                                    n_cov: int = 5, real_coef_dict: dict = None) -> dict:
     """
 
     Args:
         first_models:
         second_models:
         n_cov:
+        real_coef_dict (dict):
 
     Returns:
 
@@ -380,16 +382,7 @@ def compare_beta_models_for_example(first_models: dict, second_models: dict, n_c
         "alpha": {},
         "beta": {}
     }
-    real_coef_dict = {
-        "alpha": {
-            1: lambda t: -1 - 0.3 * np.log(t),
-            2: lambda t: -1.75 - 0.15 * np.log(t)
-        },
-        "beta": {
-            1: -np.log([0.8, 3, 3, 2.5, 2]),
-            2: -np.log([1, 3, 4, 3, 2])
-        }
-    }
+
     for event in first_models.keys():
         for model_type in models_dict.keys():
             if model_type == "alpha":

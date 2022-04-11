@@ -615,13 +615,14 @@ def repetitive_fitters(rep, n_patients, n_cov, d_times, j_events, pid_col, test_
             end_2 = time()
             times[model1_name].append(end_1 - start_1)
             times[model2_name].append(end_2 - start_2)
-            res_dict = compare_beta_models_for_example(fitter.event_models, new_fitter.event_models)
+            res_dict = compare_beta_models_for_example(fitter.event_models,
+                                                       new_fitter.event_models, real_coef_dict=real_coef_dict)
             rep_dict[samp] = res_dict
             final += 1
             if final == rep:
                 break
         except Exception as e:
-            print(e)
+            print(e.with_traceback())
             failed += 1
             print(f'Failed to fit sample {samp+1}, fail #{failed}')
             continue
