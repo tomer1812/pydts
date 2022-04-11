@@ -1,11 +1,11 @@
 from typing import Iterable, Tuple
 
 import numpy as np
-from pydts.examples_utils.simulations_data_config import *
+from .simulations_data_config import *
 from matplotlib import pyplot as plt
 import seaborn as sns
 from lifelines import KaplanMeierFitter
-from pydts.config import *
+from ..config import *
 import os
 import string
 import warnings
@@ -382,7 +382,7 @@ def compare_beta_models_for_example(first_models: dict, second_models: dict,
         "alpha": {},
         "beta": {}
     }
-
+    assert real_coef_dict is not None, "The user should supply the coefficients of the experiment"
     for event in first_models.keys():
         for model_type in models_dict.keys():
             if model_type == "alpha":
@@ -517,8 +517,6 @@ def plot_cif_plots(pred_df: pd.DataFrame, event: str, return_ax: bool = False, a
     Returns:
 
     """
-    import matplotlib.ticker as mtick
-
     cif_cols = pred_df.columns[pred_df.columns.str.startswith("cif")]
 
     event_cif_cols = cif_cols[cif_cols.str.contains(f"j{event}")]
@@ -532,9 +530,8 @@ def plot_cif_plots(pred_df: pd.DataFrame, event: str, return_ax: bool = False, a
     ax.tick_params(axis='both', which='minor', labelsize=15)
     ax.set_xticks(event_x)
     ax.set_xticklabels(event_x)
-    # ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
     y_min, y_max = get_y_perc_limits(pred_df, event_cif_cols, pad=pad, scale=scale)
-    ax.set_ylim([y_min, y_max])
+    ax.set_ylim(bottom=y_min, top=y_max)
     ax.set_xlabel("t", fontdict={'size': 18})  # , "weight": "bold"
     ax.set_ylabel(f"CIF of $J_{event}$", fontdict={'size': 18})  # , "weight": "bold"
     ax.grid()
