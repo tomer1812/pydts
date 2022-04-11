@@ -19,7 +19,7 @@ PyDTS is an open source Python package which implements tools for discrete-time 
 
 ## References
 <a id="1">[1]</a> 
-Tomer Meir\*, Rom Gutman\*, and Malka Gorfine 
+Meir, Tomer\*, Gutman, Rom\*, and Gorfine, Malka, 
 "PyDTS: A Python Package for Discrete-Time Survival Analysis with Competing Risks"
 (2022)
 

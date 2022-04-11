@@ -95,7 +95,7 @@ The simulation results of section Simple Simulation reveals that the above two-s
 
 ## References
 <a id="1">[1]</a> 
-Tomer Meir\*, Rom Gutman\*, and Malka Gorfine 
+Meir, Tomer\*, Gutman, Rom\*, and Gorfine, Malka 
 "PyDTS: A Python Package for Discrete Time Survival-analysis with Competing Risks"
 (2022)
 
