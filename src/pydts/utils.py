@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+from scipy.special import expit
+
 
 def get_expanded_df(df, event_type_col='J', duration_col='X', pid_col='pid'):
     """
@@ -67,3 +69,28 @@ def present_coefs(res_dict):
         print(f"for coef: {coef_type.capitalize()}")
         df = pd.concat([temp_df for temp_df in events_dict.values()])
         display(df)
+
+
+def get_real_hazard(df, real_coef_dict, times, events):
+    """
+
+    Args:
+        df:
+        real_coef_dict:
+        times:
+        events:
+
+    Returns:
+
+    """
+    # todo docstrings
+    # todo assertions
+    # todo move to utils?
+
+    a_t = {event: {t: real_coef_dict['alpha'][event](t) for t in times} for event in events}
+    b = pd.concat([df.dot(real_coef_dict['beta'][j]) for j in events], axis=1, keys=events)
+
+    for j in events:
+        df[[f'hazard_j{j}_t{t}' for t in times]] = pd.concat([expit(a_t[j][t] + b[j]) for t in times],
+                                                             axis=1).values
+    return df
