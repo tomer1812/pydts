@@ -1,6 +1,6 @@
 import unittest
-from pydts.examples_utils.generate_simulations_data import generate_quick_start_df
-from pydts.fitters import DataExpansionFitter
+from src.pydts.examples_utils.generate_simulations_data import generate_quick_start_df
+from src.pydts.fitters import DataExpansionFitter
 import numpy as np
 
 class TestDataExpansionFitter(unittest.TestCase):
