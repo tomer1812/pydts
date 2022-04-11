@@ -176,6 +176,7 @@ def calculate_jt(sum1, sum2, prob_j1t, prob_j2t, d_times):
     Returns:
 
     """
+    # todo: make it general
     temp_sums = pd.concat(
         [1 - sum1 - sum2, sum1, sum2],
         axis=1, keys=[0, 1, 2]

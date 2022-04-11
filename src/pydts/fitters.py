@@ -13,7 +13,7 @@ from lifelines.fitters.coxph_fitter import CoxPHFitter
 from pandarallel import pandarallel
 from typing import Optional, List, Union
 from matplotlib import colors as mcolors
-from tqdm import tqdm
+from tqdm import trange
 from joblib import Parallel, delayed
 from pydts.examples_utils.generate_simulations_data import generate_quick_start_df
 
@@ -591,7 +591,7 @@ def repetitive_fitters(rep, n_patients, n_cov, d_times, j_events, pid_col, test_
     counts_df_list = []
     final = 0
     failed = 0
-    for samp in tqdm(range(rep+allow_fails)):
+    for samp in trange(rep+allow_fails):
         try:
             patients_df = generate_quick_start_df(n_patients=n_patients, n_cov=n_cov, d_times=d_times,
                                                   j_events=j_events,
