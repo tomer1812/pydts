@@ -163,31 +163,28 @@ def default_sampling_logic(Z, d_times):
     return j_i, T_i
 
 
-def calculate_jt(sum1, sum2, prob_j1t, prob_j2t, d_times):
+def calculate_jt(sums, probs_jt, d_times, j_events):
     """
-    
+
+
     Args:
-        sum1: 
-        sum2: 
-        prob_j1t: 
-        prob_j2t: 
-        d_times: 
+        sums:
+        probs_jt:
+        d_times:
+        j_events:
 
     Returns:
 
     """
-    # todo: make it general
-    temp_sums = pd.concat(
-        [1 - sum1 - sum2, sum1, sum2],
-        axis=1, keys=[0, 1, 2]
-    )
-    # sample J
+    events = range(1, j_events + 1)
+    temp_sums = pd.concat([1 - sum(sums), *sums], axis=1, keys=[0, *events])
+
     j_df = (temp_sums.cumsum(1) > np.random.rand(temp_sums.shape[0])[:, None]).idxmax(axis=1).to_frame('J')
 
     temp_ts = []
-    for j in [1, 2]:
+    for j in events:
         rel_j = j_df.query("J==@j").index
-        prob_df = prob_j1t if j == 1 else prob_j2t  # the prob j to sample from
+        prob_df = probs_jt[j - 1]  # the prob j to sample from
         # sample T
         temp_ts.append((prob_df.loc[rel_j].cumsum(1) >= np.random.rand(rel_j.shape[0])[:, None]).idxmax(axis=1))
 
@@ -215,21 +212,17 @@ def new_sample_logic(patients_df: pd.DataFrame, j_events: int, d_times: int, rea
     a_t = {event: {t: real_coef_dict['alpha'][event](t) for t in range(1, d_times+1)} for event in events}
     b = pd.concat([patients_df.dot(real_coef_dict['beta'][j]) for j in events], axis=1, keys=events)
 
-    hazard1, hazard2 = [pd.concat([expit(a_t[j][t] + b[j]) for t in range(1, d_times+1)],
-                                  axis=1, keys=(range(1, d_times + 1))) for j in events]
-    surv_func = pd.concat([pd.Series(1, index=hazard1.index),
-                           (1 - hazard1 - hazard2).cumprod(axis=1).iloc[:, :-1]], axis=1)
-
+    hazards = [pd.concat([expit(a_t[j][t] + b[j]) for t in range(1, d_times + 1)],
+                         axis=1, keys=(range(1, d_times + 1))) for j in events]
+    surv_func = pd.concat([pd.Series(1, index=hazards[0].index),
+                           (1 - sum(hazards)).cumprod(axis=1).iloc[:, :-1]], axis=1)
     surv_func.columns += 1
 
-    proba1 = hazard1 * surv_func
-    proba2 = hazard2 * surv_func
-    sum1 = proba1.sum(axis=1)
-    sum2 = proba2.sum(axis=1)
-    probj1t = proba1.div(sum1,axis=0)
-    probj2t = proba2.div(sum2,axis=0)
+    probs = [hazard * surv_func for hazard in hazards]
+    sums = [prob.sum(axis=1) for prob in probs]
+    probjt = [prob.div(sumj, axis=0) for prob, sumj in zip(probs, sums)]
 
-    ret = calculate_jt(sum1, sum2, probj1t, probj2t, d_times)
+    ret = calculate_jt(sums, probjt, d_times, j_events)
     return ret
 
 
