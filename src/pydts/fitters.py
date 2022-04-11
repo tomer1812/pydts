@@ -1,10 +1,8 @@
-from typing import Iterable, Tuple, Union
-from time import time
+from typing import Iterable, Tuple
 
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
-from pydts.base_fitters import ExpansionBasedFitter
-from sklearn.model_selection import train_test_split
+from .base_fitters import ExpansionBasedFitter
 from scipy.optimize import minimize
 from scipy.special import logit, expit
 import numpy as np
@@ -13,10 +11,9 @@ from lifelines.fitters.coxph_fitter import CoxPHFitter
 from pandarallel import pandarallel
 from typing import Optional, List, Union
 from matplotlib import colors as mcolors
-from tqdm import trange
 from joblib import Parallel, delayed
-from pydts.examples_utils.generate_simulations_data import generate_quick_start_df
 
+from .examples_utils.generate_simulations_data import generate_quick_start_df
 
 COLORS = list(mcolors.TABLEAU_COLORS.keys())
 
@@ -569,23 +566,58 @@ def assert_fit(event_df, times, event_type_col='J', duration_col='X'):
                            f"\n See https://tomer1812.github.io/pydts/UsageExample-RegroupingData/ for more details.")
 
 
-def repetitive_fitters(rep, n_patients, n_cov, d_times, j_events, pid_col, test_size,
+def repetitive_fitters(rep: int, n_patients: int, n_cov: int, d_times: int, j_events: int, pid_col: str,
+                       test_size: float,
                        drop_cols: Iterable = ("C", "T"),
-                       model1=DataExpansionFitter,
+                       model1: ExpansionBasedFitter = DataExpansionFitter,
                        model1_name="Lee",
-                       model2=TwoStagesFitter,
+                       model2: ExpansionBasedFitter = TwoStagesFitter,
                        model2_name: str = "Ours",
                        allow_fails: int = 20,
                        verbose: int = 2,
                        real_coef_dict: dict = None,
                        censoring_prob: float = 1.
-                       ) -> Tuple[dict, dict]:
-    # todo docstrings
-    # todo assertions
-    # todo move to utils?
-    # todo try catch
+                       ) -> Tuple[dict, dict, pd.DataFrame]:
+    """
+    The function allows the user to generate N repetitions of model training (given data generating process),
+    to allow the user to compare the parameters stability and fitting time of the methods .
 
-    from pydts.examples_utils.plots import compare_beta_models_for_example
+    Args:
+        rep (int): number of repetitions to run the models
+        n_patients (int): number of sample to generate for each repetition
+        n_cov (int): number of covariates to generate for each repetition
+        d_times (int): how many times T to generate (i.e. times would be $t \in [1,\ldots,d]$)
+        j_events (int): number of events to generate for each repetition
+        pid_col (str): the name of the id column
+        test_size (float): the test size (percentage) for train/test splitting
+        drop_cols (Iterable):
+            Columns that shouldn't be visible for the model, from the generated sample.
+            default is drop the real event time (T) and censoring time (C)
+        model1 (ExpansionBasedFitter): Typically Lee et al. 2018 [1] model (DataExpansionFitter).
+            but can be any of base type ExpansionBasedFitter
+        model1_name (str): the name of the first model
+        model2 (ExpansionBasedFitter): Typically our suggested method (TwoStagesFitter).
+            but can be any of base type ExpansionBasedFitter
+        model2_name  (str): the name of the second model
+        allow_fails (int): number of allowed failed repetitions.
+            I.e. the method would run up to rep + allow_fails times.
+        verbose (int): verbosity level for the pandarallel module
+        real_coef_dict (dict): dictionary which represent the real coefficients to be generated for each repetition
+        censoring_prob (float): The probability to use the censoring method for each round of generation
+
+    Returns:
+        rep_dict (dict): Dictionary which contains for each round (key)
+            its beta/alpha/real coefficients dataframe (value).
+        times (dict): Dictionary which  contains for each model (key) a list of the training times (value).
+        ret_df (pd.DataFrame): Dataframe which contains for each time in d times, the average amount of events for it.
+
+    """
+    # todo assertions
+
+    from .examples_utils.plots import compare_beta_models_for_example
+    from sklearn.model_selection import train_test_split
+    from tqdm import trange
+    from time import time
     rep_dict = {}
     times = {model1_name: [], model2_name: []}
     counts_df_list = []
@@ -622,37 +654,10 @@ def repetitive_fitters(rep, n_patients, n_cov, d_times, j_events, pid_col, test_
             if final == rep:
                 break
         except Exception as e:
-            print(e.with_traceback())
+            print(e)
             failed += 1
             print(f'Failed to fit sample {samp+1}, fail #{failed}')
             continue
     print(f'final: {final}')
     ret_df = pd.concat(counts_df_list, axis=1).fillna(0).mean(axis=1).apply(np.ceil).to_frame()
     return rep_dict, times, ret_df
-
-
-def get_real_hazard(df, real_coef_dict, times, events):
-    """
-
-    Args:
-        df:
-        real_coef_dict:
-        times:
-        events:
-
-    Returns:
-
-    """
-    # todo docstrings
-    # todo assertions
-    # todo move to utils?
-
-    a_t = {event: {t: real_coef_dict['alpha'][event](t) for t in times} for event in events}
-    b = pd.concat([df.dot(real_coef_dict['beta'][j]) for j in events], axis=1, keys=events)
-
-    for j in events:
-        df[[f'hazard_j{j}_t{t}' for t in times]] = pd.concat([expit(a_t[j][t] + b[j]) for t in times],
-                                                             axis=1).values
-    return df
-
-

@@ -2,7 +2,7 @@ from typing import Iterable, Tuple, Union
 
 import pandas as pd
 import numpy as np
-from pydts.utils import get_expanded_df
+from .utils import get_expanded_df
 
 
 
