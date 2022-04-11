@@ -2,7 +2,7 @@
 
 Based on 
 
-"PyDTS: A Python Package for Discrete Time Survival-analysis with Competing Risks"
+"PyDTS: A Python Package for Discrete-Time Survival Analysis with Competing Risks"
 
 Tomer Meir\*, Rom Gutman\*, and Malka Gorfine (2022) [[1]](#1).
 
@@ -20,7 +20,7 @@ PyDTS is an open source Python package which implements tools for discrete-time 
 ## References
 <a id="1">[1]</a> 
 Tomer Meir\*, Rom Gutman\*, and Malka Gorfine 
-"PyDTS: A Python Package for Discrete Time Survival-analysis with Competing Risks"
+"PyDTS: A Python Package for Discrete-Time Survival Analysis with Competing Risks"
 (2022)
 
 <a id="2">[2]</a> 

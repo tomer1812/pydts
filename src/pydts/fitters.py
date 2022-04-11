@@ -299,14 +299,17 @@ class TwoStagesFitter(ExpansionBasedFitter):
         Returns:
             None
         """
+        from IPython.display import display
+        display(self.get_beta_SE())
+
         for event, model in self.event_models.items():
-            _summary_func = getattr(model[0], summary_func, None)
-            if _summary_func is not None:
-                print(f'\n\nModel summary for event: {event}')
-                _summary_func(**summary_kwargs)
-            else:
-                print(f'Not {summary_func} function in event {event} model')
-            from IPython.display import display
+            print(f'\n\nModel summary for event: {event}')
+            # _summary_func = getattr(model[0], summary_func, None)
+            # if _summary_func is not None:
+            #     print(f'\n\nModel summary for event: {event}')
+            #     _summary_func(**summary_kwargs)
+            # else:
+            #     print(f'Not {summary_func} function in event {event} model')
             display(model[1].drop('opt_res', axis=1).set_index([self.event_type_col, self.duration_col]))
 
     def plot_event_alpha(self, event: Union[str, int], ax: plt.Axes = None, scatter_kwargs: dict = {},
