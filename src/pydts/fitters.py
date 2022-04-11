@@ -14,6 +14,7 @@ from matplotlib import colors as mcolors
 from joblib import Parallel, delayed
 
 from .examples_utils.generate_simulations_data import generate_quick_start_df
+from .utils import assert_fit
 
 COLORS = list(mcolors.TABLEAU_COLORS.keys())
 
@@ -500,70 +501,6 @@ class TwoStagesFitter(ExpansionBasedFitter):
         if show:
             plt.show()
         return ax
-
-
-def create_df_for_cif_plots(df: pd.DataFrame, field: str,
-                            covariates: Iterable,
-                            vals: Optional[Iterable] = None,
-                            quantiles: Optional[Iterable] = None,
-                            zero_others: Optional[bool] = False
-                            ) -> pd.DataFrame:
-    """
-    This method creates df for cif plot, where it zeros
-
-    Args:
-        df (pd.DataFrame): Dataframe which we yield the statiscal propetrics (means, quantiles, etc) and stacture
-        field (str): The field which will represent the change
-        covariates (Iterable): The covariates of the given model
-        vals (Optional[Iterable]): The values to use for the field
-        quantiles (Optional[Iterable]): The quantiles to use as values for the field
-        zero_others (bool): Whether to zero the other covarites or to zero them
-
-    Returns:
-        df (pd.DataFrame): A dataframe that contains records per value for cif ploting
-    """
-
-    cov_not_fitted = [cov for cov in covariates if cov not in df.columns]
-    assert len(cov_not_fitted) == 0, \
-        f"Required covariates are missing from df: {cov_not_fitted}"
-    # todo add assertions
-
-    df_for_ploting = df.copy()  # todo make sure .copy() is required
-    if vals is not None:
-        pass
-    elif quantiles is not None:
-        vals = df_for_ploting[field].quantile(quantiles).values
-    else:
-        raise NotImplemented("Only Quantiles or specific values is supported")
-    temp_series = []
-    template_s = df_for_ploting.iloc[0][covariates].copy()
-    if zero_others:
-        impute_val = 0
-    else:
-        impute_val = df_for_ploting[covariates].mean().values
-    for val in vals:
-        temp_s = template_s.copy()
-        temp_s[covariates] = impute_val
-        temp_s[field] = val
-        temp_series.append(temp_s)
-
-    return pd.concat(temp_series, axis=1).T
-
-
-def assert_fit(event_df, times, event_type_col='J', duration_col='X'):
-    # todo: split to 2: one generic, one for new model
-    if not event_df['success'].all():
-        problematic_times = event_df.loc[~event_df['success'], duration_col].tolist()
-        event = event_df[event_type_col].max()  # all the events in the dataframe are the same
-        raise RuntimeError(f"In event J={event}, The method did not converged in D={problematic_times}."
-                           f" Consider changing the problem definition."
-                           f"\n See https://tomer1812.github.io/pydts/UsageExample-RegroupingData/ for more details.")
-    if event_df.shape[0] != len(times):
-        event = event_df[event_type_col].max()  # all the events in the dataframe are the same
-        problematic_times = pd.Index(event_df[duration_col]).symmetric_difference(times).tolist()
-        raise RuntimeError(f"In event J={event}, The method didn't have events D={problematic_times}."
-                           f" Consider changing the problem definition."
-                           f"\n See https://tomer1812.github.io/pydts/UsageExample-RegroupingData/ for more details.")
 
 
 def repetitive_fitters(rep: int, n_patients: int, n_cov: int, d_times: int, j_events: int, pid_col: str,
