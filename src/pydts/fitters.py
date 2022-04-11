@@ -555,6 +555,7 @@ def repetitive_fitters(rep: int, n_patients: int, n_cov: int, d_times: int, j_ev
     from sklearn.model_selection import train_test_split
     from tqdm import trange
     from time import time
+    assert real_coef_dict is not None, "The user should supply the coefficients of the experiment"
     rep_dict = {}
     times = {model1_name: [], model2_name: []}
     counts_df_list = []
