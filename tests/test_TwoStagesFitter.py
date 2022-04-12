@@ -154,3 +154,53 @@ class TestTwoStagesFitter(unittest.TestCase):
 
     def test_predict_cumulative_incident_function_case_successful_predict(self):
         self.fitted_model.predict_cumulative_incident_function(df=self.df.drop(['C', 'T'], axis=1))
+
+    def test_predict_marginal_prob_function_case_successful(self):
+        self.fitted_model.predict_marginal_prob_event_j(df=self.df.drop(columns=['C', 'T']),
+                                                        event=1)
+
+    def test_predict_marginal_prob_function_case_event_not_exists(self):
+        # Event passed to .predict_margnial() must be in fitted events
+        with self.assertRaises(AssertionError):
+            self.fitted_model.predict_marginal_prob_event_j(
+                df=self.df.drop(['C', 'T'], axis=1), event=100)
+
+    def test_predict_marginal_prob_function_cov_not_exists(self):
+        # Covariates columns used in fit (here ['Z1','Z2','Z3','Z4','Z5']) must be passed in df to .predict()
+        with self.assertRaises(AssertionError):
+            self.fitted_model.predict_marginal_prob_event_j(
+                df=self.df.drop(columns=['C', 'T', 'Z1']),
+                event=self.fitted_model.events[0])
+
+    def test_predict_marginal_prob_all_events_function_successful(self):
+        self.fitted_model.predict_marginal_prob_all_events(df=self.df.drop(columns=['C', 'T']))
+
+    def test_predict_marginal_prob_all_events_cov_not_exits(self):
+        # Covariates columns used in fit (here ['Z1','Z2','Z3','Z4','Z5']) must be passed in df to .predict()
+        with self.assertRaises(AssertionError):
+            self.fitted_model.predict_marginal_prob_all_events(
+                df=self.df.drop(columns=['C', 'T', 'Z1']))
+
+    def test_alpha_jt_function_value(self):
+        t = 1
+        j = 1
+        row = self.fitted_model.alpha_df.query("X == @t and J == @j")
+        x = row['alpha_jt'].item()
+        y_t = (self.df["X"]
+               .value_counts()
+               .sort_index(ascending=False)  # each event count for its occurring time and the times before
+               .cumsum()
+               .sort_index()
+               )
+        rel_y_t = y_t.loc[t]
+        rel_beta = self.fitted_model.beta_models[j].params_
+        n_jt = row['n_jt']
+        df = self.df.drop(columns=['C', 'T'])
+        partial_df = df[df["X"] >= t]
+        expit_add = np.dot(partial_df[self.fitted_model.covariates], rel_beta)
+        from scipy.special import expit
+        a_jt = ((1 / rel_y_t) * np.sum(expit(x + expit_add)) - (n_jt / rel_y_t)) ** 2
+        a_jt_from_func = self.fitted_model._alpha_jt(x=x, df=df,
+                                                     y_t=rel_y_t, beta_j=rel_beta,
+                                                     n_jt=n_jt, t=t)
+        self.assertEqual(a_jt.item(), a_jt_from_func.item())
