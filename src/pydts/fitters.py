@@ -21,8 +21,8 @@ COLORS = list(mcolors.TABLEAU_COLORS.keys())
 
 class DataExpansionFitter(ExpansionBasedFitter):
     """
-    This class implements the fitter as described in Lee et al. 2018 [1]
-    See also Simple Example section.
+    This class implements the estimation procedure of Lee et al. (2018) [1].
+    See also the Example section.
 
     Example:
         ```py linenums="1"
@@ -33,7 +33,7 @@ class DataExpansionFitter(ExpansionBasedFitter):
         ```
 
     References:
-        [1] "On the Analysis of Discrete Time Competing Risks Data", Lee et al., Biometrics, 2018, DOI: 10.1111/biom.12881
+        [1] Lee, Minjung and Feuer, Eric J. and Fine, Jason P., "On the analysis of discrete time competing risks data", Biometrics (2018) doi: 10.1111/biom.12881
     """
 
     def __init__(self):
@@ -166,8 +166,7 @@ class DataExpansionFitter(ExpansionBasedFitter):
 class TwoStagesFitter(ExpansionBasedFitter):
 
     """
-    This class implements the new approach for fitting model to discrete time survival data.
-    See also Simple Example section.
+    This class implements the approach of Meir et al. (2022):
 
     Example:
         ```py linenums="1"
@@ -176,6 +175,9 @@ class TwoStagesFitter(ExpansionBasedFitter):
             fitter.fit(df=train_df, event_type_col='J', duration_col='X')
             fitter.print_summary()
         ```
+
+    References:
+    [1] Meir, Tomer\*, Gutman, Rom\*, and Gorfine, Malka, "PyDTS: A Python Package for Discrete-Time Survival Analysis with Competing Risks" (2022)
     """
 
     def __init__(self):
@@ -223,13 +225,13 @@ class TwoStagesFitter(ExpansionBasedFitter):
 
         Args:
             df (pd.DataFrame): training data for fitting the model
-            covariates (list): list of covariates to be used in fitting the beta model
+            covariates (list): list of covariates to be used in estimating the regression coefficients
             event_type_col (str): The event type column name (must be a column in df),
-                                  Right censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+                                  Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
             duration_col (str): Last follow up time column name (must be a column in df).
             pid_col (str): Sample ID column name (must be a column in df).
             x0 (Union[numpy.array, int], Optional): initial guess to pass to scipy.optimize.minimize function
-            fit_beta_kwargs (dict, Optional): Keyword arguments to pass on to fit beta procedure.
+            fit_beta_kwargs (dict, Optional): Keyword arguments to pass on to the estimation procedure.
                                               If different model for beta is desired, it can be defined here.
                                               For example:
                                               fit_beta_kwargs={

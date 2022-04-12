@@ -240,7 +240,7 @@ def plot_LOS_simulation_figure1(data_df):
     kmf.plot_survival_function(ax=ax)
 
     ax.set_ylabel('Population', fontsize=font_sz)
-    ax.set_xlabel('Days from hospitalization', fontsize=font_sz)
+    ax.set_xlabel('LOS', fontsize=font_sz)
     ax.set_xlim([0, 30])
     ax.grid()
 
@@ -276,7 +276,7 @@ def plot_LOS_simulation_figure2(data_df):
     ax.text(x=20, y=0.3, s='Dead', fontsize=text_sz)
     ax.set_ylim([0, 1])
     ax.set_xlim([0, max_time])
-    ax.set_xlabel('Days from hospitalization day', fontsize=font_sz)
+    ax.set_xlabel('LOS', fontsize=font_sz)
     ax.set_ylabel('Patient status ratio', fontsize=font_sz)
 
     ax = axes[0, 1]
@@ -294,7 +294,7 @@ def plot_LOS_simulation_figure2(data_df):
     ser.plot(kind='bar', ax=ax)
     ax.set_xlim([0, max_time])
     ax.set_ylabel('Released', fontsize=font_sz)
-    ax.set_xlabel('Days from Hospitalization', fontsize=font_sz)
+    ax.set_xlabel('LOS', fontsize=font_sz)
     ax.grid(axis='y')
 
     for idl, label in enumerate(ax.xaxis.get_ticklabels()):
@@ -308,7 +308,7 @@ def plot_LOS_simulation_figure2(data_df):
     ser.plot(kind='bar', ax=ax)
     ax.set_xlim([0, max_time])
     ax.set_ylabel('Died', fontsize=font_sz)
-    ax.set_xlabel('Days from Hospitalization', fontsize=font_sz)
+    ax.set_xlabel('LOS', fontsize=font_sz)
     ax.grid(axis='y')
 
     for idl, label in enumerate(ax.xaxis.get_ticklabels()):

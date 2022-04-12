@@ -103,14 +103,12 @@ def assert_fit(event_df, times, event_type_col='J', duration_col='X'):
     if not event_df['success'].all():
         problematic_times = event_df.loc[~event_df['success'], duration_col].tolist()
         event = event_df[event_type_col].max()  # all the events in the dataframe are the same
-        raise RuntimeError(f"In event J={event}, The method did not converged in D={problematic_times}."
-                           f" Consider changing the problem definition."
+        raise RuntimeError(f"Number of observed events at some time points are too small. Consider collapsing neighbor time points."
                            f"\n See https://tomer1812.github.io/pydts/UsageExample-RegroupingData/ for more details.")
     if event_df.shape[0] != len(times):
         event = event_df[event_type_col].max()  # all the events in the dataframe are the same
         problematic_times = pd.Index(event_df[duration_col]).symmetric_difference(times).tolist()
-        raise RuntimeError(f"In event J={event}, The method didn't have events D={problematic_times}."
-                           f" Consider changing the problem definition."
+        raise RuntimeError(f"Number of observed events at some time points are too small. Consider collapsing neighbor time points."
                            f"\n See https://tomer1812.github.io/pydts/UsageExample-RegroupingData/ for more details.")
 
 
