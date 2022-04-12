@@ -54,6 +54,11 @@ class TestDataExpansionFitter(unittest.TestCase):
         m = DataExpansionFitter()
         m.fit(df=self.df.drop(['C', 'T'], axis=1))
 
+    def test_fit_with_kwargs(self):
+        import statsmodels.api as sm
+        m = DataExpansionFitter()
+        m.fit(df=self.df.drop(columns=['C', 'T']), models_kwargs=dict(family=sm.families.Binomial()))
+
     def test_print_summary(self):
         self.fitted_model.print_summary()
 

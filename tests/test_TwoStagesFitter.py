@@ -1,4 +1,6 @@
 import unittest
+
+import matplotlib.pyplot as plt
 import pandas as pd
 from src.pydts.examples_utils.generate_simulations_data import generate_quick_start_df
 from src.pydts.fitters import TwoStagesFitter
@@ -78,11 +80,25 @@ class TestTwoStagesFitter(unittest.TestCase):
     def test_plot_all_events_alpha(self):
         self.fitted_model.plot_all_events_alpha(show=False)
 
+    def test_plot_all_events_alpha_case_show(self):
+        self.fitted_model.plot_all_events_alpha(show=True)
+
+    def test_plot_all_events_alpha_case_axis_exits(self):
+        fig, ax = plt.subplots()
+        self.fitted_model.plot_all_events_alpha(show=False, ax=ax)
+
     def test_get_beta_SE(self):
         self.fitted_model.get_beta_SE()
 
     def test_plot_all_events_beta(self):
         self.fitted_model.plot_all_events_beta(show=False)
+
+    def test_plot_all_events_beta_case_show(self):
+        self.fitted_model.plot_all_events_beta(show=True)
+
+    def test_plot_all_events_beta_case_ax_exists(self):
+        fig, ax = plt.subplots()
+        self.fitted_model.plot_all_events_beta(show=False, ax=ax)
 
     def test_predict_hazard_jt_case_covariate_not_in_df(self):
         # Covariates columns used in fit (here ['Z1','Z2','Z3','Z4','Z5']) must be passed in df to .predict()
