@@ -50,8 +50,8 @@ nav:
       - Fitters Comparison: ModelsComparison.ipynb
       - Hospitalization LOS Simulation: SimulatedDataset.ipynb
     - API:
-      - The Two Stages Procedure: 'api/two_stages_fitter.md'
-      - Data Expansion: 'api/data_expansion_fitter.md'
+      - The Two Stages Procedure of Meir et al. (2022): 'api/two_stages_fitter.md'
+      - Data Expansion Procedure of Lee et al. (2018): 'api/data_expansion_fitter.md'
 
 plugins:
   - mknotebooks

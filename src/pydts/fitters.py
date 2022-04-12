@@ -177,7 +177,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
         ```
 
     References:
-    [1] Meir, Tomer\*, Gutman, Rom\*, and Gorfine, Malka, "PyDTS: A Python Package for Discrete-Time Survival Analysis with Competing Risks" (2022)
+        [1] Meir, Tomer\*, Gutman, Rom\*, and Gorfine, Malka, "PyDTS: A Python Package for Discrete-Time Survival Analysis with Competing Risks" (2022)
     """
 
     def __init__(self):
