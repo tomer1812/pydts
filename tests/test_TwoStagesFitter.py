@@ -204,3 +204,17 @@ class TestTwoStagesFitter(unittest.TestCase):
                                                      y_t=rel_y_t, beta_j=rel_beta,
                                                      n_jt=n_jt, t=t)
         self.assertEqual(a_jt.item(), a_jt_from_func.item())
+
+    def test_predict_event_jt_case_t1_not_hazard(self):
+        self.fitted_model.predict_prob_event_j_at_t(df=self.df.drop(['C', 'T'], axis=1),
+                                                    event=self.fitted_model.events[0],
+                                                    t=self.fitted_model.times[0])
+
+    def test_predict_event_jt_case_t3_not_hazard(self):
+        temp_df = self.df.drop(['C', 'T'], axis=1)
+        temp_df = self.fitted_model.predict_overall_survival(df=temp_df,
+                                                             t=self.fitted_model.times[3],
+                                                             return_hazards=False)
+        self.fitted_model.predict_prob_event_j_at_t(df=temp_df,
+                                                    event=self.fitted_model.events[0],
+                                                    t=self.fitted_model.times[3])
