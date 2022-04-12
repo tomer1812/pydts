@@ -44,8 +44,8 @@ nav:
       - Usage Example:
         - Introduction: UsageExample-Intro.ipynb
         - Data Preparation: UsageExample-DataPreparation.ipynb
-        - Fitting Two Stages Fitter: UsageExample-FittingTwoStagesFitter.ipynb
-        - Fitting Data Expansion Fitter: UsageExample-FittingDataExpansionFitter.ipynb
+        - Estimation with TwoStagesFitter: UsageExample-FittingTwoStagesFitter.ipynb
+        - Estimation with DataExpansionFitter: UsageExample-FittingDataExpansionFitter.ipynb
       - Data Regrouping Example: UsageExample-RegroupingData.ipynb
       - Fitters Comparison: ModelsComparison.ipynb
       - Hospitalization LOS Simulation: SimulatedDataset.ipynb
