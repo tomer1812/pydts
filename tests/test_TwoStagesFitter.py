@@ -1,7 +1,7 @@
 import unittest
 
 import matplotlib.pyplot as plt
-import pandas as pd
+from unittest.mock import patch
 from src.pydts.examples_utils.generate_simulations_data import generate_quick_start_df
 from src.pydts.fitters import TwoStagesFitter
 from src.pydts.utils import get_real_hazard
@@ -71,7 +71,8 @@ class TestTwoStagesFitter(unittest.TestCase):
         self.fitted_model.plot_event_alpha(event=self.fitted_model.events[0], show=False)
 
     def test_plot_event_alpha_case_correct_event_and_show(self):
-        self.fitted_model.plot_event_alpha(event=self.fitted_model.events[0], show=True)
+        with patch('matplotlib.pyplot.show') as p:
+            self.fitted_model.plot_event_alpha(event=self.fitted_model.events[0], show=True)
 
     def test_plot_event_alpha_case_incorrect_event(self):
         with self.assertRaises(AssertionError):
@@ -81,7 +82,8 @@ class TestTwoStagesFitter(unittest.TestCase):
         self.fitted_model.plot_all_events_alpha(show=False)
 
     def test_plot_all_events_alpha_case_show(self):
-        self.fitted_model.plot_all_events_alpha(show=True)
+        with patch('matplotlib.pyplot.show') as p:
+            self.fitted_model.plot_all_events_alpha(show=True)
 
     def test_plot_all_events_alpha_case_axis_exits(self):
         fig, ax = plt.subplots()
@@ -94,7 +96,8 @@ class TestTwoStagesFitter(unittest.TestCase):
         self.fitted_model.plot_all_events_beta(show=False)
 
     def test_plot_all_events_beta_case_show(self):
-        self.fitted_model.plot_all_events_beta(show=True)
+        with patch('matplotlib.pyplot.show') as p:
+            self.fitted_model.plot_all_events_beta(show=True)
 
     def test_plot_all_events_beta_case_ax_exists(self):
         fig, ax = plt.subplots()
