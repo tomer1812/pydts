@@ -36,3 +36,12 @@ class TestTwoStagesFitter(unittest.TestCase):
             _ = repetitive_fitters(rep=5, n_patients=self.n_patients, n_cov=self.n_cov,
                                    d_times=self.d, j_events=2, pid_col='pid', test_size=0.25, verbose=0,
                                    allow_fails=20, censoring_prob=.8)
+
+    def test_fit_repetitive_function_case_j_event_not_equal_to_real_coef(self):
+        # event where fit are sent with wrong j_events, causing except to print it,
+        # but not deal with value error in the end
+        with self.assertRaises(ValueError):
+            _ = repetitive_fitters(rep=2, n_patients=self.n_patients, n_cov=self.n_cov,
+                                   d_times=self.d, j_events=3, pid_col='pid', test_size=0.25, verbose=0,
+                                   allow_fails=0, real_coef_dict=self.real_coef_dict,
+                                   censoring_prob=.8)

@@ -24,16 +24,16 @@ class BaseFitter:
 
     def fit(self, df: pd.DataFrame, event_type_col: str = 'J', duration_col: str = 'X', pid_col: str = 'pid',
             **kwargs) -> dict:
-        raise NotImplemented
+        raise NotImplementedError
 
     def predict(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
-        raise NotImplemented
+        raise NotImplementedError
 
     def evaluate(self, test_df: pd.DataFrame, oracle_col: str = 'T', **kwargs) -> float:
-        raise NotImplemented
+        raise NotImplementedError
 
     def print_summary(self, **kwargs) -> None:
-        raise NotImplemented
+        raise NotImplementedError
 
     def _validate_t(self, t, return_iter=True):
         _t = np.array([t]) if not isinstance(t, Iterable) else t
@@ -94,7 +94,7 @@ class ExpansionBasedFitter(BaseFitter):
         Returns:
             df (pd.DataFrame): samples with the prediction columns
         """
-        raise NotImplemented
+        raise NotImplementedError
 
     def predict_hazard_t(self, df: pd.DataFrame, t: Union[int, np.array]) -> pd.DataFrame:
         """
