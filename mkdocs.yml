@@ -47,7 +47,7 @@ nav:
         - Estimation with TwoStagesFitter: UsageExample-FittingTwoStagesFitter.ipynb
         - Estimation with DataExpansionFitter: UsageExample-FittingDataExpansionFitter.ipynb
       - Data Regrouping Example: UsageExample-RegroupingData.ipynb
-      - Fitters Comparison: ModelsComparison.ipynb
+      - Comparing the Estimation Methods: ModelsComparison.ipynb
       - Hospitalization LOS Simulation: SimulatedDataset.ipynb
     - API:
       - The Two Stages Procedure of Meir et al. (2022): 'api/two_stages_fitter.md'
