@@ -2,6 +2,8 @@ import unittest
 from src.pydts.examples_utils.generate_simulations_data import generate_quick_start_df
 from src.pydts.fitters import DataExpansionFitter
 import numpy as np
+from src.pydts.utils import get_real_hazard
+
 
 class TestDataExpansionFitter(unittest.TestCase):
     def setUp(self):
@@ -109,3 +111,13 @@ class TestDataExpansionFitter(unittest.TestCase):
     def test_predict_cumulative_incident_function_case_successful_predict(self):
         self.fitted_model.predict_cumulative_incident_function(df=self.df.drop(['C', 'T'], axis=1))
 
+    def test_predict_hazard_jt_case_hazard_already_on_df(self):
+        df_temp = get_real_hazard(self.df.drop(['C', 'T', 'X', 'J'], axis=1).set_index('pid').copy(),
+                                  real_coef_dict=self.real_coef_dict,
+                                  times=self.fitted_model.times,
+                                  events=self.fitted_model.events)
+        assert (df_temp == self.fitted_model.predict_hazard_jt(df=df_temp,
+                                                               event=self.fitted_model.events[0],
+                                                               t=self.fitted_model.times
+                                                               )
+                ).all().all()

@@ -68,6 +68,9 @@ class TestTwoStagesFitter(unittest.TestCase):
     def test_plot_event_alpha_case_correct_event(self):
         self.fitted_model.plot_event_alpha(event=self.fitted_model.events[0], show=False)
 
+    def test_plot_event_alpha_case_correct_event_and_show(self):
+        self.fitted_model.plot_event_alpha(event=self.fitted_model.events[0], show=True)
+
     def test_plot_event_alpha_case_incorrect_event(self):
         with self.assertRaises(AssertionError):
             self.fitted_model.plot_event_alpha(event=100, show=False)
@@ -95,7 +98,6 @@ class TestTwoStagesFitter(unittest.TestCase):
                                   real_coef_dict=self.real_coef_dict,
                                   times=self.fitted_model.times,
                                   events=self.fitted_model.events)
-        print(df_temp.shape)
         assert (df_temp == self.fitted_model.predict_hazard_jt(df=df_temp,
                                                                event=self.fitted_model.events[0],
                                                                t=self.fitted_model.times

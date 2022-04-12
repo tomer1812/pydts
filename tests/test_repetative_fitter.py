@@ -22,13 +22,11 @@ class TestTwoStagesFitter(unittest.TestCase):
         self.n_cov = 5
         self.d = 15
 
-    def test_fit(self):
-        rep_dict, times_dict, counts_df = repetitive_fitters(rep=5,
-                                                             n_patients=self.n_patients, n_cov=self.n_cov,
-                                                             d_times=self.d,
-                                                             j_events=2, pid_col='pid', test_size=0.25, verbose=0,
-                                                             allow_fails=20, real_coef_dict=self.real_coef_dict,
-                                                             censoring_prob=.8)
+    def test_fit_function_case_successful(self):
+        _ = repetitive_fitters(rep=5, n_patients=self.n_patients, n_cov=self.n_cov,
+                               d_times=self.d, j_events=2, pid_col='pid', test_size=0.25, verbose=0,
+                               allow_fails=20, real_coef_dict=self.real_coef_dict,
+                               censoring_prob=.8)
 
     def test_fit_not_sending_coef(self):
         # event where fit are sent without real coefficient dict
@@ -45,3 +43,11 @@ class TestTwoStagesFitter(unittest.TestCase):
                                    d_times=self.d, j_events=3, pid_col='pid', test_size=0.25, verbose=0,
                                    allow_fails=0, real_coef_dict=self.real_coef_dict,
                                    censoring_prob=.8)
+
+    def test_fit_function_case_second_model_is_not_twoStages(self):
+        from src.pydts.fitters import DataExpansionFitter
+        _ = repetitive_fitters(rep=2, n_patients=self.n_patients, n_cov=self.n_cov,
+                               d_times=self.d, j_events=2, pid_col='pid', test_size=0.25,
+                               model2=DataExpansionFitter, verbose=0,
+                               allow_fails=20, real_coef_dict=self.real_coef_dict,
+                               censoring_prob=.8)
