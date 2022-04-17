@@ -2,6 +2,8 @@
 [![Tests](https://github.com/tomer1812/pydts/workflows/Tests/badge.svg)](https://github.com/tomer1812/pydts/actions?workflow=Tests)
 [![documentation](https://img.shields.io/badge/docs-mkdocs%20material-blue.svg?style=flat)](https://tomer1812.github.io/pydts)
 [![codecov](https://codecov.io/gh/tomer1812/pydts/branch/main/graph/badge.svg)](https://codecov.io/gh/tomer1812/pydts)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6466158.svg)](https://doi.org/10.5281/zenodo.6466158)
+
 # Discrete Time Survival Analysis  
 A Python package for discrete-time survival data analysis with competing risks.
 
@@ -45,3 +47,10 @@ If you found PyDTS useful, please cite:
 ```
 
 and please consider starring the project [on GitHub](https://github.com/tomer1812/pydts)
+
+## How to Contribute
+1. Open Github issues to suggest new features or to report bugs\errors
+2. Contact Tomer or Rom if you want to add a usage example to the documentation 
+3. If you want to become a developer (thank you, we appreciate it!) - please contact Tomer or Rom for developers' on-boarding 
+
+Tomer Meir: tomer1812@gmail.com, Rom Gutman: rom.gutman1@gmail.com
