@@ -164,18 +164,6 @@ def default_sampling_logic(Z, d_times):
 
 
 def calculate_jt(sums, probs_jt, d_times, j_events):
-    """
-
-
-    Args:
-        sums:
-        probs_jt:
-        d_times:
-        j_events:
-
-    Returns:
-
-    """
     events = range(1, j_events + 1)
     temp_sums = pd.concat([1 - sum(sums), *sums], axis=1, keys=[0, *events])
 
@@ -197,18 +185,8 @@ def calculate_jt(sums, probs_jt, d_times, j_events):
 def new_sample_logic(patients_df: pd.DataFrame, j_events: int, d_times: int, real_coef_dict: dict) -> pd.DataFrame:
     """
     A quicker sample logic, that uses coefficients supplied by the user
-
-    Args:
-        patients_df:
-        j_events:
-        d_times:
-        real_coef_dict:
-
-    Returns:
-
     """
     events = range(1, j_events + 1)
-    # todo: Add tests
     a_t = {event: {t: real_coef_dict['alpha'][event](t) for t in range(1, d_times+1)} for event in events}
     b = pd.concat([patients_df.dot(real_coef_dict['beta'][j]) for j in events], axis=1, keys=events)
 

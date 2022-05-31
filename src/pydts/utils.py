@@ -18,7 +18,6 @@ def get_expanded_df(df, event_type_col='J', duration_col='X', pid_col='pid'):
 
     :return: result_df: expanded dataframe
     """
-    # todo: consider dealing with highly not continues cases
     unique_times = df[duration_col].sort_values().unique()
     result_df = df.reindex(df.index.repeat(df[duration_col]))
     result_df[duration_col] = result_df.groupby(pid_col).cumcount() + 1
@@ -41,19 +40,6 @@ def compare_models_coef_per_event(first_model: pd.Series,
                                   first_model_label:str = "first",
                                   second_model_label:str = "second"
                                   ) -> pd.DataFrame:
-    """
-
-    Args:
-        first_model:
-        second_model:
-        real_values:
-        event:
-        first_model_label:
-        second_model_label:
-
-    Returns:
-
-    """
     event_suffix = f"_{event}"
     assert (first_model.index == second_model.index).all(), "All index should be the same"
     models = pd.concat([first_model.to_frame(first_model_label),
@@ -64,7 +50,6 @@ def compare_models_coef_per_event(first_model: pd.Series,
     return pd.concat([models, real_values_s.to_frame("real")], axis=1)
 
 
-#todo: move from here
 def present_coefs(res_dict):
     from IPython.display import display
     for coef_type, events_dict in res_dict.items():
@@ -74,21 +59,6 @@ def present_coefs(res_dict):
 
 
 def get_real_hazard(df, real_coef_dict, times, events):
-    """
-
-    Args:
-        df:
-        real_coef_dict:
-        times:
-        events:
-
-    Returns:
-
-    """
-    # todo docstrings
-    # todo assertions
-    # todo move to utils?
-
     a_t = {event: {t: real_coef_dict['alpha'][event](t) for t in times} for event in events}
     b = pd.concat([df.dot(real_coef_dict['beta'][j]) for j in events], axis=1, keys=events)
 
@@ -99,7 +69,6 @@ def get_real_hazard(df, real_coef_dict, times, events):
 
 
 def assert_fit(event_df, times, event_type_col='J', duration_col='X'):
-    # todo: split to 2: one generic, one for new model
     if not event_df['success'].all():
         problematic_times = event_df.loc[~event_df['success'], duration_col].tolist()
         event = event_df[event_type_col].max()  # all the events in the dataframe are the same
@@ -136,9 +105,8 @@ def create_df_for_cif_plots(df: pd.DataFrame, field: str,
     cov_not_fitted = [cov for cov in covariates if cov not in df.columns]
     assert len(cov_not_fitted) == 0, \
         f"Required covariates are missing from df: {cov_not_fitted}"
-    # todo add assertions
 
-    df_for_ploting = df.copy()  # todo make sure .copy() is required
+    df_for_ploting = df.copy()
     if vals is not None:
         pass
     elif quantiles is not None:

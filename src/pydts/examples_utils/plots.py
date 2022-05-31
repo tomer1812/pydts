@@ -363,20 +363,9 @@ def plot_LOS_simulation_figure3(data_df):
     fig.tight_layout()
 
 
-# todo: move from here
 def compare_beta_models_for_example(first_models: dict, second_models: dict,
                                     n_cov: int = 5, real_coef_dict: dict = None) -> dict:
-    """
 
-    Args:
-        first_models:
-        second_models:
-        n_cov:
-        real_coef_dict (dict):
-
-    Returns:
-
-    """
     from pydts.utils import compare_models_coef_per_event
     models_dict = {
         "alpha": {},
@@ -408,18 +397,7 @@ def compare_beta_models_for_example(first_models: dict, second_models: dict,
     return models_dict
 
 
-def plot_reps_coef_std(rep_dict: dict, return_summary: bool = True, filename: str = None):
-    """
-
-    Args:
-        rep_dict:
-        return_summary:
-        filename:
-    Returns:
-
-    """
-    # todo: use mean as well
-    # todo: split to different functions
+def plot_reps_coef_std(rep_dict: dict, return_summary: bool = True, filename: str = None, paper_plots: bool = False):
     alphabet_list = list(string.ascii_lowercase)
     first_key = next(iter(rep_dict))    # deal with cases where there isn't 0 in samples
     coef_types = list(rep_dict[first_key].keys())  # alpha, beta
@@ -444,16 +422,16 @@ def plot_reps_coef_std(rep_dict: dict, return_summary: bool = True, filename: st
             ax.set_ylabel("Ours std", fontsize=18)
             ax.plot([0, 1], [0, 1], "--", transform=ax.transAxes, alpha=0.3, color="tab:green");
             ax.grid()
-            # todo remove paper limits
-            if idct == 0:
-                ax.set_xlim([0, 0.6])
-                ax.set_ylim([0, 0.6])
-            elif ((idct == 1) and (idet == 0)):
-                ax.set_xlim([0.02, 0.04])
-                ax.set_ylim([0.02, 0.04])
-            elif ((idct == 1) and (idet == 1)):
-                ax.set_xlim([0.04, 0.06])
-                ax.set_ylim([0.04, 0.06])
+            if paper_plots:
+                if idct == 0:
+                    ax.set_xlim([0, 0.6])
+                    ax.set_ylim([0, 0.6])
+                elif ((idct == 1) and (idet == 0)):
+                    ax.set_xlim([0.02, 0.04])
+                    ax.set_ylim([0.02, 0.04])
+                elif ((idct == 1) and (idet == 1)):
+                    ax.set_xlim([0.04, 0.06])
+                    ax.set_ylim([0.04, 0.06])
             latter = "\\alpha" if coef_type == "alpha" else "\\beta"
             ax.set_title(f"${latter}{event_type}$", fontsize=18)
     fig.tight_layout()
@@ -468,15 +446,6 @@ def plot_reps_coef_std(rep_dict: dict, return_summary: bool = True, filename: st
 def plot_times(times_dict: dict,
                filename: str = None,
                ax = None, color='tab:blue') -> None:
-    """
-
-    Args:
-        times_dict:
-        filename:
-    Returns:
-
-    """
-
     if ax is None:
 
         ax = pd.DataFrame.from_dict(times_dict).boxplot(figsize=(8, 6), boxprops={"lw": 1.5, "color": "tab:blue"},
@@ -505,17 +474,6 @@ def plot_cif_plots(pred_df: pd.DataFrame, event: str, return_ax: bool = False, a
                    pad: float = 0.15, scale: int = 5) -> None:
     """
     this method plot cif given pred df with cif and event
-
-    Args:
-        pred_df:
-        event:
-        return_ax (bool): Whether to return the ax object
-        ax (plt.Axes): Axes
-        pad (float): the pad to the y-axis
-        scale (int): the scaling of the y-axis pad
-
-    Returns:
-
     """
     cif_cols = pred_df.columns[pred_df.columns.str.startswith("cif")]
 
@@ -543,32 +501,11 @@ def plot_cif_plots(pred_df: pd.DataFrame, event: str, return_ax: bool = False, a
 
 
 def scale_perc_limits(num: float, scale: int, up: bool = False):
-    """
-
-    Args:
-        num:
-        scale:
-        up:
-
-    Returns:
-
-    """
     func = np.ceil if up else np.floor
     return (func((num * 100) / scale) * scale) / 100
 
 
 def get_y_perc_limits(df: pd.DataFrame, cols: Iterable, pad: float = 0.15, scale: int = 5) -> Tuple[float, float]:
-    """
-
-    Args:
-        df (pd.DataFrame):
-        cols (Iterable):
-        pad (float):
-        scale (int):
-
-    Returns:
-
-    """
     y_min = max(df[cols].min().min() - pad, 0)
     y_min = scale_perc_limits(y_min, scale=scale, up=False)
 

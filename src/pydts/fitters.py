@@ -145,7 +145,6 @@ class DataExpansionFitter(ExpansionBasedFitter):
         Returns:
             df (pd.DataFrame): samples with the prediction columns
         """
-        # todo : make it more general for both classes
         t = self._validate_t(t, return_iter=True)
         assert event in self.events, \
             f"Cannot predict for event {event} - it was not included during .fit()"
@@ -155,7 +154,7 @@ class DataExpansionFitter(ExpansionBasedFitter):
         if len(_t) == 0:
             return df
 
-        temp_df = df.copy()  # todo make sure .copy() is required
+        temp_df = df.copy()
         model = self.event_models[event]
         res = Parallel(n_jobs=n_jobs)(delayed(model.predict)(df[self.covariates].assign(X=c)) for c in t)
         temp_hazard_df = pd.concat(res, axis=1)
@@ -407,7 +406,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
         _t = np.array([t_i for t_i in t if (f'hazard_j{event}_t{t_i}' not in df.columns)])
         if len(_t) == 0:
             return df
-        temp_df = df.copy()  # todo make sure .copy() is required
+        temp_df = df.copy()
         beta_j_x = temp_df[self.covariates].dot(model[0].params_)
         temp_df[[f'hazard_j{event}_t{c}' for c in _t]] = pd.concat(
             [self._hazard_inverse_transformation(alpha_df[c] + beta_j_x) for c in _t], axis=1).values
@@ -551,7 +550,6 @@ def repetitive_fitters(rep: int, n_patients: int, n_cov: int, d_times: int, j_ev
         ret_df (pd.DataFrame): Dataframe which contains for each time in d times, the average amount of events for it.
 
     """
-    # todo assertions
 
     from .examples_utils.plots import compare_beta_models_for_example
     from sklearn.model_selection import train_test_split
