@@ -512,3 +512,20 @@ def get_y_perc_limits(df: pd.DataFrame, cols: Iterable, pad: float = 0.15, scale
     y_max = min(df[cols].max().max() + pad, 1)
     y_max = scale_perc_limits(y_max, scale=scale, up=True)
     return y_min, y_max
+
+
+def plot_events_occurrence_fig(patients_df: pd.DataFrame, ax: plt.Axes = None, event_type_col: str = 'J',
+                               pid_col: str = 'pid', event_time_col: str = 'X', fname: str = None):
+    if ax is None:
+        fig, ax = plt.subplots(1, 1, figsize=(10, 4))
+    patients_df.groupby([event_type_col, event_time_col])[pid_col].count().unstack('J').fillna(0).plot(ax=ax,
+                                                                                                       kind='bar',
+                                                                                                       width=0.8)
+    ax.tick_params(axis='both', which='major', labelsize=15)
+    ax.tick_params(axis='both', which='minor', labelsize=15)
+    ax.set_xlabel(f"Time of Occurrence ({event_time_col})", fontdict={'size': 18})
+    ax.set_ylabel(f"Number of Events", fontdict={'size': 18})
+    fig.tight_layout()
+    if fname is not None:
+        fig.savefig(fname, dpi=300)
+    return ax
