@@ -514,8 +514,8 @@ def get_y_perc_limits(df: pd.DataFrame, cols: Iterable, pad: float = 0.15, scale
     return y_min, y_max
 
 
-def plot_events_occurrence_fig(patients_df: pd.DataFrame, ax: plt.Axes = None, event_type_col: str = 'J',
-                               pid_col: str = 'pid', event_time_col: str = 'X', fname: str = None):
+def plot_events_occurrence(patients_df: pd.DataFrame, ax: plt.Axes = None, event_type_col: str = 'J',
+                           pid_col: str = 'pid', event_time_col: str = 'X', fname: str = None):
     if ax is None:
         fig, ax = plt.subplots(1, 1, figsize=(10, 4))
     patients_df.groupby([event_type_col, event_time_col])[pid_col].count().unstack('J').fillna(0).plot(ax=ax,
