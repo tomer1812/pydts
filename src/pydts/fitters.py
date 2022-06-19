@@ -313,7 +313,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
 
     def plot_event_alpha(self, event: Union[str, int], ax: plt.Axes = None, scatter_kwargs: dict = {},
                          show=True, title=None, xlabel='t', ylabel=r'$\alpha_{jt}$', fontsize=18,
-                         color: str = None, label: str = None) -> plt.Axes:
+                         color: str = None, label: str = None, ticklabelsize: int = 15) -> plt.Axes:
         """
         This function plots a scatter plot of the $ alpha_{jt} $ coefficients of a specific event.
         Args:
@@ -335,6 +335,8 @@ class TwoStagesFitter(ExpansionBasedFitter):
 
         if ax is None:
             fig, ax = plt.subplots(1, 1)
+        ax.tick_params(axis='both', which='major', labelsize=ticklabelsize)
+        ax.tick_params(axis='both', which='minor', labelsize=ticklabelsize)
         title = r'$\alpha_{jt}$' + f' for event {event}' if title is None else title
         label = f'{event}' if label is None else label
         color = 'tab:blue' if color is None else color
@@ -350,7 +352,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
 
     def plot_all_events_alpha(self, ax: plt.Axes = None, scatter_kwargs: dict = {}, colors: list = COLORS,
                               show: bool = True, title: Union[str, None] = None, xlabel: str = 't',
-                              ylabel: str = r'$\alpha_{jt}$', fontsize: int = 18) -> plt.Axes:
+                              ylabel: str = r'$\alpha_{jt}$', fontsize: int = 18, ticklabelsize: int = 15) -> plt.Axes:
         """
         This function plots a scatter plot of the $ alpha_{jt} $ coefficients of all the events.
         Args:
@@ -368,12 +370,15 @@ class TwoStagesFitter(ExpansionBasedFitter):
         """
         if ax is None:
             fig, ax = plt.subplots(1, 1)
+        ax.tick_params(axis='both', which='major', labelsize=ticklabelsize)
+        ax.tick_params(axis='both', which='minor', labelsize=ticklabelsize)
         title = r'$\alpha_{jt}$' + f' for all events' if title is None else title
         for idx, (event, model) in enumerate(self.event_models.items()):
             label = f'{event}'
             color = colors[idx % len(colors)]
             self.plot_event_alpha(event=event, ax=ax, scatter_kwargs=scatter_kwargs, show=False, title=title,
-                                  ylabel=ylabel, xlabel=xlabel, fontsize=fontsize, label=label, color=color)
+                                  ylabel=ylabel, xlabel=xlabel, fontsize=fontsize, label=label, color=color,
+                                  ticklabelsize=ticklabelsize)
         ax.legend()
         if show:
             plt.show()
@@ -459,7 +464,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
         return se_df
 
     def plot_all_events_beta(self, ax: plt.Axes = None, colors: list = COLORS, show: bool = True,
-                             title: Union[str, None] = None, xlabel: str = 't',  ylabel: str = r'$\beta_{j}$',
+                             title: Union[str, None] = None, xlabel: str = 'Value',  ylabel: str = r'$\beta_{j}$',
                              fontsize: int = 18, ticklabelsize: int = 15) -> plt.Axes:
         """
         This function plots the $ beta_{j} $ coefficients and standard errors of all the events.
@@ -490,7 +495,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
                        color=colors[idx % len(colors)], xerr=se_df.iloc[:, idx+1].values, label=f'{col}',
                        markersize=6, ls='', marker='o')
 
-        yt = list(se_df.index) * (len(se_df) // 2)
+        yt = list(se_df.index) * (len(se_df.columns) // 2)
         ax.set_yticks(np.arange(0, len(yt)))
         ax.set_yticklabels(yt)
         ax.set_title(title, fontsize=fontsize)
