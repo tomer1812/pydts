@@ -3,6 +3,7 @@ from typing import Iterable, Tuple
 import numpy as np
 from .simulations_data_config import *
 from matplotlib import pyplot as plt
+import matplotlib.gridspec as gridspec
 import seaborn as sns
 from lifelines import KaplanMeierFitter
 from ..config import *
@@ -10,7 +11,6 @@ import os
 import string
 import warnings
 warnings.filterwarnings('ignore')
-
 
 
 def add_panel_text(ax, text, xplace=-0.15, fsz=17):
@@ -533,3 +533,68 @@ def plot_events_occurrence(patients_df: pd.DataFrame, ax: plt.Axes = None, event
     if fname is not None:
         fig.savefig(fname, dpi=300)
     return ax
+
+
+def plot_example_pred_output(pred_df, fname: str = None):
+    gs = gridspec.GridSpec(4, 4)
+    ax1 = plt.subplot(gs[0, 0:2])
+    ax2 = plt.subplot(gs[0,2:])
+    ax3 = plt.subplot(gs[1,0:2])
+    ax4 = plt.subplot(gs[1,2:])
+    ax5 = plt.subplot(gs[2,0:2])
+    ax6 = plt.subplot(gs[2,2:])
+    ax7 = plt.subplot(gs[3,1:3])
+    fig = plt.gcf()
+    fig.set_size_inches(14, 14)
+    ax_lst = [ax1,ax2,ax3,ax4,ax5,ax6,ax7]
+
+    titles = ['Hazard', 'Probability', 'CIF', 'Overall Survival']
+    letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g']
+
+    for idp, pref in enumerate(['hazard', 'prob', 'cif', 'overall_survival']):
+        for ide, event in enumerate(['j1', 'j2']):
+            if idp*2+ide > 6:
+                break
+            ax = ax_lst[idp*2+ide]
+            add_panel_text(ax, letters[idp*2+ide])
+            for patient in pred_df.columns:
+                times = [m for m in range(1, 31)]
+                if pref == 'overall_survival':
+                    index_val = [f'{pref}_t{m}' for m in times]
+                elif pref == 'hazard':
+                    index_val = [f'{pref}_{event}_t{m}' for m in times]
+                else:
+                    index_val = [f'{pref}_{event}_at_t{m}' for m in times]
+                tmp = pred_df.loc[index_val, patient]
+                ax.plot(tmp.index, tmp.values, label=patient)
+            ax.set_xticks(range(len(times)))
+            ax.set_xticklabels(times, rotation=90)
+            ax.set_xlabel('Time', fontsize=15)
+            if idp*2+ide < 6:
+                ax.set_ylabel(f'{titles[idp]}   {event}', fontsize=15)
+            else:
+                ax.set_ylabel(f'{titles[idp]}', fontsize=15)
+                
+            ax.tick_params(axis='both', which='major', labelsize=14)
+            ax.tick_params(axis='both', which='minor', labelsize=14)
+            ax.legend()
+        
+    fig.tight_layout()
+    if fname is not None:
+        fig.savefig(fname, dpi=300)
+
+
+def plot_example_estimated_params(fitter, fname: str = None):
+    fig, axes = plt.subplots(1,2, figsize=(14,7))
+    ax = axes[0]
+    fitter.plot_all_events_alpha(ax=ax, show=False)
+    ax.grid()
+    ax.legend(fontsize=16, loc='center right')
+    add_panel_text(ax, 'a')
+    ax = axes[1]
+    fitter.plot_all_events_beta(ax=ax, show=False, xlabel='Value')
+    ax.legend(fontsize=16, loc='center right')
+    add_panel_text(ax, 'b')
+    fig.tight_layout()
+    if fname is not None:
+        fig.savefig(fname, dpi=300)
