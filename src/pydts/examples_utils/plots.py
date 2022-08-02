@@ -31,12 +31,16 @@ def plot_first_model_coefs(models, times, train_df, n_cov=5, filename=None):
     ax.plot(times, -1.75 -0.15*np.log(times), label='J=2 (True)', ls='--', color='tab:green')
     ax.set_xlabel(r'Time', fontsize=18)
     ax.set_ylabel(r'$\alpha_{t}$', fontsize=18)
-    ax.legend(loc='upper center', fontsize=14)
     ax.set_ylim([-3, 0.5])
+    ax.legend(loc='upper center', fontsize=12)
     ax2 = ax.twinx()
-    ax2.hist(train_df[train_df['J'] != 0]['X'], color='r', alpha=0.3, bins=times)
-    ax2.set_ylabel('N events', fontsize=16, color='red')
+    tmp_ajt = train_df[train_df['J'] == 1].groupby('X')['pid'].count()
+    ax2.bar(tmp_ajt.index, tmp_ajt.values, label='J=1', color='tab:red', alpha=0.4, width=0.5)
+    tmp_ajt = train_df[train_df['J'] == 2].groupby('X')['pid'].count()
+    ax2.bar(tmp_ajt.index, tmp_ajt.values, label='J=2', color='tab:brown', alpha=0.6, align='edge', width=0.5)
+    ax2.set_ylabel('Number of observed events', fontsize=16, color='red')
     ax2.tick_params(axis='y', colors='red')
+    ax2.legend(loc='upper right', fontsize=12)
 
     ax = axes[1]
     ax.tick_params(axis='both', which='major', labelsize=15)
@@ -52,7 +56,7 @@ def plot_first_model_coefs(models, times, train_df, n_cov=5, filename=None):
            width=0.3, alpha=0.4)
     ax.scatter(0.35+np.arange(1, n_cov+1), -np.log([1, 3, 4, 3, 2]), color='tab:green', label='J=2 (True)', marker="3",
                s=130)
-    ax.legend(loc='upper center', fontsize=14)
+    ax.legend(loc='upper center', fontsize=12)
     ax.set_ylim([-1.5, 1])
     fig.tight_layout()
     if filename is not None:
@@ -67,18 +71,22 @@ def plot_second_model_coefs(alpha_df, beta_models, times, n_cov=5, filename=None
     add_panel_text(ax=ax, text='a')
     ax.set_title(r'$\alpha_{jt}$', fontsize=26)
     tmp_ajt = alpha_df[alpha_df['J'] == 1]
-    ax.scatter(tmp_ajt['X'].values, tmp_ajt['alpha_jt'].values, label='J=1 (Pred)', color='tab:blue')
+    ax.scatter(tmp_ajt['X'].values, tmp_ajt['alpha_jt'].values, label='J=1 (two-step)', color='tab:blue')
     ax.plot(times, -1 -0.3*np.log(times), label='J=1 (True)', ls='--', color='tab:blue' )
     tmp_ajt = alpha_df[alpha_df['J'] == 2]
-    ax.scatter(tmp_ajt['X'].values, tmp_ajt['alpha_jt'].values, label='J=2 (Pred)', color='tab:green')
+    ax.scatter(tmp_ajt['X'].values, tmp_ajt['alpha_jt'].values, label='J=2 (two-step)', color='tab:green')
     ax.plot(times, -1.75 -0.15*np.log(times), label='J=2 (True)', ls='--', color='tab:green')
     ax.set_xlabel(r'Time', fontsize=18)
     ax.set_ylabel(r'$\alpha_{t}$', fontsize=18)
-    ax.legend(loc='upper center', fontsize=14)
+    ax.legend(loc='upper center', fontsize=12)
     ax.set_ylim([-3, 0.5])
     ax2 = ax.twinx()
-    ax2.bar(alpha_df.groupby('X')['n_jt'].sum().index, alpha_df.groupby('X')['n_jt'].sum().values, color='r', alpha=0.3)
-    ax2.set_ylabel('N events', fontsize=16, color='red')
+    tmp_ajt = alpha_df[alpha_df['J'] == 1].groupby('X')['n_jt'].sum()
+    ax2.bar(tmp_ajt.index, tmp_ajt.values, label='J=1', color='tab:red', alpha=0.4, width=0.5)
+    tmp_ajt = alpha_df[alpha_df['J'] == 2].groupby('X')['n_jt'].sum()
+    ax2.bar(tmp_ajt.index, tmp_ajt.values, label='J=2', color='tab:brown', alpha=0.6, align='edge', width=0.5)
+    ax2.legend(loc='upper right', fontsize=12)
+    ax2.set_ylabel('Number of observed events', fontsize=16, color='red')
     ax2.tick_params(axis='y', colors='red')
 
     ax = axes[1]
@@ -86,15 +94,15 @@ def plot_second_model_coefs(alpha_df, beta_models, times, n_cov=5, filename=None
     ax.tick_params(axis='both', which='minor', labelsize=15)
     add_panel_text(ax=ax, text='b')
     ax.set_title(r'$\beta_{j}$', fontsize=26)
-    ax.bar(np.arange(1, n_cov+1), beta_models[1].params_.values, label='J=1 (Pred)', width=0.3, alpha=0.4,
+    ax.bar(np.arange(1, n_cov+1), beta_models[1].params_.values, label='J=1 (two-step)', width=0.3, alpha=0.4,
            color='tab:blue')
     ax.scatter(-0.2+np.arange(1, n_cov+1), -np.log([0.8, 3, 3, 2.5, 2]), color='tab:blue', label='J=1 (True)',
                marker="4", s=130)
-    ax.bar(np.arange(1, n_cov+1), beta_models[2].params_.values, color='tab:green', label='J=2 (Pred)', align='edge',
+    ax.bar(np.arange(1, n_cov+1), beta_models[2].params_.values, color='tab:green', label='J=2 (two-step)', align='edge',
            width=0.3, alpha=0.4)
     ax.scatter(0.35+np.arange(1, n_cov+1), -np.log([1, 3, 4, 3, 2]), color='tab:green', label='J=2 (True)', marker="3",
                s=130)
-    ax.legend(loc='upper center', fontsize=14)
+    ax.legend(loc='upper center', fontsize=12)
     ax.set_xlabel('Covariate', fontsize=18)
     ax.set_ylabel(r'$\beta}$', fontsize=18)
     ax.set_ylim([-1.5, 1])
@@ -106,10 +114,10 @@ def plot_second_model_coefs(alpha_df, beta_models, times, n_cov=5, filename=None
 
 
 def plot_models_coefficients(alpha_dict: dict, beta_dict: dict, times: Iterable,
-                             njt_counts: Iterable,
+                             counts_df: pd.DataFrame,
                              n_cov: int = 5,
-                             first_model_name: str = 'Lee',
-                             second_model_name: str = 'Ours',
+                             first_model_name: str = 'Lee et al.',
+                             second_model_name: str = 'two-step',
                              filename: str = None) -> None:
     """
     This method takes the repetitive runs results and plotting the comparison between the methods coefs
@@ -118,7 +126,7 @@ def plot_models_coefficients(alpha_dict: dict, beta_dict: dict, times: Iterable,
         alpha_dict (dict): a dict that contains for each event type (key) a dataframe of all the $\alpha_t$ (value)
         beta_dict (dict): a dict that contains for each event type(key) a dataframe of all the $\beta_t$ (value)
         times (Iterable): array like that contains all the unique times that were used
-        njt_counts (Iterable): an array-like which contains how many events per each time t (not including censorship)
+        counts_df (pandas.DataFrame): pandas dataframe which contains how many events per each time t
         n_cov (int): number of covariates (used to plot beta plot)
         first_model_name (Optional[str]): the name of the first model
         second_model_name (Optional[str]): the name of the second model
@@ -133,24 +141,27 @@ def plot_models_coefficients(alpha_dict: dict, beta_dict: dict, times: Iterable,
     add_panel_text(ax=ax, text='a')
     ax.set_title(r'$\alpha_{jt}$', fontsize=26)
     tmp_ajt = alpha_dict[1]
-    ax.scatter(times, tmp_ajt[f'{first_model_name}_mean'].values,
-               label=f'J=1 ({first_model_name} Pred)', color='tab:blue', marker='o', alpha=0.4, s=40)
-    ax.scatter(times, tmp_ajt[f'{second_model_name}_mean'].values,
-               label=f'J=1 ({second_model_name} Pred)', color='navy', marker='*', alpha=0.7, s=40)
+    ax.scatter(times, tmp_ajt[f'Lee_mean'].values,
+               label=f'J=1 ({first_model_name})', color='tab:blue', marker='o', alpha=0.4, s=40)
+    ax.scatter(times, tmp_ajt[f'Ours_mean'].values,
+               label=f'J=1 ({second_model_name})', color='navy', marker='*', alpha=0.7, s=40)
     ax.plot(times, tmp_ajt['real_mean'].values, label='J=1 (True)', ls='--', color='tab:blue')
     tmp_ajt = alpha_dict[2]
-    ax.scatter(times, tmp_ajt[f'{first_model_name}_mean'].values,
-               label=f'J=2 ({first_model_name} Pred)', color='tab:green', alpha=0.4, s=30)
-    ax.scatter(times, tmp_ajt[f'{second_model_name}_mean'].values,
-               label=f'J=2 ({second_model_name} Pred)', color='darkgreen', marker='*', alpha=0.7, s=30)
+    ax.scatter(times, tmp_ajt[f'Lee_mean'].values,
+               label=f'J=2 ({first_model_name})', color='tab:green', alpha=0.4, s=30)
+    ax.scatter(times, tmp_ajt[f'Ours_mean'].values,
+               label=f'J=2 ({second_model_name})', color='darkgreen', marker='*', alpha=0.7, s=30)
     ax.plot(times, tmp_ajt['real_mean'].values, label='J=2 (True)', ls='--', color='tab:green')
     ax.set_xlabel(r'Time', fontsize=18)
     ax.set_ylabel(r'$\alpha_{t}$', fontsize=18)
-    ax.legend(loc='upper center', fontsize=14)
+    ax.legend(loc='upper center', fontsize=12)
     ax.set_ylim([-3, 0.5])
     ax2 = ax.twinx()
-    ax2.bar(times, njt_counts, color='r', alpha=0.3)
-    ax2.set_ylabel('N events', fontsize=16, color='red')
+    ax2.bar(times, counts_df.loc[1].values.squeeze(), label='J=1', color='tab:red', alpha=0.4, width=0.5)
+    ax2.bar(times, counts_df.loc[2].values.squeeze(), label='J=2', color='tab:brown', alpha=0.6, align='edge',
+            width=0.5)
+    ax2.legend(loc='upper right', fontsize=12)
+    ax2.set_ylabel('Number of observed events', fontsize=16, color='red')
     ax2.tick_params(axis='y', colors='red')
 
     ax = axes[1]
@@ -161,23 +172,23 @@ def plot_models_coefficients(alpha_dict: dict, beta_dict: dict, times: Iterable,
     beta_j = beta_dict[1]
     ax.bar(np.arange(1, n_cov + 1), beta_j['real_mean'].values, label='J=1 (True)', width=0.3, alpha=0.4,
            color='tab:blue')
-    ax.scatter(-0.2 + np.arange(1, n_cov + 1), beta_j[f'{first_model_name}_mean'].values,
-               color='tab:blue', label=f'J=1 ({first_model_name} Pred)', marker="4", s=130)
-    ax.scatter(-0.2 + np.arange(1, n_cov + 1), beta_j[f'{second_model_name}_mean'].values,
-               color='navy', label=f'J=1 ({second_model_name} Pred)', marker=">", s=130, alpha=0.4)
+    ax.scatter(-0.2 + np.arange(1, n_cov + 1), beta_j[f'Lee_mean'].values,
+               color='tab:blue', label=f'J=1 ({first_model_name})', marker="4", s=130)
+    ax.scatter(-0.2 + np.arange(1, n_cov + 1), beta_j[f'Ours_mean'].values,
+               color='navy', label=f'J=1 ({second_model_name})', marker=">", s=130, alpha=0.4)
 
     beta_j = beta_dict[2]
     ax.bar(np.arange(1, n_cov + 1), beta_j['real_mean'].values, color='tab:green', label='J=2 (True)', align='edge',
            width=0.3, alpha=0.4)
-    ax.scatter(0.35 + np.arange(1, n_cov + 1), beta_j[f'{first_model_name}_mean'].values,
-               color='tab:green', label=f'J=2 ({first_model_name} Pred)', marker="3",
+    ax.scatter(0.35 + np.arange(1, n_cov + 1), beta_j[f'Lee_mean'].values,
+               color='tab:green', label=f'J=2 ({first_model_name})', marker="3",
                s=130)
-    ax.scatter(0.35 + np.arange(1, n_cov + 1), beta_j[f'{second_model_name}_mean'].values,
-               color='darkgreen', label=f'J=2 ({second_model_name} Pred)', marker="<",
+    ax.scatter(0.35 + np.arange(1, n_cov + 1), beta_j[f'Ours_mean'].values,
+               color='darkgreen', label=f'J=2 ({second_model_name})', marker="<",
                s=130, alpha=0.4)
     ax.set_xlabel('Covariate', fontsize=18)
     ax.set_ylabel(r'$\beta}$', fontsize=18)
-    ax.legend(loc='upper center', fontsize=14)
+    ax.legend(loc='upper center', fontsize=12)
     ax.set_ylim([-1.5, 1])
     fig.tight_layout()
     if filename is not None:
@@ -204,6 +215,7 @@ def plot_LOS_simulation_figure1(data_df):
     tmp.groupby([AGE_COL, GENDER_COL]).size().unstack().plot(kind='bar', ax=ax)
     ax.set_xlabel('Age [years]', fontsize=font_sz)
     ax.set_ylabel('Number of patients', fontsize=font_sz)
+    ax.legend(labels=['Male', 'Female'], title="Sex")
     ax.set_xticklabels(AGE_LABELS, rotation=90)
 
     ax = axes[1, 0]
@@ -214,6 +226,9 @@ def plot_LOS_simulation_figure1(data_df):
     ax.set_yscale('log')
     ax.set_ylabel('Number of patients', fontsize=font_sz)
     ax.set_xlabel('Number of admissions', fontsize=font_sz)
+    ax.set_xticks(list(range(1, int(data_df[ADMISSION_SERIAL_COL].max()+1))))
+    ax.set_xticklabels(list(range(1, int(data_df[ADMISSION_SERIAL_COL].max()+1))))
+
     ax.axvline(1.5, ls='--', color='r')
     ax.axvline(4.5, ls='--', color='r')
     ax.axvline(8.5, ls='--', color='r')
@@ -240,7 +255,7 @@ def plot_LOS_simulation_figure1(data_df):
     kmf.plot_survival_function(ax=ax)
 
     ax.set_ylabel('Population', fontsize=font_sz)
-    ax.set_xlabel('LOS', fontsize=font_sz)
+    ax.set_xlabel('LOS (Days)', fontsize=font_sz)
     ax.set_xlim([0, 30])
     ax.grid()
 
@@ -276,7 +291,7 @@ def plot_LOS_simulation_figure2(data_df):
     ax.text(x=20, y=0.3, s='Dead', fontsize=text_sz)
     ax.set_ylim([0, 1])
     ax.set_xlim([0, max_time])
-    ax.set_xlabel('LOS', fontsize=font_sz)
+    ax.set_xlabel('LOS (Days)', fontsize=font_sz)
     ax.set_ylabel('Patient status ratio', fontsize=font_sz)
 
     ax = axes[0, 1]
@@ -294,7 +309,7 @@ def plot_LOS_simulation_figure2(data_df):
     ser.plot(kind='bar', ax=ax)
     ax.set_xlim([0, max_time])
     ax.set_ylabel('Released', fontsize=font_sz)
-    ax.set_xlabel('LOS', fontsize=font_sz)
+    ax.set_xlabel('LOS (Days)', fontsize=font_sz)
     ax.grid(axis='y')
 
     for idl, label in enumerate(ax.xaxis.get_ticklabels()):
@@ -308,7 +323,7 @@ def plot_LOS_simulation_figure2(data_df):
     ser.plot(kind='bar', ax=ax)
     ax.set_xlim([0, max_time])
     ax.set_ylabel('Died', fontsize=font_sz)
-    ax.set_xlabel('LOS', fontsize=font_sz)
+    ax.set_xlabel('LOS (Days)', fontsize=font_sz)
     ax.grid(axis='y')
 
     for idl, label in enumerate(ax.xaxis.get_ticklabels()):
@@ -360,6 +375,65 @@ def plot_LOS_simulation_figure3(data_df):
     ax.set_xlabel('Year of admission', fontsize=font_sz)
     ax.set_title(missingness_titles[0], fontsize=title_sz)
     ax.set_ylim([0, 1100])
+    fig.tight_layout()
+
+
+def plot_LOS_simulation_desc_figure(data_df):
+    text_sz = 16
+
+    fig, axes = plt.subplots(2, 2, figsize=(14, 8))
+
+    ax = axes[0, 0]
+    ax.tick_params(axis='both', which='major', labelsize=text_sz-2)
+    ax.tick_params(axis='both', which='minor', labelsize=text_sz-2)
+    add_panel_text(ax=ax, text='a')
+    tmp = data_df[[AGE_COL, GENDER_COL]]
+    tmp[AGE_COL] = pd.cut(tmp[AGE_COL], bins=AGE_BINS, labels=AGE_LABELS)
+    tmp.groupby([AGE_COL, GENDER_COL]).size().unstack().plot(kind='bar', ax=ax)
+    ax.set_xlabel('Age (years)', fontsize=font_sz)
+    ax.set_ylabel('Number of patients', fontsize=font_sz)
+    ax.legend(labels=['Male', 'Female'], title="Sex")
+    ax.set_xticklabels(AGE_LABELS, rotation=90)
+
+    ax = axes[0, 1]
+    ax.tick_params(axis='both', which='major', labelsize=text_sz-2)
+    ax.tick_params(axis='both', which='minor', labelsize=text_sz-2)
+    add_panel_text(ax=ax, text='b')
+    tmp = data_df[[SMOKING_COL, HYPERTENSION_COL, DIABETES_COL, ART_FIB_COL, COPD_COL, CRF_COL]].sum(axis=1).to_frame()
+    tmp.columns = ['pre']
+    h = tmp.groupby('pre').size()
+    ax.bar(h.index, h.values, width=0.4)
+    ax.set_xlabel('Number of preconditions', fontsize=font_sz)
+    ax.set_ylabel('Number of patients', fontsize=font_sz)
+
+    tmp = data_df.copy()
+    tmp['binned_age'] = pd.cut(tmp[AGE_COL], bins=AGE_BINS, labels=AGE_LABELS)
+    tmp['death_at_hosp_ind'] = tmp[DEATH_RELATIVE_COL].notnull().astype(int)
+
+    ax = axes[1, 0]
+    ax.tick_params(axis='both', which='major', labelsize=text_sz-2)
+    ax.tick_params(axis='both', which='minor', labelsize=text_sz-2)
+    add_panel_text(ax=ax, text='c')
+    ser = tmp[tmp['death_at_hosp_ind'] != 1].groupby(DISCHARGE_RELATIVE_COL).size()
+    ser = ser.reindex(range(0, 31)).fillna(0)
+    ser.plot(kind='bar', ax=ax)
+    ax.set_xlim([0, 30])
+    ax.set_ylabel('Released', fontsize=font_sz)
+    ax.set_xlabel('LOS (Days)', fontsize=font_sz)
+    ax.grid(axis='y')
+
+    ax = axes[1, 1]
+    ax.tick_params(axis='both', which='major', labelsize=text_sz-2)
+    ax.tick_params(axis='both', which='minor', labelsize=text_sz-2)
+    add_panel_text(ax=ax, text='d')
+    ser = tmp[tmp['death_at_hosp_ind'] == 1].groupby(DEATH_RELATIVE_COL).size()
+    ser = ser.reindex(range(0, 31)).fillna(0)
+    ser.plot(kind='bar', ax=ax)
+    ax.set_ylabel('Died', fontsize=font_sz)
+    ax.set_xlabel('LOS (Days)', fontsize=font_sz)
+    ax.grid(axis='y')
+    ax.set_xlim([0, 30])
+
     fig.tight_layout()
 
 
@@ -418,20 +492,23 @@ def plot_reps_coef_std(rep_dict: dict, return_summary: bool = True, filename: st
             temp_df.columns = temp_df.columns.get_level_values(0) + "_" + temp_df.columns.get_level_values(1)
             res_dict[coef_type][event_type] = temp_df.copy()
             temp_df.plot(x="Lee_std", y="Ours_std", kind="scatter", ax=ax)
-            ax.set_xlabel("Lee std", fontsize=18)
-            ax.set_ylabel("Ours std", fontsize=18)
+            ax.set_xlabel("Lee et al. std", fontsize=18)
+            ax.set_ylabel("two-step std", fontsize=18)
             ax.plot([0, 1], [0, 1], "--", transform=ax.transAxes, alpha=0.3, color="tab:green");
             ax.grid()
             if paper_plots:
-                if idct == 0:
-                    ax.set_xlim([0, 0.6])
-                    ax.set_ylim([0, 0.6])
+                if ((idct == 0) and (idet == 0)):
+                    ax.set_xlim([0, 0.2])
+                    ax.set_ylim([0, 0.2])
+                elif ((idct == 0) and (idet == 1)):
+                    ax.set_xlim([0, 0.25])
+                    ax.set_ylim([0, 0.25])
                 elif ((idct == 1) and (idet == 0)):
-                    ax.set_xlim([0.02, 0.04])
-                    ax.set_ylim([0.02, 0.04])
+                    ax.set_xlim([0.025, 0.035])
+                    ax.set_ylim([0.025, 0.035])
                 elif ((idct == 1) and (idet == 1)):
-                    ax.set_xlim([0.04, 0.06])
-                    ax.set_ylim([0.04, 0.06])
+                    ax.set_xlim([0.035, 0.05])
+                    ax.set_ylim([0.035, 0.05])
             latter = "\\alpha" if coef_type == "alpha" else "\\beta"
             ax.set_title(f"${latter}{event_type}$", fontsize=18)
     fig.tight_layout()
@@ -526,8 +603,8 @@ def plot_events_occurrence(patients_df: pd.DataFrame, ax: plt.Axes = None, event
                                                                                                        width=0.8)
     ax.tick_params(axis='both', which='major', labelsize=15)
     ax.tick_params(axis='both', which='minor', labelsize=15)
-    ax.set_xlabel(f"Time of Occurrence ({event_time_col})", fontdict={'size': 18})
-    ax.set_ylabel(f"Number of Events", fontdict={'size': 18})
+    ax.set_xlabel(f"Time", fontdict={'size': 18})
+    ax.set_ylabel(f"Number of Observations", fontdict={'size': 18})
     if tight:
         fig.tight_layout()
     if fname is not None:
@@ -538,15 +615,15 @@ def plot_events_occurrence(patients_df: pd.DataFrame, ax: plt.Axes = None, event
 def plot_example_pred_output(pred_df, fname: str = None):
     gs = gridspec.GridSpec(4, 4)
     ax1 = plt.subplot(gs[0, 0:2])
-    ax2 = plt.subplot(gs[0,2:])
-    ax3 = plt.subplot(gs[1,0:2])
-    ax4 = plt.subplot(gs[1,2:])
-    ax5 = plt.subplot(gs[2,0:2])
-    ax6 = plt.subplot(gs[2,2:])
-    ax7 = plt.subplot(gs[3,1:3])
+    ax2 = plt.subplot(gs[0, 2:])
+    ax3 = plt.subplot(gs[1, 0:2])
+    ax4 = plt.subplot(gs[1, 2:])
+    ax5 = plt.subplot(gs[2, 0:2])
+    ax6 = plt.subplot(gs[2, 2:])
+    ax7 = plt.subplot(gs[3, 1:3])
     fig = plt.gcf()
     fig.set_size_inches(14, 14)
-    ax_lst = [ax1,ax2,ax3,ax4,ax5,ax6,ax7]
+    ax_lst = [ax1, ax2, ax3, ax4, ax5, ax6, ax7]
 
     titles = ['Hazard', 'Probability', 'CIF', 'Overall Survival']
     letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g']
@@ -566,7 +643,10 @@ def plot_example_pred_output(pred_df, fname: str = None):
                 else:
                     index_val = [f'{pref}_{event}_at_t{m}' for m in times]
                 tmp = pred_df.loc[index_val, patient]
-                ax.plot(tmp.index, tmp.values, label=patient)
+                if pref in ['cif', 'overall_survival']:
+                    ax.step(tmp.index, tmp.values, label=patient)
+                else:
+                    ax.plot(tmp.index, tmp.values, label=patient)
             ax.set_xticks(range(len(times)))
             ax.set_xticklabels(times, rotation=90)
             ax.set_xlabel('Time', fontsize=15)

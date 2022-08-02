@@ -33,8 +33,8 @@ def sample_los(new_patient, age_mean, age_std, bmi_mean, bmi_std, coefs=COEFS, b
 
 
 def hide_weight_info(row):
-    admyear = row[ADMISSION_YEAR_COL]
-    p_weight = 0.1 + int(admyear > (min_year + 3)) * 0.8 * ((admyear - min_year) / (max_year - min_year))
+    #admyear = row[ADMISSION_YEAR_COL]
+    p_weight = 0.3 #+ int(admyear > (min_year + 3)) * 0.8 * ((admyear - min_year) / (max_year - min_year))
     sample_weight = np.random.binomial(1, p=p_weight)
     if sample_weight == 0:
         row[WEIGHT_COL] = np.nan
@@ -103,16 +103,17 @@ def main(seed=0, N_patients=DEFAULT_N_PATIENTS, output_dir=OUTPUT_DIR, filename=
         simulated_patients_df = simulated_patients_df.append(new_patient, ignore_index=True)
 
     # [age, gender, ADMISSION_YEAR, FIRST_ADMISSION, ADMISSION_SERIAL, WEIGHT_COL, HEIGHT_COL, BMI, SMOKING_COL, 5*preconditions]
-    b1 = [0.02, -0.5, 0, 0, 0, -0.5, 0.01, 0.05, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+    #b1 = [-0.003, 0.05, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    b2 = [0.003, -0.05, 0, 0, 0, 0.003, 0.0001, 0.005, 0.05, 0.02, 0.02, 0.02, 0.02, 0.02]
 
     real_coef_dict = {
         "alpha": {
-            1: lambda t: -1.3 - 0.1 * np.log(t),
-            2: lambda t: -1 - 0.1 * np.log(t)
+            1: lambda t: -2.2 - 0.2 * np.log(t),
+            2: lambda t: -2.3 - 0.2 * np.log(t)
         },
         "beta": {
-            1: [0.07*b for b in b1],
-            2: [0.05*b for b in b1]
+            1: [-1*b for b in b2],
+            2: [b for b in b2]
         }
     }
 
@@ -224,5 +225,5 @@ def generate_quick_start_df(n_patients=10000, d_times=30, j_events=2, n_cov=5, s
 
 
 if __name__ == "__main__":
-    main(N_patients=10000)
+    main(N_patients=50000)
     #generate_quick_start_df(n_patients=2)

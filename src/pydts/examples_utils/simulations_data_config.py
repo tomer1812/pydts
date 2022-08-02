@@ -14,7 +14,7 @@ max_p = 0.65
 
 PATIENT_NO_COL = 'ID'
 AGE_COL = 'Age'
-GENDER_COL = 'Gender'
+GENDER_COL = 'Sex'
 ADMISSION_YEAR_COL = 'Admyear'
 FIRST_ADMISSION_COL = 'Firstadm'
 ADMISSION_SERIAL_COL = 'Admserial'
