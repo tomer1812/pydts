@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pydts"
-version = "0.3.8"
+version = "0.4.0"
 description = "Discrete time survival analysis with competing risks"
 authors = ["Tomer Meir <tomer1812@gmail.com>", "Rom Gutman <rom.gutman1@gmail.com>", "Malka Gorfine <malkago12@gmail.com>"]
 license = "GNU GPLv3"
