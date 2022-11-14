@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pydts"
-version = "0.4.0"
+version = "0.4.1"
 description = "Discrete time survival analysis with competing risks"
 authors = ["Tomer Meir <tomer1812@gmail.com>", "Rom Gutman <rom.gutman1@gmail.com>", "Malka Gorfine <malkago12@gmail.com>"]
 license = "GNU GPLv3"
@@ -24,6 +24,7 @@ tqdm = "^4.63.0"
 statsmodels = "^0.13.2"
 pandarallel = "^1.5.7"
 ipython = "^8.2.0"
+numpy = ">=1.23.4"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.0.1"

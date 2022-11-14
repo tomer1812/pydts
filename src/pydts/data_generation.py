@@ -19,7 +19,7 @@ class EventTimesSampler(object):
         self.j_event_types = j_event_types
         self.events = range(1, self.j_event_types + 1)
 
-    def calculate_hazards(self, observations_df: pd.DataFrame, hazard_coefs: dict) -> list:
+    def calculate_hazards(self, observations_df: pd.DataFrame, hazard_coefs: dict, events: list = None) -> list:
         """
         Calculates the hazard function for the observations given the hazard coefficients.
 
@@ -30,12 +30,16 @@ class EventTimesSampler(object):
         Returns:
             hazards_dfs (list): A list of dataframes, one for each event type, with the hazard function at time t to each of the observations.
         """
-
-        a_t = {event: {t: hazard_coefs['alpha'][event](t) for t in range(1, self.d_times + 1)} for event in self.events}
-        b = pd.concat([observations_df.dot(hazard_coefs['beta'][j]) for j in self.events], axis=1, keys=self.events)
-
-        hazards_dfs = [pd.concat([expit(a_t[j][t] + b[j]) for t in range(1, self.d_times + 1)],
-                             axis=1, keys=(range(1, self.d_times + 1))) for j in self.events]
+        events = events if events is not None else self.events
+        a_t = {}
+        for event in events:
+            if callable(hazard_coefs['alpha'][event]):
+                a_t[event] = {t: hazard_coefs['alpha'][event](t) for t in range(1, self.d_times + 1)}
+            else:
+                a_t[event] = {t: hazard_coefs['alpha'][event][t-1] for t in range(1, self.d_times + 1)}
+        b = pd.concat([observations_df.dot(hazard_coefs['beta'][j]) for j in events], axis=1, keys=events)
+        hazards_dfs = [pd.concat([expit((a_t[j][t] + b[j]).astype(float)) for t in range(1, self.d_times + 1)],
+                                  axis=1, keys=(range(1, self.d_times + 1))) for j in events]
         return hazards_dfs
 
     def calculate_overall_survival(self, hazards: list) -> pd.DataFrame:
@@ -95,6 +99,7 @@ class EventTimesSampler(object):
     def sample_event_times(self, observations_df: pd.DataFrame,
                                  hazard_coefs: dict,
                                  covariates: Union[list, None] = None,
+                                 events: Union[list, None] = None,
                                  seed: Union[int, None] = None) -> pd.DataFrame:
         """
         Sample event type and event occurance times
@@ -109,13 +114,18 @@ class EventTimesSampler(object):
         np.random.seed(seed)
         if covariates is None:
             covariates = [c for c in observations_df.columns if c not in ['X', 'T', 'C', 'J']]
+        events = events if events is not None else self.events
         cov_df = observations_df[covariates]
-        hazards = self.calculate_hazards(cov_df, hazard_coefs)
+        hazards = self.calculate_hazards(cov_df, hazard_coefs, events=events)
         overall_survival = self.calculate_overall_survival(hazards)
         probs_j_at_t = self.calculate_prob_event_at_t(hazards, overall_survival)
         total_prob_j = self.calculate_prob_event_j(probs_j_at_t)
         probs_t_given_j = self.calc_prob_t_given_j(probs_j_at_t, total_prob_j)
         sampled_jt = self.sample_jt(total_prob_j, probs_t_given_j)
+        if 'J' in observations_df.columns:
+            observations_df.drop('J', axis=1, inplace=True)
+        if 'T' in observations_df.columns:
+            observations_df.drop('T', axis=1, inplace=True)
         observations_df = pd.concat([observations_df, sampled_jt], axis=1)
         return observations_df
 
@@ -168,28 +178,36 @@ class EventTimesSampler(object):
         prob_los_at_t[-1] += (1-sum(prob_los_at_t))
         sampled_df = pd.DataFrame(np.random.choice(a=self.times, size=len(observations_df), p=prob_los_at_t),
                                   index=observations_df.index, columns=['C'])
+        if 'C' in observations_df.columns:
+            observations_df.drop('C', axis=1, inplace=True)
         observations_df = pd.concat([observations_df, sampled_df], axis=1)
         return observations_df
 
     def sample_hazard_lof_censoring(self, observations_df: pd.DataFrame, censoring_hazard_coefs: dict,
-                                    seed: Union[int, None] = None, covariates: Union[list, None] = None) -> pd.DataFrame:
+                                    seed: Union[int, None] = None, covariates: Union[list, None] = None,
+                                    events: Union[list, None] = None) -> pd.DataFrame:
         """
         Samples loss of follow-up censoring time from hazard coefficients.
         Args:
             observations_df (pd.DataFrame): Dataframe with observations covariates.
             censoring_hazard_coefs (dict): time coefficients and covariates coefficients for the censoring hazard.
             seed (int): pseudo random seed number for numpy.random.seed()
-            covariates (list): list of covariates name, must be a subset of observations_df.columns
+            covariates (list): list of covariates names, must be a subset of observations_df.columns
+            events (list): list of events names, must be a subset of censoring_hazard_coefs.keys()
 
         Returns:
             observations_df (pd.DataFrame): Upadted dataframe including sampled censoring time.
         """
         if covariates is None:
             covariates = [c for c in observations_df.columns if c not in ['X', 'T', 'C', 'J']]
+        events = events if events is not None else self.events
         cov_df = observations_df[covariates]
         tmp_ets = EventTimesSampler(d_times=self.d_times, j_event_types=1)
-        sampled_df = tmp_ets.sample_event_times(cov_df, censoring_hazard_coefs, seed=seed, covariates=covariates)[['T']]
+        sampled_df = tmp_ets.sample_event_times(cov_df, censoring_hazard_coefs, seed=seed, covariates=covariates,
+                                                events=events)[['T']]
         sampled_df.columns = ['C']
+        if 'C' in observations_df.columns:
+            observations_df.drop('C', axis=1, inplace=True)
         observations_df = pd.concat([observations_df, sampled_df], axis=1)
         return observations_df
 
