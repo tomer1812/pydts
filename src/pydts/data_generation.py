@@ -178,6 +178,8 @@ class EventTimesSampler(object):
         prob_los_at_t[-1] += (1-sum(prob_los_at_t))
         sampled_df = pd.DataFrame(np.random.choice(a=self.times, size=len(observations_df), p=prob_los_at_t),
                                   index=observations_df.index, columns=['C'])
+        # No follow-up censoring, C=d+2 such that T wins when building X column:
+        sampled_df.loc[sampled_df['C'] == self.times[-1], 'C'] = self.d_times + 2
         if 'C' in observations_df.columns:
             observations_df.drop('C', axis=1, inplace=True)
         observations_df = pd.concat([observations_df, sampled_df], axis=1)
