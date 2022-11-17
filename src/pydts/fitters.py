@@ -161,6 +161,24 @@ class DataExpansionFitter(ExpansionBasedFitter):
         temp_df[[f'hazard_j{event}_t{c_}' for c_ in t]] = temp_hazard_df.values
         return temp_df
 
+    def get_beta_SE(self):
+        """
+        This function returns the Beta coefficients and their Standard Errors for all the events.
+
+        Returns:
+            se_df (pandas.DataFrame): Beta coefficients and Standard Errors Dataframe
+
+        """
+
+        full_table = pd.DataFrame()
+        for event in self.events:
+            summary = self.event_models[event].summary()
+            summary_df = pd.DataFrame([x.split(',') for x in summary.tables[1].as_csv().split('\n')])
+            summary_df.columns = summary_df.iloc[0]
+            summary_df = summary_df.iloc[1:].set_index(summary_df.columns[0])
+            summary_df.columns = pd.MultiIndex.from_product([[event], summary_df.columns])
+            full_table = pd.concat([full_table, summary_df.iloc[-len(self.covariates):]], axis=1)
+        return full_table
 
 class TwoStagesFitter(ExpansionBasedFitter):
 

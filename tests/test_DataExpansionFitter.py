@@ -62,6 +62,9 @@ class TestDataExpansionFitter(unittest.TestCase):
     def test_print_summary(self):
         self.fitted_model.print_summary()
 
+    def test_get_beta_SE(self):
+        self.fitted_model.get_beta_SE()
+
     def test_predict_hazard_jt_case_covariate_not_in_df(self):
         # Covariates columns used in fit (here ['Z1','Z2','Z3','Z4','Z5']) must be passed in df to .predict()
         with self.assertRaises(AssertionError):
