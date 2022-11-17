@@ -204,7 +204,11 @@ class EventTimesSampler(object):
         cov_df = observations_df[covariates]
         tmp_ets = EventTimesSampler(d_times=self.d_times, j_event_types=1)
         sampled_df = tmp_ets.sample_event_times(cov_df, censoring_hazard_coefs, seed=seed, covariates=covariates,
-                                                events=events)[['T']]
+                                                events=events)
+
+        # No follow-up censoring, C=d+2 such that T wins when building X column:
+        sampled_df.loc[sampled_df['J'] == 0, 'T'] = self.d_times + 2
+        sampled_df = sampled_df[['T']]
         sampled_df.columns = ['C']
         if 'C' in observations_df.columns:
             observations_df.drop('C', axis=1, inplace=True)
