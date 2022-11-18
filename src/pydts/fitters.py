@@ -180,6 +180,26 @@ class DataExpansionFitter(ExpansionBasedFitter):
             full_table = pd.concat([full_table, summary_df.iloc[-len(self.covariates):]], axis=1)
         return full_table
 
+    def get_alpha_df(self):
+        """
+        This function returns the Alpha coefficients and their Standard Errors for all the events.
+
+        Returns:
+            se_df (pandas.DataFrame): Alpha coefficients and Standard Errors Dataframe
+
+        """
+
+        full_table = pd.DataFrame()
+        for event in self.events:
+            summary = self.event_models[event].summary()
+            summary_df = pd.DataFrame([x.split(',') for x in summary.tables[1].as_csv().split('\n')])
+            summary_df.columns = summary_df.iloc[0]
+            summary_df = summary_df.iloc[1:].set_index(summary_df.columns[0])
+            summary_df.columns = pd.MultiIndex.from_product([[event], summary_df.columns])
+            full_table = pd.concat([full_table, summary_df.iloc[:len(self.covariates)]], axis=1)
+        return full_table
+
+
 class TwoStagesFitter(ExpansionBasedFitter):
 
     """
@@ -328,6 +348,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
             # else:
             #     print(f'Not {summary_func} function in event {event} model')
             display(model[1].drop('opt_res', axis=1).set_index([self.event_type_col, self.duration_col]))
+
 
     def plot_event_alpha(self, event: Union[str, int], ax: plt.Axes = None, scatter_kwargs: dict = {},
                          show=True, title=None, xlabel='t', ylabel=r'$\alpha_{jt}$', fontsize=18,
@@ -480,6 +501,23 @@ class TwoStagesFitter(ExpansionBasedFitter):
             mdf.columns = [f'j{event}_params', f'j{event}_SE']
             se_df = pd.concat([se_df, mdf], axis=1)
         return se_df
+
+    def get_alpha_df(self):
+        """
+        This function returns the Alpha coefficients for all the events.
+
+        Returns:
+            alpha_df (pandas.DataFrame): Alpha coefficients Dataframe
+
+        """
+
+        alpha_df = pd.DataFrame()
+        for event, model in self.event_models.items():
+            model_alpha_df = model[1].drop('opt_res', axis=1).set_index([self.event_type_col, self.duration_col])
+            model_alpha_df.columns = pd.MultiIndex.from_product([[event], model_alpha_df.columns])
+            alpha_df = pd.concat([alpha_df, model_alpha_df], axis=1)
+
+        return alpha_df
 
     def plot_all_events_beta(self, ax: plt.Axes = None, colors: list = COLORS, show: bool = True,
                              title: Union[str, None] = None, xlabel: str = 'Value',  ylabel: str = r'$\beta_{j}$',

@@ -92,6 +92,9 @@ class TestTwoStagesFitter(unittest.TestCase):
     def test_get_beta_SE(self):
         self.fitted_model.get_beta_SE()
 
+    def test_get_alpha_df(self):
+        self.fitted_model.get_alpha_df()
+
     def test_plot_all_events_beta(self):
         self.fitted_model.plot_all_events_beta(show=False)
 
