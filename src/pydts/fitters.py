@@ -196,7 +196,7 @@ class DataExpansionFitter(ExpansionBasedFitter):
             summary_df.columns = summary_df.iloc[0]
             summary_df = summary_df.iloc[1:].set_index(summary_df.columns[0])
             summary_df.columns = pd.MultiIndex.from_product([[event], summary_df.columns])
-            full_table = pd.concat([full_table, summary_df.iloc[:len(self.covariates)]], axis=1)
+            full_table = pd.concat([full_table, summary_df.iloc[:-len(self.covariates)]], axis=1)
         return full_table
 
 
