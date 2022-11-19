@@ -7,16 +7,20 @@ from scipy.optimize import minimize
 from scipy.special import logit, expit
 import numpy as np
 import pandas as pd
+import psutil
 from lifelines.fitters.coxph_fitter import CoxPHFitter
 from pandarallel import pandarallel
 from typing import Optional, List, Union
 from matplotlib import colors as mcolors
 from joblib import Parallel, delayed
+import warnings
+warnings.filterwarnings("ignore")
 
 from .examples_utils.generate_simulations_data import generate_quick_start_df
 from .utils import assert_fit
 
 COLORS = list(mcolors.TABLEAU_COLORS.keys())
+WORKERS = psutil.cpu_count(logical=False)
 
 
 class DataExpansionFitter(ExpansionBasedFitter):
@@ -255,8 +259,8 @@ class TwoStagesFitter(ExpansionBasedFitter):
             pid_col: str = 'pid',
             x0: Union[np.array, int] = 0,
             fit_beta_kwargs: dict = {},
-            verbose: int = 2
-            ) -> dict:
+            verbose: int = 2,
+            nb_workers: int = WORKERS) -> dict:
         """
         This method fits a model to the discrete data.
 
@@ -277,6 +281,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
                                                     model_fit_kwargs={}  # keywords arguments to pass on to model.fit() method
                                               }
             verbose (int, Optional): The verbosity level of pandaallel
+            nb_workers (int, Optional): The number of workers to pandaallel. If not sepcified, defaults to the number of workers available.
         Returns:
             event_models (dict): Fitted models dictionary. Keys - event names, Values - fitted models for the event.
         """
@@ -287,7 +292,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
             if len(cov_not_in_df) > 0:
                 raise ValueError(f"Error during fit - missing covariates from df: {cov_not_in_df}")
 
-        pandarallel.initialize(verbose=verbose)
+        pandarallel.initialize(verbose=verbose, nb_workers=nb_workers)
         self.events = [c for c in sorted(df[event_type_col].unique()) if c != 0]
         if covariates is None:
             covariates = [col for col in df if col not in [event_type_col, duration_col, pid_col]]
