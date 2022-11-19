@@ -1093,6 +1093,17 @@ python-versions = ">=3.6.2"
 wcwidth = "*"
 
 [[package]]
+name = "psutil"
+version = "5.9.4"
+description = "Cross-platform lib for process and system monitoring in Python."
+category = "main"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+
+[package.extras]
+test = ["ipaddress", "mock", "enum34", "pywin32", "wmi"]
+
+[[package]]
 name = "ptyprocess"
 version = "0.7.0"
 description = "Run a subprocess in a pseudo terminal"
@@ -1638,7 +1649,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "bec8b3c03e2faf288bc47a13bde06c09900d5f1808b832d2bcf3571f9cb9d500"
+content-hash = "ffa4815d3f3afaf771afb2c6d09e5b2117518a0fd5f08f2aeede48bc6e324d2b"
 
 [metadata.files]
 appnope = []
@@ -1724,6 +1735,7 @@ pillow = []
 pluggy = []
 prometheus-client = []
 prompt-toolkit = []
+psutil = []
 ptyprocess = []
 pure-eval = []
 py = []
