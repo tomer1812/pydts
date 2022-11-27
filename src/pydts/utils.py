@@ -74,7 +74,7 @@ def assert_fit(event_df, times, event_type_col='J', duration_col='X'):
         event = event_df[event_type_col].max()  # all the events in the dataframe are the same
         raise RuntimeError(f"Number of observed events at some time points are too small. Consider collapsing neighbor time points."
                            f"\n See https://tomer1812.github.io/pydts/UsageExample-RegroupingData/ for more details.")
-    if event_df.shape[0] != len(times):
+    if event_df.shape[0] != (len(times)-1):
         event = event_df[event_type_col].max()  # all the events in the dataframe are the same
         problematic_times = pd.Index(event_df[duration_col]).symmetric_difference(times).tolist()
         raise RuntimeError(f"Number of observed events at some time points are too small. Consider collapsing neighbor time points."

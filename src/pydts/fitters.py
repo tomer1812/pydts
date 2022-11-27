@@ -200,7 +200,7 @@ class DataExpansionFitter(ExpansionBasedFitter):
             summary_df.columns = summary_df.iloc[0]
             summary_df = summary_df.iloc[1:].set_index(summary_df.columns[0])
             summary_df.columns = pd.MultiIndex.from_product([[event], summary_df.columns])
-            full_table = pd.concat([full_table, summary_df.iloc[:-len(self.covariates)]], axis=1)
+            full_table = pd.concat([full_table, summary_df.iloc[:-len(self.covariates)-1]], axis=1)
         return full_table
 
 
@@ -235,11 +235,12 @@ class TwoStagesFitter(ExpansionBasedFitter):
     def _fit_event_beta(self, expanded_df, event, model=CoxPHFitter, model_kwargs={}, model_fit_kwargs={}):
         # Model fitting for conditional estimation of Beta_j for specific event
         strata_df = expanded_df[self.covariates + [f'j_{event}', self.duration_col]]
-        strata_df[f'{self.duration_col}_copy'] = expanded_df[self.duration_col]
+        strata_df[f'{self.duration_col}_copy'] = np.ones_like(expanded_df[self.duration_col])
+
         beta_j_model = model(**model_kwargs)
         beta_j_model.fit(df=strata_df[self.covariates + [f'{self.duration_col}', f'{self.duration_col}_copy', f'j_{event}']],
-                         duration_col=self.duration_col, event_col=f'j_{event}', strata=f'{self.duration_col}_copy',
-                         **model_fit_kwargs)
+                         duration_col=f'{self.duration_col}_copy', event_col=f'j_{event}', strata=self.duration_col,
+                         **model_fit_kwargs, batch_mode=False)
         return beta_j_model
 
     def _fit_beta(self, expanded_df, events, model=CoxPHFitter, model_kwargs={}, model_fit_kwargs={}):
@@ -320,7 +321,8 @@ class TwoStagesFitter(ExpansionBasedFitter):
             n_et = n_jt[n_jt[event_type_col] == event]
             n_et['opt_res'] = n_et.parallel_apply(lambda row: minimize(self._alpha_jt, x0=x0,
                                     args=(df, y_t.loc[row[duration_col]], self.beta_models[event].params_, row['n_jt'],
-                                    row[duration_col])), axis=1)
+                                    row[duration_col]), method='BFGS',
+                                    options={'gtol': 1e-10, 'eps': 1.5e-08, 'maxiter': 200}), axis=1)
             n_et['success'] = n_et['opt_res'].parallel_apply(lambda val: val.success)
             n_et['alpha_jt'] = n_et['opt_res'].parallel_apply(lambda val: val.x[0])
             assert_fit(n_et, self.times, event_type_col=event_type_col, duration_col=duration_col)  # todo move basic input validation before any optimization
