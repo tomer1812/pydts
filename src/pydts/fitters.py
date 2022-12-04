@@ -322,10 +322,10 @@ class TwoStagesFitter(ExpansionBasedFitter):
             n_et['opt_res'] = n_et.parallel_apply(lambda row: minimize(self._alpha_jt, x0=x0,
                                     args=(df, y_t.loc[row[duration_col]], self.beta_models[event].params_, row['n_jt'],
                                     row[duration_col]), method='BFGS',
-                                    options={'gtol': 1e-10, 'eps': 1.5e-08, 'maxiter': 200}), axis=1)
+                                    options={'gtol': 1e-7, 'eps': 1.5e-08, 'maxiter': 200}), axis=1)
             n_et['success'] = n_et['opt_res'].parallel_apply(lambda val: val.success)
             n_et['alpha_jt'] = n_et['opt_res'].parallel_apply(lambda val: val.x[0])
-            assert_fit(n_et, self.times, event_type_col=event_type_col, duration_col=duration_col)  # todo move basic input validation before any optimization
+            assert_fit(n_et, self.times[:-1], event_type_col=event_type_col, duration_col=duration_col)  # todo move basic input validation before any optimization
             self.event_models[event] = [self.beta_models[event], n_et]
             self.alpha_df = pd.concat([self.alpha_df, n_et], ignore_index=True)
         return self.event_models
