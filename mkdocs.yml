@@ -53,6 +53,8 @@ nav:
       - The Two Stages Procedure of Meir et al. (2022): 'api/two_stages_fitter.md'
       - Data Expansion Procedure of Lee et al. (2018): 'api/data_expansion_fitter.md'
       - Event Times Sampler: 'api/event_times_sampler.md'
+      - Evaluation: 'api/evaluation.md'
+      - Cross Validation: 'api/cross_validation.md'
 
 plugins:
   - mknotebooks
