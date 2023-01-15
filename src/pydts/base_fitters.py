@@ -128,7 +128,7 @@ class ExpansionBasedFitter(BaseFitter):
 
         """
         self._validate_covariates_in_df(df.head())
-        df = self.predict_hazard_t(df, t=self.times)
+        df = self.predict_hazard_t(df, t=self.times[:-1])
         return df
 
     def predict_overall_survival(self,
@@ -151,7 +151,7 @@ class ExpansionBasedFitter(BaseFitter):
         self._validate_covariates_in_df(df.head())
 
         all_hazards = self.predict_hazard_all(df)
-        _times = self.times if t is None else [_t for _t in self.times if _t <= t]
+        _times = self.times[:-1] if t is None else [_t for _t in self.times[:-1] if _t <= t]
         overall = pd.DataFrame()
         for t_i in _times:
             cols = [f'hazard_j{e}_t{t_i}' for e in self.events]
@@ -194,7 +194,7 @@ class ExpansionBasedFitter(BaseFitter):
             elif not f'overall_survival_t{t - 1}' in df.columns:
                 df = self.predict_overall_survival(df, t=t, return_hazards=True)
             elif not f'hazard_j{event}_t{t}' in df.columns:
-                df = self.predict_hazard_t(df, t=np.array([_t for _t in self.times if _t <= t]))
+                df = self.predict_hazard_t(df, t=np.array([_t for _t in self.times[:-1] if _t <= t]))
             df[f'prob_j{event}_at_t{t}'] = df[f'overall_survival_t{t - 1}'] * df[f'hazard_j{event}_t{t}']
         return df
 
@@ -214,9 +214,9 @@ class ExpansionBasedFitter(BaseFitter):
             f"Cannot predict for event {event} - it was not included during .fit()"
         self._validate_covariates_in_df(df.head())
 
-        if f'overall_survival_t{self.times[-1]}' not in df.columns:
+        if f'overall_survival_t{self.times[-2]}' not in df.columns:
             df = self.predict_overall_survival(df, return_hazards=True)
-        for t in self.times:
+        for t in self.times[:-1]:
             if f'prob_j{event}_at_t{t}' not in df.columns:
                 df = self.predict_prob_event_j_at_t(df=df, event=event, t=t)
         return df
@@ -254,11 +254,11 @@ class ExpansionBasedFitter(BaseFitter):
             f"Cannot predict for event {event} - it was not included during .fit()"
         self._validate_covariates_in_df(df.head())
 
-        if f'prob_j{event}_at_t{self.times[-1]}' not in df.columns:
+        if f'prob_j{event}_at_t{self.times[-2]}' not in df.columns:
             df = self.predict_prob_events(df=df)
-        cols = [f'prob_j{event}_at_t{t}' for t in self.times]
+        cols = [f'prob_j{event}_at_t{t}' for t in self.times[:-1]]
         cif_df = df[cols].cumsum(axis=1)
-        cif_df.columns = [f'cif_j{event}_at_t{t}' for t in self.times]
+        cif_df.columns = [f'cif_j{event}_at_t{t}' for t in self.times[:-1]]
         df = pd.concat([df, cif_df], axis=1)
         return df
 
@@ -277,7 +277,7 @@ class ExpansionBasedFitter(BaseFitter):
         self._validate_covariates_in_df(df.head())
 
         for event in self.events:
-            if f'cif_j{event}_at_t{self.times[-1]}' not in df.columns:
+            if f'cif_j{event}_at_t{self.times[-2]}' not in df.columns:
                 df = self.predict_event_cumulative_incident_function(df=df, event=event)
         return df
 
@@ -297,9 +297,9 @@ class ExpansionBasedFitter(BaseFitter):
             f"Cannot predict for event {event} - it was not included during .fit()"
         self._validate_covariates_in_df(df.head())
 
-        if f'prob_j{event}_at_t{self.times[-1]}' not in df.columns:
+        if f'prob_j{event}_at_t{self.times[-2]}' not in df.columns:
             df = self.predict_prob_event_j_all(df=df, event=event)
-        cols = [f'prob_j{event}_at_t{_t}' for _t in self.times]
+        cols = [f'prob_j{event}_at_t{_t}' for _t in self.times[:-1]]
         marginal_prob = df[cols].sum(axis=1)
         marginal_prob.name = f'marginal_prob_j{event}'
         return pd.concat([df, marginal_prob], axis=1)
