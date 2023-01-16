@@ -67,13 +67,13 @@ class TestEventTimesSampler(unittest.TestCase):
         ets = EventTimesSampler(d_times=15, j_event_types=4)
         censoring_coef_dict = {
             "alpha": {
-                1: lambda t: -1 - 0.3 * np.log(t),
+                0: lambda t: -1 - 0.3 * np.log(t),
             },
             "beta": {
-                1: -np.log([0.8, 3, 3, 2.5, 2]),
+                0: -np.log([0.8, 3, 3, 2.5, 2]),
             }
         }
-        ets.sample_hazard_lof_censoring(patients_df, censoring_coef_dict, seed, events=[1])
+        ets.sample_hazard_lof_censoring(patients_df, censoring_coef_dict, seed)
 
     def test_sample_independent_censoring(self):
         n_cov = 4
@@ -109,14 +109,14 @@ class TestEventTimesSampler(unittest.TestCase):
         patients_df = ets.sample_event_times(patients_df, hazard_coefs=real_coef_dict, seed=seed)
         censoring_coef_dict = {
             "alpha": {
-                1: lambda t: -1 - 0.3 * np.log(t),
+                0: lambda t: -1 - 0.3 * np.log(t),
             },
             "beta": {
-                1: -np.log([0.8, 3, 3, 2.5, 2]),
+                0: -np.log([0.8, 3, 3, 2.5, 2]),
             }
         }
 
-        patients_df = ets.sample_hazard_lof_censoring(patients_df, censoring_coef_dict, seed=seed, events=[1])
+        patients_df = ets.sample_hazard_lof_censoring(patients_df, censoring_coef_dict, seed=seed)
         patients_df = ets.update_event_or_lof(patients_df)
 
     def test_update_event_or_lof_T_assertion(self):
@@ -132,14 +132,14 @@ class TestEventTimesSampler(unittest.TestCase):
             ets = EventTimesSampler(d_times=15, j_event_types=3)
             censoring_coef_dict = {
                 "alpha": {
-                    1: lambda t: -1 - 0.3 * np.log(t),
+                    0: lambda t: -1 - 0.3 * np.log(t),
                 },
                 "beta": {
-                    1: -np.log([0.8, 3, 3, 2.5, 2]),
+                    0: -np.log([0.8, 3, 3, 2.5, 2]),
                 }
             }
 
-            patients_df = ets.sample_hazard_lof_censoring(patients_df, censoring_coef_dict, seed=seed, events=[1])
+            patients_df = ets.sample_hazard_lof_censoring(patients_df, censoring_coef_dict, seed=seed)
             patients_df = ets.update_event_or_lof(patients_df)
 
     def test_update_event_or_lof_C_assertion(self):

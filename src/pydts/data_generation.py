@@ -210,8 +210,8 @@ class EventTimesSampler(object):
         return observations_df
 
     def sample_hazard_lof_censoring(self, observations_df: pd.DataFrame, censoring_hazard_coefs: dict,
-                                    seed: Union[int, None] = None, covariates: Union[list, None] = None,
-                                    events: Union[list, None] = None) -> pd.DataFrame:
+                                    seed: Union[int, None] = None,
+                                    covariates: Union[list, None] = None) -> pd.DataFrame:
         """
         Samples loss of follow-up censoring time from hazard coefficients.
         Args:
@@ -219,18 +219,15 @@ class EventTimesSampler(object):
             censoring_hazard_coefs (dict): time coefficients and covariates coefficients for the censoring hazard.
             seed (int): pseudo random seed number for numpy.random.seed()
             covariates (list): list of covariates names, must be a subset of observations_df.columns
-            events (list): list of events names, must be a subset of censoring_hazard_coefs.keys()
-
         Returns:
             observations_df (pd.DataFrame): Upadted dataframe including sampled censoring time.
         """
         if covariates is None:
             covariates = [c for c in observations_df.columns if c not in ['X', 'T', 'C', 'J']]
-        events = events if events is not None else self.events
         cov_df = observations_df[covariates]
         tmp_ets = EventTimesSampler(d_times=self.d_times, j_event_types=1)
         sampled_df = tmp_ets.sample_event_times(cov_df, censoring_hazard_coefs, seed=seed, covariates=covariates,
-                                                events=events)
+                                                events=[0])
 
         # No follow-up censoring, C=d+2 such that T wins when building X column:
         sampled_df.loc[sampled_df['J'] == 0, 'T'] = self.d_times + 2
