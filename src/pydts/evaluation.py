@@ -74,6 +74,35 @@ def prediction_error(pred_df: pd.DataFrame,
     return prediction_error.T
 
 
+def events_auc_at_t(pred_df: pd.DataFrame,
+                    event_type_col: str = 'J',
+                    duration_col: str ='X') -> pd.DataFrame:
+    """
+    This function implements the calculation of the events AUC at t.
+
+    Args:
+        pred_df (pd.DataFrame): Data to calculate prediction error.
+                                Must contain the observed duration and event-type, and the cumulative incident function prediction results.
+                                See TwoStagesFitter.predict_cumulative_incident_function()
+        duration_col (str): Last follow up time column name (must be a column in pred_df).
+        event_type_col (str): The event type column name (must be a column in df),
+                              Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+    Returns:
+        event_auc_at_t_df (pd.DataFrame): events auc at t results.
+    """
+
+    events = [e for e in pred_df[event_type_col].unique() if e != 0]
+    event_auc_at_t_df = pd.DataFrame()
+    for event in sorted(events):
+        event_auc_at_t_df = pd.concat([event_auc_at_t_df,
+                                       event_specific_auc_at_t_all(pred_df=pred_df,
+                                                                   event=event,
+                                                                   event_type_col=event_type_col,
+                                                                   duration_col=duration_col)],
+                                       axis=1)
+    return event_auc_at_t_df.T
+
+
 def event_specific_auc_at_t(pred_df: pd.DataFrame,
                             event: int,
                             t: int,
@@ -100,6 +129,8 @@ def event_specific_auc_at_t(pred_df: pd.DataFrame,
     no_event_at_t_df = no_event_at_t_df[~((no_event_at_t_df[event_type_col] == event) &
                                           (no_event_at_t_df[duration_col] == t))]
     total_t = (len(event_observed_at_t_df)*len(no_event_at_t_df))
+    if total_t == 0:
+        return np.nan
     correct_order = 0
     for i_idx, i_row in event_observed_at_t_df.iterrows():
         pi_ij = i_row.loc[f'prob_j{event}_at_t{t}']
@@ -131,7 +162,7 @@ def event_specific_auc_at_t_all(pred_df: pd.DataFrame,
     for t in sorted(pred_df[duration_col].unique())[:-1]:
         res[t] = event_specific_auc_at_t(pred_df=pred_df, event=event, t=t,
                                          event_type_col=event_type_col, duration_col=duration_col)
-    return pd.Series(res)
+    return pd.Series(res, name=event)
 
 
 def event_specific_auc_weights(pred_df: pd.DataFrame,
@@ -219,3 +250,29 @@ def global_auc(pred_df: pd.DataFrame,
             pred_df=pred_df, event=event, event_type_col=event_type_col,
             duration_col=duration_col)
     return global_auc
+
+
+def events_integrated_auc(pred_df: pd.DataFrame, event_type_col: str = 'J',
+                          duration_col: str ='X') -> dict:
+    """
+    This function implements the calculation of the integrated AUC to all events.
+
+    Args:
+        pred_df (pd.DataFrame): Data to calculate prediction error.
+                                Must contain the observed duration and event-type, and the cumulative incident function prediction results.
+                                See TwoStagesFitter.predict_cumulative_incident_function()
+        duration_col (str): Last follow up time column name (must be a column in pred_df).
+        event_type_col (str): The event type column name (must be a column in df),
+                              Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+    Returns:
+        integrated_auc (dict): integrated AUC results.
+    """
+
+    events = [e for e in pred_df[event_type_col].unique() if e != 0]
+    integrated_auc = {}
+    for event in sorted(events):
+        integrated_auc[event] = event_specific_integrated_auc(pred_df=pred_df,
+                                                              event=event,
+                                                              event_type_col=event_type_col,
+                                                              duration_col=duration_col)
+    return integrated_auc

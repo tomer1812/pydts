@@ -47,6 +47,22 @@ class TestCrossValidation(unittest.TestCase):
         patients_df = ets.sample_independent_lof_censoring(patients_df, prob_lof_at_t=0.01 * np.ones_like(ets.times))
         self.patients_df = ets.update_event_or_lof(patients_df)
 
-    def test_cross_validation(self):
+    def test_cross_validation_pe(self):
         tscv = TwoStagesCV()
-        tscv.cross_validate(self.patients_df)
+        tscv.cross_validate(self.patients_df, metrics='PE')
+        print('x')
+
+    def test_cross_validation_auc(self):
+        tscv = TwoStagesCV()
+        tscv.cross_validate(self.patients_df, metrics='AUC')
+        print('x')
+
+    def test_cross_validation_iauc(self):
+        tscv = TwoStagesCV()
+        tscv.cross_validate(self.patients_df, metrics='IAUC')
+        print('x')
+
+    def test_cross_validation_gauc(self):
+        tscv = TwoStagesCV()
+        tscv.cross_validate(self.patients_df, metrics='GAUC')
+        print('x')

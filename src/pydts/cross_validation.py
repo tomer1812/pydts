@@ -9,7 +9,7 @@ warnings.filterwarnings('ignore')
 slicer = pd.IndexSlice
 from typing import Optional, List, Union
 import psutil
-from .evaluation import prediction_error
+from .evaluation import prediction_error, events_integrated_auc, global_auc, events_auc_at_t
 
 WORKERS = psutil.cpu_count(logical=False)
 
@@ -23,6 +23,8 @@ class TwoStagesCV(object):
         self.models = {}
         self.test_idx = {}
         self.results = pd.DataFrame()
+        self.global_auc = {}
+        self.integrated_auc = {}
 
     def cross_validate(self,
                        full_df: pd.DataFrame,
@@ -56,7 +58,11 @@ class TwoStagesCV(object):
             x0 (Union[numpy.array, int], Optional): initial guess to pass to scipy.optimize.minimize function
             verbose (int, Optional): The verbosity level of pandaallel
             nb_workers (int, Optional): The number of workers to pandaallel. If not sepcified, defaults to the number of workers available.
-            metrics (str, list): Evaluation metrics. Currently only prediction error ('PE') is available
+            metrics (str, list): Evaluation metrics. Available metrics:
+                                                    'PE': Prediction Error
+                                                    'AUC': AUC at t,
+                                                    'IAUC': Integrated AUC,
+                                                    'GAUC': Global AUC.
 
         Returns:
             Results (pd.DataFrame): Cross validation metrics results
@@ -94,6 +100,21 @@ class TwoStagesCV(object):
                     pred_df = self.models[i_fold].predict_cumulative_incident_function(test_df)
                     tmp_res = prediction_error(pred_df, event_type_col=event_type_col,
                                                         duration_col=duration_col)
+                    tmp_res = pd.concat([tmp_res], keys=[i_fold], names=['fold'])
+                    tmp_res = pd.concat([tmp_res], keys=[metric], names=['metric'])
+                    self.results = pd.concat([self.results, tmp_res], axis=0)
+                elif metric == 'IAUC':
+                    pred_df = self.models[i_fold].predict_prob_events(test_df)
+                    self.integrated_auc[i_fold] = events_integrated_auc(pred_df, event_type_col=event_type_col,
+                                                                        duration_col=duration_col)
+                elif metric == 'GAUC':
+                    pred_df = self.models[i_fold].predict_prob_events(test_df)
+                    self.global_auc[i_fold] = global_auc(pred_df, event_type_col=event_type_col,
+                                                                  duration_col=duration_col)
+                elif metric == 'AUC':
+                    pred_df = self.models[i_fold].predict_prob_events(test_df)
+                    tmp_res = events_auc_at_t(pred_df, event_type_col=event_type_col,
+                                                       duration_col=duration_col)
                     tmp_res = pd.concat([tmp_res], keys=[i_fold], names=['fold'])
                     tmp_res = pd.concat([tmp_res], keys=[metric], names=['metric'])
                     self.results = pd.concat([self.results, tmp_res], axis=0)
