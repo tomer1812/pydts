@@ -21,7 +21,7 @@ class TwoStagesCV(object):
 
     def __init__(self):
         self.models = {}
-        self.test_idx = {}
+        self.test_pids = {}
         self.results = pd.DataFrame()
         self.global_auc = {}
         self.integrated_auc = {}
@@ -80,8 +80,8 @@ class TwoStagesCV(object):
             full_df = full_df.drop(['T'], axis=1)
 
         for i_fold, (train_index, test_index) in enumerate(self.kfold_cv.split(full_df)):
-            self.test_idx[i_fold] = test_index
-            train_df, test_df = full_df.loc[train_index], full_df.loc[test_index]
+            self.test_pids[i_fold] = full_df.iloc[test_index][pid_col].values
+            train_df, test_df = full_df.iloc[train_index], full_df.iloc[test_index]
             fold_fitter = TwoStagesFitter()
             print(f'Fitting fold {i_fold+1}/{n_splits}')
             fold_fitter.fit(df=train_df,
