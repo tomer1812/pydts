@@ -5,6 +5,7 @@ pd.set_option("display.max_rows", 500)
 warnings.filterwarnings('ignore')
 slicer = pd.IndexSlice
 from lifelines.fitters.kaplan_meier_fitter import KaplanMeierFitter
+from typing import Optional, List, Union
 
 
 def event_specific_prediction_error(pred_df: pd.DataFrame,
@@ -199,7 +200,8 @@ def event_specific_auc_weights(pred_df: pd.DataFrame,
 def event_specific_integrated_auc(pred_df: pd.DataFrame,
                                   event: int,
                                   event_type_col: str = 'J',
-                                  duration_col: str = 'X') -> float:
+                                  duration_col: str = 'X',
+                                  weights: Union[pd.Series, None] = None) -> float:
     """
     This function implements the calculation of the event specific integrated auc.
 
@@ -211,6 +213,7 @@ def event_specific_integrated_auc(pred_df: pd.DataFrame,
         duration_col (str): Last follow up time column name (must be a column in pred_df).
         event_type_col (str): The event type column name (must be a column in df),
                               Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+        weights (pd.Series): Optional. Weights vector with time as index and weight as value. Length must be the number of possible event times.
     Returns:
         result (float): integrated AUC results.
     """
@@ -218,10 +221,11 @@ def event_specific_integrated_auc(pred_df: pd.DataFrame,
     auc_at_t = event_specific_auc_at_t_all(pred_df=pred_df, event=event,
                                            event_type_col=event_type_col,
                                            duration_col=duration_col)
-    weights = event_specific_auc_weights(pred_df=pred_df, event=event,
-                                         event_type_col=event_type_col,
-                                         duration_col=duration_col)
-    result = auc_at_t.dot(weights)
+    if weights is None:
+        weights = event_specific_auc_weights(pred_df=pred_df, event=event,
+                                             event_type_col=event_type_col,
+                                             duration_col=duration_col)
+    result = auc_at_t.dot(weights.sort_index())
     return result
 
 

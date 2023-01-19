@@ -107,6 +107,21 @@ class TestEvaluation(unittest.TestCase):
         esauc = event_specific_integrated_auc(pred_df, event=event)
         print(esauc)
 
+    def test_event_specific_integrated_auc_with_weights_perfect_model(self):
+        cov_df = self.patients_df[self.covariates]
+        hazards = self.ets.calculate_hazards(cov_df, self.real_coef_dict, events=self.ets.events)
+        overall_survival = self.ets.calculate_overall_survival(hazards)
+        probs_j_at_t = self.ets.calculate_prob_event_at_t(hazards, overall_survival)
+        event = 1
+        probs_j_at_t = pd.DataFrame(probs_j_at_t[event-1].values,
+                                    columns=[f'prob_j{event}_at_t{t}'
+                                             for t in range(1, self.ets.d_times+1)])
+        pred_df = pd.concat([self.patients_df, probs_j_at_t], axis=1)
+        weights = pd.Series((1/self.ets.d_times)*np.ones(self.ets.d_times),
+                            index=range(1, self.ets.d_times+1))
+        esauc = event_specific_integrated_auc(pred_df, event=event, weights=weights)
+        print(esauc)
+
     def test_global_auc_perfect_model(self):
         cov_df = self.patients_df[self.covariates]
         hazards = self.ets.calculate_hazards(cov_df, self.real_coef_dict, events=self.ets.events)

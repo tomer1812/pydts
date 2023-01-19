@@ -95,6 +95,8 @@ class TwoStagesCV(object):
                             nb_workers=nb_workers)
 
             self.models[i_fold] = deepcopy(fold_fitter)
+            if (('AUC' in metrics) or ('IAUC' in metrics) or ('GAUC' in metrics)):
+                pred_df = self.models[i_fold].predict_prob_events(test_df)
             for metric in metrics:
                 if metric == 'PE':
                     pred_df = self.models[i_fold].predict_cumulative_incident_function(test_df)
@@ -104,15 +106,12 @@ class TwoStagesCV(object):
                     tmp_res = pd.concat([tmp_res], keys=[metric], names=['metric'])
                     self.results = pd.concat([self.results, tmp_res], axis=0)
                 elif metric == 'IAUC':
-                    pred_df = self.models[i_fold].predict_prob_events(test_df)
                     self.integrated_auc[i_fold] = events_integrated_auc(pred_df, event_type_col=event_type_col,
                                                                         duration_col=duration_col)
                 elif metric == 'GAUC':
-                    pred_df = self.models[i_fold].predict_prob_events(test_df)
                     self.global_auc[i_fold] = global_auc(pred_df, event_type_col=event_type_col,
                                                                   duration_col=duration_col)
                 elif metric == 'AUC':
-                    pred_df = self.models[i_fold].predict_prob_events(test_df)
                     tmp_res = events_auc_at_t(pred_df, event_type_col=event_type_col,
                                                        duration_col=duration_col)
                     tmp_res = pd.concat([tmp_res], keys=[i_fold], names=['fold'])
