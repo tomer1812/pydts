@@ -49,18 +49,6 @@ class TestEvaluation(unittest.TestCase):
                                                                 prob_lof_at_t=0.01 * np.ones_like(self.ets.times))
         self.patients_df = self.ets.update_event_or_lof(patients_df)
 
-    def test_prediction_error(self):
-        fitter = TwoStagesFitter()
-        fitter.fit(df=self.patients_df.drop(['C', 'T'], axis=1), nb_workers=1)
-        pred_df = fitter.predict_cumulative_incident_function(self.patients_df)
-        prediction_error(pred_df)
-
-    def test_event_specific_prediction_error(self):
-        fitter = TwoStagesFitter()
-        fitter.fit(df=self.patients_df.drop(['C', 'T'], axis=1), nb_workers=1)
-        pred_df = fitter.predict_cumulative_incident_function(self.patients_df)
-        event_specific_prediction_error(pred_df, event=1)
-
     def test_event_specific_auc(self):
         fitter = TwoStagesFitter()
         fitter.fit(df=self.patients_df.drop(['C', 'T'], axis=1), nb_workers=1)
@@ -81,6 +69,19 @@ class TestEvaluation(unittest.TestCase):
         esauc = event_specific_auc_at_t(pred_df, event=event, t=9)
         print(esauc)
 
+    def test_event_specific_brier_score_perfect_model(self):
+        cov_df = self.patients_df[self.covariates]
+        hazards = self.ets.calculate_hazards(cov_df, self.real_coef_dict, events=self.ets.events)
+        overall_survival = self.ets.calculate_overall_survival(hazards)
+        probs_j_at_t = self.ets.calculate_prob_event_at_t(hazards, overall_survival)
+        event = 1
+        probs_j_at_t = pd.DataFrame(probs_j_at_t[event-1].values,
+                                    columns=[f'prob_j{event}_at_t{t}'
+                                             for t in range(1, self.ets.d_times+1)])
+        pred_df = pd.concat([self.patients_df, probs_j_at_t], axis=1)
+        esauc = event_specific_brier_score_at_t(pred_df, event=event, t=9)
+        print(esauc)
+
     def test_event_specific_auc_all_perfect_model(self):
         cov_df = self.patients_df[self.covariates]
         hazards = self.ets.calculate_hazards(cov_df, self.real_coef_dict, events=self.ets.events)
@@ -94,6 +95,19 @@ class TestEvaluation(unittest.TestCase):
         esauc = event_specific_auc_at_t_all(pred_df, event=event)
         print(esauc)
 
+    def test_event_specific_brier_score_all_perfect_model(self):
+        cov_df = self.patients_df[self.covariates]
+        hazards = self.ets.calculate_hazards(cov_df, self.real_coef_dict, events=self.ets.events)
+        overall_survival = self.ets.calculate_overall_survival(hazards)
+        probs_j_at_t = self.ets.calculate_prob_event_at_t(hazards, overall_survival)
+        event = 1
+        probs_j_at_t = pd.DataFrame(probs_j_at_t[event-1].values,
+                                    columns=[f'prob_j{event}_at_t{t}'
+                                             for t in range(1, self.ets.d_times+1)])
+        pred_df = pd.concat([self.patients_df, probs_j_at_t], axis=1)
+        esbs = event_specific_brier_score_at_t_all(pred_df, event=event)
+        print(esbs)
+
     def test_event_specific_integrated_auc_perfect_model(self):
         cov_df = self.patients_df[self.covariates]
         hazards = self.ets.calculate_hazards(cov_df, self.real_coef_dict, events=self.ets.events)
@@ -106,6 +120,19 @@ class TestEvaluation(unittest.TestCase):
         pred_df = pd.concat([self.patients_df, probs_j_at_t], axis=1)
         esauc = event_specific_integrated_auc(pred_df, event=event)
         print(esauc)
+
+    def test_event_specific_integrated_brier_score_perfect_model(self):
+        cov_df = self.patients_df[self.covariates]
+        hazards = self.ets.calculate_hazards(cov_df, self.real_coef_dict, events=self.ets.events)
+        overall_survival = self.ets.calculate_overall_survival(hazards)
+        probs_j_at_t = self.ets.calculate_prob_event_at_t(hazards, overall_survival)
+        event = 1
+        probs_j_at_t = pd.DataFrame(probs_j_at_t[event-1].values,
+                                    columns=[f'prob_j{event}_at_t{t}'
+                                             for t in range(1, self.ets.d_times+1)])
+        pred_df = pd.concat([self.patients_df, probs_j_at_t], axis=1)
+        esbs = event_specific_integrated_brier_score(pred_df, event=event)
+        print(esbs)
 
     def test_event_specific_integrated_auc_with_weights_perfect_model(self):
         cov_df = self.patients_df[self.covariates]
@@ -121,6 +148,21 @@ class TestEvaluation(unittest.TestCase):
                             index=range(1, self.ets.d_times+1))
         esauc = event_specific_integrated_auc(pred_df, event=event, weights=weights)
         print(esauc)
+
+    def test_event_specific_integrated_brier_score_with_weights_perfect_model(self):
+        cov_df = self.patients_df[self.covariates]
+        hazards = self.ets.calculate_hazards(cov_df, self.real_coef_dict, events=self.ets.events)
+        overall_survival = self.ets.calculate_overall_survival(hazards)
+        probs_j_at_t = self.ets.calculate_prob_event_at_t(hazards, overall_survival)
+        event = 1
+        probs_j_at_t = pd.DataFrame(probs_j_at_t[event-1].values,
+                                    columns=[f'prob_j{event}_at_t{t}'
+                                             for t in range(1, self.ets.d_times+1)])
+        pred_df = pd.concat([self.patients_df, probs_j_at_t], axis=1)
+        weights = pd.Series((1/self.ets.d_times)*np.ones(self.ets.d_times),
+                            index=range(1, self.ets.d_times+1))
+        esbs = event_specific_integrated_brier_score(pred_df, event=event, weights=weights)
+        print(esbs)
 
     def test_global_auc_perfect_model(self):
         cov_df = self.patients_df[self.covariates]
@@ -139,6 +181,91 @@ class TestEvaluation(unittest.TestCase):
         esauc = global_auc(pred_df)
         print(esauc)
 
+    def test_global_brier_score_perfect_model(self):
+        cov_df = self.patients_df[self.covariates]
+        hazards = self.ets.calculate_hazards(cov_df, self.real_coef_dict, events=self.ets.events)
+        overall_survival = self.ets.calculate_overall_survival(hazards)
+        probs_j_at_t = self.ets.calculate_prob_event_at_t(hazards, overall_survival)
+        event = 1
+        probs_j_at_t_1 = pd.DataFrame(probs_j_at_t[event-1].values,
+                                    columns=[f'prob_j{event}_at_t{t}'
+                                             for t in range(1, self.ets.d_times+1)])
+        event = 2
+        probs_j_at_t_2 = pd.DataFrame(probs_j_at_t[event-1].values,
+                                    columns=[f'prob_j{event}_at_t{t}'
+                                             for t in range(1, self.ets.d_times+1)])
+        pred_df = pd.concat([self.patients_df, probs_j_at_t_1, probs_j_at_t_2], axis=1)
+        esbs = global_brier_score(pred_df)
+        print(esbs)
+
+    def test_events_integrated_brier_score_perfect_model(self):
+        cov_df = self.patients_df[self.covariates]
+        hazards = self.ets.calculate_hazards(cov_df, self.real_coef_dict, events=self.ets.events)
+        overall_survival = self.ets.calculate_overall_survival(hazards)
+        probs_j_at_t = self.ets.calculate_prob_event_at_t(hazards, overall_survival)
+        event = 1
+        probs_j_at_t_1 = pd.DataFrame(probs_j_at_t[event-1].values,
+                                    columns=[f'prob_j{event}_at_t{t}'
+                                             for t in range(1, self.ets.d_times+1)])
+        event = 2
+        probs_j_at_t_2 = pd.DataFrame(probs_j_at_t[event-1].values,
+                                    columns=[f'prob_j{event}_at_t{t}'
+                                             for t in range(1, self.ets.d_times+1)])
+        pred_df = pd.concat([self.patients_df, probs_j_at_t_1, probs_j_at_t_2], axis=1)
+        esbs = events_integrated_brier_score(pred_df)
+        print(esbs)
+
+    def test_events_integrated_auc_perfect_model(self):
+        cov_df = self.patients_df[self.covariates]
+        hazards = self.ets.calculate_hazards(cov_df, self.real_coef_dict, events=self.ets.events)
+        overall_survival = self.ets.calculate_overall_survival(hazards)
+        probs_j_at_t = self.ets.calculate_prob_event_at_t(hazards, overall_survival)
+        event = 1
+        probs_j_at_t_1 = pd.DataFrame(probs_j_at_t[event-1].values,
+                                    columns=[f'prob_j{event}_at_t{t}'
+                                             for t in range(1, self.ets.d_times+1)])
+        event = 2
+        probs_j_at_t_2 = pd.DataFrame(probs_j_at_t[event-1].values,
+                                    columns=[f'prob_j{event}_at_t{t}'
+                                             for t in range(1, self.ets.d_times+1)])
+        pred_df = pd.concat([self.patients_df, probs_j_at_t_1, probs_j_at_t_2], axis=1)
+        esbs = events_integrated_auc(pred_df)
+        print(esbs)
+
+    def test_events_auc_at_t_perfect_model(self):
+        cov_df = self.patients_df[self.covariates]
+        hazards = self.ets.calculate_hazards(cov_df, self.real_coef_dict, events=self.ets.events)
+        overall_survival = self.ets.calculate_overall_survival(hazards)
+        probs_j_at_t = self.ets.calculate_prob_event_at_t(hazards, overall_survival)
+        event = 1
+        probs_j_at_t_1 = pd.DataFrame(probs_j_at_t[event-1].values,
+                                    columns=[f'prob_j{event}_at_t{t}'
+                                             for t in range(1, self.ets.d_times+1)])
+        event = 2
+        probs_j_at_t_2 = pd.DataFrame(probs_j_at_t[event-1].values,
+                                    columns=[f'prob_j{event}_at_t{t}'
+                                             for t in range(1, self.ets.d_times+1)])
+        pred_df = pd.concat([self.patients_df, probs_j_at_t_1, probs_j_at_t_2], axis=1)
+        esauc = events_auc_at_t(pred_df)
+        print(esauc)
+
+    def test_events_brier_score_at_t_perfect_model(self):
+        cov_df = self.patients_df[self.covariates]
+        hazards = self.ets.calculate_hazards(cov_df, self.real_coef_dict, events=self.ets.events)
+        overall_survival = self.ets.calculate_overall_survival(hazards)
+        probs_j_at_t = self.ets.calculate_prob_event_at_t(hazards, overall_survival)
+        event = 1
+        probs_j_at_t_1 = pd.DataFrame(probs_j_at_t[event-1].values,
+                                    columns=[f'prob_j{event}_at_t{t}'
+                                             for t in range(1, self.ets.d_times+1)])
+        event = 2
+        probs_j_at_t_2 = pd.DataFrame(probs_j_at_t[event-1].values,
+                                    columns=[f'prob_j{event}_at_t{t}'
+                                             for t in range(1, self.ets.d_times+1)])
+        pred_df = pd.concat([self.patients_df, probs_j_at_t_1, probs_j_at_t_2], axis=1)
+        esbs = events_brier_score_at_t(pred_df)
+        print(esbs)
+
     def test_event_specific_weights_perfect_model(self):
         cov_df = self.patients_df[self.covariates]
         hazards = self.ets.calculate_hazards(cov_df, self.real_coef_dict, events=self.ets.events)
@@ -149,7 +276,7 @@ class TestEvaluation(unittest.TestCase):
                                     columns=[f'prob_j{event}_at_t{t}'
                                              for t in range(1, self.ets.d_times+1)])
         pred_df = pd.concat([self.patients_df, probs_j_at_t], axis=1)
-        weights = event_specific_auc_weights(pred_df, event=event)
+        weights = event_specific_weights(pred_df, event=event)
         print(weights)
 
     def test_event_specific_auc_simple_case_j1_t5(self):
@@ -196,5 +323,5 @@ class TestEvaluation(unittest.TestCase):
             [2, 6, 0.04, 0.04, 0.07, 0.07, 0.12, 0.12],
         ], columns=['J', 'X'] + [f'prob_j1_at_t{t}' for t in range(1, d+1)])
 
-        event_specific_auc_weights(pred_df, event=1)
+        event_specific_weights(pred_df, event=1)
         print('x')

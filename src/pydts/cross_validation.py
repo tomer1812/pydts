@@ -9,7 +9,8 @@ warnings.filterwarnings('ignore')
 slicer = pd.IndexSlice
 from typing import Optional, List, Union
 import psutil
-from .evaluation import prediction_error, events_integrated_auc, global_auc, events_auc_at_t
+from .evaluation import events_brier_score_at_t, events_integrated_brier_score, global_brier_score, \
+    events_integrated_auc, global_auc, events_auc_at_t
 
 WORKERS = psutil.cpu_count(logical=False)
 
@@ -25,6 +26,8 @@ class TwoStagesCV(object):
         self.results = pd.DataFrame()
         self.global_auc = {}
         self.integrated_auc = {}
+        self.global_bs = {}
+        self.integrated_bs = {}
 
     def cross_validate(self,
                        full_df: pd.DataFrame,
@@ -39,7 +42,7 @@ class TwoStagesCV(object):
                        x0: Union[np.array, int] = 0,
                        verbose: int = 2,
                        nb_workers: int = WORKERS,
-                       metrics='PE'):
+                       metrics=['BS', 'IBS', 'GBS', 'AUC', 'IAUC', 'GAUC']):
 
         """
         This method implements K-fold cross-validation using TwoStagesFitters and full_df data.
@@ -59,10 +62,12 @@ class TwoStagesCV(object):
             verbose (int, Optional): The verbosity level of pandaallel
             nb_workers (int, Optional): The number of workers to pandaallel. If not sepcified, defaults to the number of workers available.
             metrics (str, list): Evaluation metrics. Available metrics:
-                                                    'PE': Prediction Error
-                                                    'AUC': AUC at t,
-                                                    'IAUC': Integrated AUC,
-                                                    'GAUC': Global AUC.
+                                                    'AUC': AUC at t (will be added to TwoStagesCV.results),
+                                                    'IAUC': Integrated AUC (will be in TwoStagesCV.integrated_auc),
+                                                    'GAUC': Global AUC (will be in TwoStagesCV.global_auc).
+                                                    'BS': Brier score at t (will be added to TwoStagesCV.results),
+                                                    'IBS': Integrated Brier Score (will be in TwoStagesCV.integrated_bs),
+                                                    'GBS': Global Brier Score (will be in TwoStagesCV.global_bs).
 
         Returns:
             Results (pd.DataFrame): Cross validation metrics results
@@ -95,25 +100,31 @@ class TwoStagesCV(object):
                             nb_workers=nb_workers)
 
             self.models[i_fold] = deepcopy(fold_fitter)
-            if (('AUC' in metrics) or ('IAUC' in metrics) or ('GAUC' in metrics)):
-                pred_df = self.models[i_fold].predict_prob_events(test_df)
+
+            pred_df = self.models[i_fold].predict_prob_events(test_df)
+
             for metric in metrics:
-                if metric == 'PE':
-                    pred_df = self.models[i_fold].predict_cumulative_incident_function(test_df)
-                    tmp_res = prediction_error(pred_df, event_type_col=event_type_col,
-                                                        duration_col=duration_col)
-                    tmp_res = pd.concat([tmp_res], keys=[i_fold], names=['fold'])
-                    tmp_res = pd.concat([tmp_res], keys=[metric], names=['metric'])
-                    self.results = pd.concat([self.results, tmp_res], axis=0)
-                elif metric == 'IAUC':
+                if metric == 'IAUC':
                     self.integrated_auc[i_fold] = events_integrated_auc(pred_df, event_type_col=event_type_col,
                                                                         duration_col=duration_col)
                 elif metric == 'GAUC':
                     self.global_auc[i_fold] = global_auc(pred_df, event_type_col=event_type_col,
                                                                   duration_col=duration_col)
+                elif metric == 'IBS':
+                    self.integrated_bs[i_fold] = events_integrated_brier_score(pred_df, event_type_col=event_type_col,
+                                                                                        duration_col=duration_col)
+                elif metric == 'GBS':
+                    self.global_bs[i_fold] = global_brier_score(pred_df, event_type_col=event_type_col,
+                                                                         duration_col=duration_col)
                 elif metric == 'AUC':
                     tmp_res = events_auc_at_t(pred_df, event_type_col=event_type_col,
                                                        duration_col=duration_col)
+                    tmp_res = pd.concat([tmp_res], keys=[i_fold], names=['fold'])
+                    tmp_res = pd.concat([tmp_res], keys=[metric], names=['metric'])
+                    self.results = pd.concat([self.results, tmp_res], axis=0)
+                elif metric == 'BS':
+                    tmp_res = events_brier_score_at_t(pred_df, event_type_col=event_type_col,
+                                                               duration_col=duration_col)
                     tmp_res = pd.concat([tmp_res], keys=[i_fold], names=['fold'])
                     tmp_res = pd.concat([tmp_res], keys=[metric], names=['metric'])
                     self.results = pd.concat([self.results, tmp_res], axis=0)
