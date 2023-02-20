@@ -245,53 +245,14 @@ class TwoStagesFitter(ExpansionBasedFitter):
 
     def _fit_beta(self, expanded_df, events, model=CoxPHFitter, model_kwargs={}, model_fit_kwargs={}):
         # Model fitting for conditional estimation of Beta_j for all events
+        _model_kwargs_per_event = np.any([event in model_kwargs.keys() for event in events])
         beta_models = {}
         for event in events:
+            _model_kwargs = model_kwargs[event] if _model_kwargs_per_event else model_kwargs
             beta_models[event] = self._fit_event_beta(expanded_df=expanded_df, event=event,
-                                                      model=model, model_kwargs=model_kwargs,
+                                                      model=model, model_kwargs=_model_kwargs,
                                                       model_fit_kwargs=model_fit_kwargs)
         return beta_models
-    #
-    #
-    # def expand_and_calc_breslow(self, df, with_reg_term: bool = True):
-    #
-    #     expanded_df = self._expand_data(df=df, event_type_col=self.event_type_col, duration_col=self.duration_col,
-    #                                     pid_col=self.pid_col)
-    #
-    #     breslow_pll = {}
-    #     for event in self.events:
-    #         breslow_pll[event] = self.calc_breslow_partial_likelihood(expanded_df=expanded_df, event=event,
-    #                                                                   with_reg_term=with_reg_term)
-    #
-    #     return breslow_pll
-    #
-    # def calc_breslow_partial_likelihood(self,
-    #                                     expanded_df,
-    #                                     event,
-    #                                     with_reg_term: bool = True):
-    #     event_col=f'j_{event}'
-    #     RISK_SCORE_COL = '_risk_score'
-    #     BETA_Z = '_beta_z'
-    #     expanded_df[BETA_Z] = np.dot(expanded_df[self.covariates], self.beta_models[event].params_)
-    #     expanded_df[RISK_SCORE_COL] = np.exp(expanded_df[BETA_Z])
-    #     total_breslow_logPL = 0
-    #
-    #     for idt, event_time in enumerate(sorted(expanded_df[self.duration_col].unique())):
-    #         current_time_breslow_pll = 0
-    #
-    #         # Since we deal with the expanded data, there is a pseudo-observation row in each time that the original
-    #         # observation is included in the risk set. Therefore, the risk-set is
-    #         # expanded_df[duration_col] == event_time , and not expanded_df[duration_col] >= event_time.
-    #         risk_set = expanded_df[expanded_df[self.duration_col] == event_time]
-    #         event_occurred = risk_set[risk_set[event_col] == 1]
-    #
-    #         # PL = product(eventoccurred) / ( sum(riskscore)**len(riskscore) )
-    #         # logPL = expanded_df[BETA_Z].sum() - len(riskscore) log sum()
-    #
-    #         total_breslow_logPL += (event_occurred[BETA_Z].sum() -
-    #                                 len(event_occurred[RISK_SCORE_COL]) * np.log(risk_set[RISK_SCORE_COL].sum()))
-    #
-    #     return total_breslow_logPL
 
     def fit(self,
             df: pd.DataFrame,
@@ -389,12 +350,6 @@ class TwoStagesFitter(ExpansionBasedFitter):
 
         for event, model in self.event_models.items():
             print(f'\n\nModel summary for event: {event}')
-            # _summary_func = getattr(model[0], summary_func, None)
-            # if _summary_func is not None:
-            #     print(f'\n\nModel summary for event: {event}')
-            #     _summary_func(**summary_kwargs)
-            # else:
-            #     print(f'Not {summary_func} function in event {event} model')
             display(model[1].drop('opt_res', axis=1).set_index([self.event_type_col, self.duration_col]))
 
 

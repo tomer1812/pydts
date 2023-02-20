@@ -242,3 +242,33 @@ class TestTwoStagesFitter(unittest.TestCase):
         self.fitted_model.predict_prob_event_j_at_t(df=temp_df,
                                                     event=self.fitted_model.events[0],
                                                     t=self.fitted_model.times[3])
+
+    def test_regularization_same_for_all_beta_models(self):
+        L1_regularized_fitter = TwoStagesFitter()
+
+        fit_beta_kwargs = {
+            'model_kwargs': {
+                'penalizer': 0.003,
+                'l1_ratio': 1
+            }
+        }
+
+        L1_regularized_fitter.fit(df=self.df.drop(['C', 'T'], axis=1), fit_beta_kwargs=fit_beta_kwargs)
+
+    def test_regularization_different_to_each_beta_model(self):
+        L1_regularized_fitter = TwoStagesFitter()
+
+        fit_beta_kwargs = {
+            'model_kwargs': {
+                1: {
+                        'penalizer': 0.003,
+                        'l1_ratio': 1
+                },
+                2: {
+                        'penalizer': 0.005,
+                        'l1_ratio': 1
+                }
+            }
+        }
+
+        L1_regularized_fitter.fit(df=self.df.drop(['C', 'T'], axis=1), fit_beta_kwargs=fit_beta_kwargs)
