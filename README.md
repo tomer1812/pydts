@@ -41,7 +41,7 @@ If you found PyDTS software useful to your research, please cite the papers:
 ```bibtex
 @article{Meir_PyDTS_2022,
     author = {Meir, Tomer and Gutman, Rom, and Gorfine, Malka},
-    doi = {arXiv:2204.05731 [stat.ML]},
+    doi = {10.48550/arXiv.2204.05731},
     title = {{PyDTS: A Python Package for Discrete Time Survival Analysis with Competing Risks}},
     url = {https://arxiv.org/abs/2204.05731},
     year = {2022}
