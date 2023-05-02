@@ -177,7 +177,7 @@ def calculate_jt(sums, probs_jt, d_times, j_events):
         # sample T
         temp_ts.append((prob_df.loc[rel_j].cumsum(1) >= np.random.rand(rel_j.shape[0])[:, None]).idxmax(axis=1))
 
-    temp_ts.append(pd.Series(d_times, index=j_df.query('J==0').index))
+    temp_ts.append(pd.Series(d_times+1, index=j_df.query('J==0').index))
 
     j_df["T"] = pd.concat(temp_ts).sort_index()
     return j_df
@@ -218,7 +218,7 @@ def generate_quick_start_df(n_patients=10000, d_times=30, j_events=2, n_cov=5, s
     patients_df.index.name = pid_col
     patients_df['C'] = np.where(np.random.rand(n_patients) < censoring_prob,
                                 np.random.randint(low=1, high=d_times+1,
-                                                  size=n_patients), d_times)
+                                                  size=n_patients), d_times+1)
     patients_df['X'] = patients_df[['T', 'C']].min(axis=1)
     patients_df.loc[patients_df['C'] < patients_df['T'], 'J'] = 0
     return patients_df.reset_index()

@@ -199,7 +199,11 @@ class EventTimesSampler(object):
             observations_df (pd.DataFrame): Upadted dataframe including sampled censoring time.
         """
         np.random.seed(seed)
-        prob_lof_at_t[-1] += (1 - sum(prob_lof_at_t))
+        administrative_censoring_prob = (1 - sum(prob_lof_at_t))
+        assert (administrative_censoring_prob >= 0), "Check the sum of prob_lof_at_t argument."
+        assert (administrative_censoring_prob <= 1), "Check the sum of prob_lof_at_t argument."
+
+        prob_lof_at_t = np.append(prob_lof_at_t, administrative_censoring_prob)
         sampled_df = pd.DataFrame(np.random.choice(a=self.times, size=len(observations_df), p=prob_lof_at_t),
                                   index=observations_df.index, columns=['C'])
         # No follow-up censoring, C=d+2 such that T wins when building X column:

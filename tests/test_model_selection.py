@@ -46,7 +46,7 @@ class TestPenaltyGridSearch(unittest.TestCase):
         patients_df = ets.sample_event_times(patients_df, hazard_coefs=real_coef_dict, seed=seed)
         patients_df.index.name = 'pid'
         patients_df = patients_df.reset_index()
-        patients_df = ets.sample_independent_lof_censoring(patients_df, prob_lof_at_t=0.01 * np.ones_like(ets.times))
+        patients_df = ets.sample_independent_lof_censoring(patients_df, prob_lof_at_t=0.01 * np.ones(d_times))
         self.patients_df = ets.update_event_or_lof(patients_df)
 
     def test_get_mixed_two_stages_fitter(self):

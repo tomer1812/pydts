@@ -82,8 +82,9 @@ class TestEventTimesSampler(unittest.TestCase):
         patients_df = pd.DataFrame(data=np.random.uniform(low=0.0, high=1.0, size=[n_patients, n_cov]),
                                    columns=covariates)
 
+        d_times = 15
         ets = EventTimesSampler(d_times=15, j_event_types=2)
-        ets.sample_independent_lof_censoring(patients_df, prob_lof_at_t=0.03 * np.ones_like(ets.times))
+        ets.sample_independent_lof_censoring(patients_df, prob_lof_at_t=0.03 * np.ones(d_times))
 
     def test_update_event_or_lof(self):
         n_cov = 5

@@ -5,7 +5,7 @@ import numpy as np
 from src.pydts.fitters import repetitive_fitters
 
 
-class TestTwoStagesFitter(unittest.TestCase):
+class TestRepFitters(unittest.TestCase):
     def setUp(self):
         self.real_coef_dict = {
             "alpha": {

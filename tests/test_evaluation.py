@@ -46,7 +46,7 @@ class TestEvaluation(unittest.TestCase):
         patients_df.index.name = 'pid'
         patients_df = patients_df.reset_index()
         patients_df = self.ets.sample_independent_lof_censoring(patients_df,
-                                                                prob_lof_at_t=0.01 * np.ones_like(self.ets.times))
+                                                                prob_lof_at_t=0.01 * np.ones(d_times))
         self.patients_df = self.ets.update_event_or_lof(patients_df)
 
     def test_event_specific_auc(self):

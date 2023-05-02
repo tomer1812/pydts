@@ -632,7 +632,7 @@ def repetitive_fitters(rep: int, n_patients: int, n_cov: int, d_times: int, j_ev
                                                   pid_col=pid_col, seed=samp, real_coef_dict=real_coef_dict,
                                                   censoring_prob=censoring_prob )
             train_df, test_df = train_test_split(patients_df, test_size=test_size)
-            counts_df = train_df.groupby(['J', 'X']).size().to_frame(samp)
+            counts_df = train_df[train_df['X'] <= d_times].groupby(['J', 'X']).size().to_frame(samp)
             assert not (counts_df.reset_index()['X'].value_counts() < (j_events + 1)).any(), "Not enough events"
             counts_df_list.append(counts_df)
             drop_cols = pd.Index(drop_cols)
