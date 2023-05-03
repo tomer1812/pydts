@@ -207,7 +207,7 @@ class EventTimesSampler(object):
         sampled_df = pd.DataFrame(np.random.choice(a=self.times, size=len(observations_df), p=prob_lof_at_t),
                                   index=observations_df.index, columns=['C'])
         # No follow-up censoring, C=d+2 such that T wins when building X column:
-        sampled_df.loc[sampled_df['C'] == self.times[-1], 'C'] = self.d_times + 2
+        #sampled_df.loc[sampled_df['C'] == self.times[-1], 'C'] = self.d_times + 2
         if 'C' in observations_df.columns:
             observations_df.drop('C', axis=1, inplace=True)
         observations_df = pd.concat([observations_df, sampled_df], axis=1)
@@ -234,7 +234,7 @@ class EventTimesSampler(object):
                                                 events=[0])
 
         # No follow-up censoring, C=d+2 such that T wins when building X column:
-        sampled_df.loc[sampled_df['J'] == 0, 'T'] = self.d_times + 2
+        #sampled_df.loc[sampled_df['J'] == 0, 'T'] = self.d_times + 2
         sampled_df = sampled_df[['T']]
         sampled_df.columns = ['C']
         if 'C' in observations_df.columns:
