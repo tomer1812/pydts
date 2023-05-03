@@ -453,6 +453,7 @@ def compare_beta_models_for_example(first_models: dict, second_models: dict,
                 first_model = first_models[event].params[first_slicing].copy()
                 first_model.index = first_model.index.str.replace(r"\D+", "", regex=True)
                 first_model = first_model.add_prefix("a")
+                first_model = first_model.iloc[:-1]
                 second_model = second_models[event][1][["X", "alpha_jt"]].copy()
                 second_model = second_model.set_index("X")["alpha_jt"].add_prefix("a")
                 real_coef = real_coef_dict[model_type][event](np.arange(1, first_model.index.shape[0] + 1))
