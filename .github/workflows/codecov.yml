@@ -10,16 +10,11 @@ jobs:
       OS: ${{ matrix.os }}
       PYTHON: '3.8'
     steps:
-    - uses: actions/checkout@v2
-      with:
-        node-version: 16
+    - uses: actions/checkout@v3
     - uses: actions/setup-node@v2
-      with:
-        node-version: 16
     - name: Setup Python
       uses: actions/setup-python@v2
       with:
-        node-version: 16
         python-version: 3.8
     - name: Generate coverage report
       run: |

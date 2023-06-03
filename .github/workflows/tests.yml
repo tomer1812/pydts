@@ -9,15 +9,10 @@ jobs:
         python-version: [3.8]
         os: [ubuntu-latest, macOS-latest]
     steps:
-    - uses: actions/checkout@v2
-      with:
-        node-version: 16
+    - uses: actions/checkout@v3
     - uses: actions/setup-node@v2
-      with:
-        node-version: 16
     - uses: actions/setup-python@v2
       with:
-        node-version: 16
         python-version: 3.8
         architecture: x64
     - run: pip install poetry==1.1.13
