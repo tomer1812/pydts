@@ -8,13 +8,16 @@ jobs:
         os: [ubuntu-latest]
     env:
       OS: ${{ matrix.os }}
-      PYTHON: '3.9'
+      PYTHON: '3.8'
     steps:
     - uses: actions/checkout@master
+    - uses: actions/setup-node@v2
+      with:
+        node-version: 16
     - name: Setup Python
       uses: actions/setup-python@master
       with:
-        python-version: 3.9
+        python-version: 3.8
     - name: Generate coverage report
       run: |
         pip install poetry==1.1.13
