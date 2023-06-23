@@ -569,7 +569,6 @@ class TwoStagesFitter(ExpansionBasedFitter):
 
 
 def repetitive_fitters(rep: int, n_patients: int, n_cov: int, d_times: int, j_events: int, pid_col: str,
-                       test_size: float,
                        drop_cols: Iterable = ("C", "T"),
                        model1: ExpansionBasedFitter = DataExpansionFitter,
                        model1_name="Lee",
@@ -616,7 +615,6 @@ def repetitive_fitters(rep: int, n_patients: int, n_cov: int, d_times: int, j_ev
     """
 
     from .examples_utils.plots import compare_beta_models_for_example
-    from sklearn.model_selection import train_test_split
     from tqdm import trange
     from time import time
     assert real_coef_dict is not None, "The user should supply the coefficients of the experiment"
@@ -631,21 +629,20 @@ def repetitive_fitters(rep: int, n_patients: int, n_cov: int, d_times: int, j_ev
                                                   j_events=j_events,
                                                   pid_col=pid_col, seed=samp, real_coef_dict=real_coef_dict,
                                                   censoring_prob=censoring_prob )
-            train_df, test_df = train_test_split(patients_df, test_size=test_size)
-            counts_df = train_df[train_df['X'] <= d_times].groupby(['J', 'X']).size().to_frame(samp)
+            counts_df = patients_df[patients_df['X'] <= d_times].groupby(['J', 'X']).size().to_frame(samp)
             assert not (counts_df.reset_index()['X'].value_counts() < (j_events + 1)).any(), "Not enough events"
             counts_df_list.append(counts_df)
             drop_cols = pd.Index(drop_cols)
             start_1 = time()
             fitter = model1()
-            fitter.fit(df=train_df.drop(drop_cols, axis=1))
+            fitter.fit(df=patients_df.drop(drop_cols, axis=1))
             end_1 = time()
             start_2 = time()
             new_fitter = model2()
             if isinstance(new_fitter, TwoStagesFitter):
-                new_fitter.fit(df=train_df.drop(drop_cols, axis=1), verbose=verbose)
+                new_fitter.fit(df=patients_df.drop(drop_cols, axis=1), verbose=verbose)
             else:
-                new_fitter.fit(df=train_df.drop(drop_cols, axis=1))
+                new_fitter.fit(df=patients_df.drop(drop_cols, axis=1))
             end_2 = time()
             times[model1_name].append(end_1 - start_1)
             times[model2_name].append(end_2 - start_2)

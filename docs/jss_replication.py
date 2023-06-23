@@ -8,12 +8,13 @@
 from time import time
 from pydts.data_generation import EventTimesSampler
 from pydts.examples_utils.plots import add_panel_text, plot_events_occurrence, plot_example_pred_output, \
-    plot_models_coefficients, plot_reps_coef_std, plot_times
+    plot_models_coefficients, plot_times, compare_beta_models_for_example, plot_jss_reps_coef_std
 from pydts.examples_utils.generate_simulations_data import generate_quick_start_df
 from pydts.fitters import DataExpansionFitter, TwoStagesFitter, repetitive_fitters
 from pydts.model_selection import PenaltyGridSearch
 from pydts.cross_validation import PenaltyGridSearchCV, TwoStagesCV
 from pydts.evaluation import events_auc_at_t
+from pydts.examples_utils.mimic_consts import *
 from tableone import TableOne
 import numpy as np
 import pandas as pd
@@ -35,146 +36,11 @@ nb_start = time()
 # Estimated total running time (Apple MacBook Pro 32Gb RAM):
 # lean_version = True:
 # lean_version = False: 63651 seconds
-
-lean_version = False
+lean_version = True  # False
 
 # Provide the MIMIC-IV v2.0 data dir to replicate the use-case section results.
-mimic_data_dir = '/Users/tomer/git/DiscreteTimeSurvivalPenalization/data/mimic-iv-2.0'
+mimic_data_dir = None  # '/Users/tomer/git/DiscreteTimeSurvivalPenalization/data/mimic-iv-2.0'
 OUTPUT_DIR = ''
-
-
-from typing import Iterable
-import string
-
-def plot_models_coefficients(alpha_dict: dict, beta_dict: dict, times: Iterable,
-                             counts_df: pd.DataFrame,
-                             n_cov: int = 5,
-                             first_model_name: str = 'Lee et al.',
-                             second_model_name: str = 'two-step',
-                             filename: str = None) -> None:
-    """
-    This method takes the repetitive runs results and plotting the comparison between the methods coefs
-
-    Args:
-        alpha_dict (dict): a dict that contains for each event type (key) a dataframe of all the $\alpha_t$ (value)
-        beta_dict (dict): a dict that contains for each event type(key) a dataframe of all the $\beta_t$ (value)
-        times (Iterable): array like that contains all the unique times that were used
-        counts_df (pandas.DataFrame): pandas dataframe which contains how many events per each time t
-        n_cov (int): number of covariates (used to plot beta plot)
-        first_model_name (Optional[str]): the name of the first model
-        second_model_name (Optional[str]): the name of the second model
-
-    Returns:
-        None
-    """
-    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
-    ax = axes[0]
-    ax.tick_params(axis='both', which='major', labelsize=15)
-    ax.tick_params(axis='both', which='minor', labelsize=15)
-    add_panel_text(ax=ax, text='a')
-    ax.set_title(r'$\alpha_{jt}$', fontsize=26)
-    tmp_ajt = alpha_dict[1]
-    ax.scatter(times, tmp_ajt[f'Lee_mean'].values,
-               label=f'J=1 ({first_model_name})', color='tab:blue', marker='o', alpha=0.4, s=40)
-    ax.scatter(times, tmp_ajt[f'Ours_mean'].values,
-               label=f'J=1 ({second_model_name})', color='navy', marker='*', alpha=0.7, s=40)
-    ax.plot(times, tmp_ajt['real_mean'].values, label='J=1 (True)', ls='--', color='tab:blue')
-    tmp_ajt = alpha_dict[2]
-    ax.scatter(times, tmp_ajt[f'Lee_mean'].values,
-               label=f'J=2 ({first_model_name})', color='tab:green', alpha=0.4, s=30)
-    ax.scatter(times, tmp_ajt[f'Ours_mean'].values,
-               label=f'J=2 ({second_model_name})', color='darkgreen', marker='*', alpha=0.7, s=30)
-    ax.plot(times, tmp_ajt['real_mean'].values, label='J=2 (True)', ls='--', color='tab:green')
-    ax.set_xlabel(r'Time', fontsize=18)
-    ax.set_ylabel(r'$\alpha_{t}$', fontsize=18)
-    ax.legend(loc='upper center', fontsize=12)
-    ax.set_ylim([-3, 0.5])
-    ax2 = ax.twinx()
-    ax2.bar(times, counts_df.loc[1].values.squeeze(), label='J=1', color='tab:red', alpha=0.4, width=0.5)
-    ax2.bar(times, counts_df.loc[2].values.squeeze(), label='J=2', color='tab:brown', alpha=0.6, align='edge',
-            width=0.5)
-    ax2.legend(loc='upper right', fontsize=12)
-    ax2.set_ylabel('Number of observed events', fontsize=16, color='red')
-    ax2.tick_params(axis='y', colors='red')
-
-    ax = axes[1]
-    ax.tick_params(axis='both', which='major', labelsize=15)
-    ax.tick_params(axis='both', which='minor', labelsize=15)
-    ax.set_title(r'$\beta_{j}$', fontsize=26)
-    add_panel_text(ax=ax, text='b')
-    beta_j = beta_dict[1]
-    ax.bar(np.arange(1, n_cov + 1), beta_j['real_mean'].values, label='J=1 (True)', width=0.3, alpha=0.4,
-           color='tab:blue')
-    ax.scatter(-0.2 + np.arange(1, n_cov + 1), beta_j[f'Lee_mean'].values,
-               color='tab:blue', label=f'J=1 ({first_model_name})', marker="4", s=130)
-    ax.scatter(-0.2 + np.arange(1, n_cov + 1), beta_j[f'Ours_mean'].values,
-               color='navy', label=f'J=1 ({second_model_name})', marker=">", s=130, alpha=0.4)
-
-    beta_j = beta_dict[2]
-    ax.bar(np.arange(1, n_cov + 1), beta_j['real_mean'].values, color='tab:green', label='J=2 (True)', align='edge',
-           width=0.3, alpha=0.4)
-    ax.scatter(0.35 + np.arange(1, n_cov + 1), beta_j[f'Lee_mean'].values,
-               color='tab:green', label=f'J=2 ({first_model_name})', marker="3",
-               s=130)
-    ax.scatter(0.35 + np.arange(1, n_cov + 1), beta_j[f'Ours_mean'].values,
-               color='darkgreen', label=f'J=2 ({second_model_name})', marker="<",
-               s=130, alpha=0.4)
-    ax.set_xlabel('Covariate', fontsize=18)
-    ax.set_ylabel(r'$\beta}$', fontsize=18)
-    ax.legend(loc='upper center', fontsize=12)
-    ax.set_ylim([-1.5, 1])
-    fig.tight_layout()
-    if filename is not None:
-        fig.savefig(filename, dpi=300)
-
-
-def plot_reps_coef_std(rep_dict: dict, return_summary: bool = True, filename: str = None, paper_plots: bool = False):
-    alphabet_list = list(string.ascii_lowercase)
-    first_key = next(iter(rep_dict))    # deal with cases where there isn't 0 in samples
-    coef_types = list(rep_dict[first_key].keys())  # alpha, beta
-    event_types = rep_dict[first_key][coef_types[0]].keys()
-    mapping = {t: i for i, t in enumerate(coef_types)}
-    fig, axes = plt.subplots(len(coef_types), len(event_types), figsize=(12, 10))
-    res_dict = {coef: {event_type: None for event_type in event_types} for coef in coef_types}
-    for idct, coef_type in enumerate(coef_types):
-        for idet, event_type in enumerate(event_types):
-            ax = axes[mapping[coef_type]][event_type - 1]
-            add_panel_text(ax=ax, text=alphabet_list[idct*len(event_types)+idet])
-            ax.tick_params(axis='both', which='major', labelsize=15)
-            ax.tick_params(axis='both', which='minor', labelsize=15)
-            df = pd.concat([dfs[coef_type][event_type] for dfs in rep_dict.values()])
-            temp_df = df.groupby(df.index).agg(["mean", "std"])
-            prefix = "a" if coef_type == "alpha" else "Z"
-            temp_df = temp_df.loc[[f"{prefix}{idx}_{event_type}" for idx in range(1, temp_df.shape[0]+1)]]
-            temp_df.columns = temp_df.columns.get_level_values(0) + "_" + temp_df.columns.get_level_values(1)
-            res_dict[coef_type][event_type] = temp_df.copy()
-            temp_df.plot(x="Lee_std", y="Ours_std", kind="scatter", ax=ax)
-            ax.set_xlabel("Lee et al. std", fontsize=18)
-            ax.set_ylabel("two-step std", fontsize=18)
-            ax.plot([0, 1], [0, 1], "--", transform=ax.transAxes, alpha=0.3, color="tab:green");
-            ax.grid()
-            if paper_plots:
-                if ((idct == 0) and (idet == 0)):
-                    ax.set_xlim([0, 0.2])
-                    ax.set_ylim([0, 0.2])
-                elif ((idct == 0) and (idet == 1)):
-                    ax.set_xlim([0, 0.25])
-                    ax.set_ylim([0, 0.25])
-                elif ((idct == 1) and (idet == 0)):
-                    ax.set_xlim([0.025, 0.035])
-                    ax.set_ylim([0.025, 0.035])
-                elif ((idct == 1) and (idet == 1)):
-                    ax.set_xlim([0.035, 0.05])
-                    ax.set_ylim([0.035, 0.05])
-            latter = "\\alpha" if coef_type == "alpha" else "\\beta"
-            ax.set_title(f"${latter}{event_type}$", fontsize=18)
-    fig.tight_layout()
-    fig.show()
-    if filename is not None:
-        fig.savefig(filename, dpi=300)
-
-    if return_summary:
-        return res_dict
 
 
 # Section 3: Simulating discrete time survival data with competing events
@@ -234,9 +100,6 @@ plt.show()
 
 
 # Sections 3.2-3.3: Censoring sampling options and event times
-prob_lof_at_t = [0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05]
-observations_df = ets.sample_independent_lof_censoring(observations_df, prob_lof_at_t)
-
 ets = EventTimesSampler(d_times=7, j_event_types=2)
 censoring_coef_dict = {
     "alpha": {
@@ -248,6 +111,10 @@ censoring_coef_dict = {
 }
 
 observations_df = ets.sample_hazard_lof_censoring(observations_df, censoring_coef_dict)
+
+
+prob_lof_at_t = [0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05]
+observations_df = ets.sample_independent_lof_censoring(observations_df, prob_lof_at_t)
 
 coefficients_dict = {
     "alpha": {
@@ -366,15 +233,14 @@ pred_df.columns = ['ID=0', 'ID=1', 'ID=2']
 plot_example_pred_output(pred_df, fname=os.path.join(OUTPUT_DIR, 'figure_4.png'))
 plt.show()
 
+# Single build single run rep dict
+rep_dict = {}
+counts_df = patients_df[patients_df['X'] <= 30].groupby(['J', 'X']).size().to_frame(0)
+rep_dict[0] = compare_beta_models_for_example(fitter.event_models,
+                                           new_fitter.event_models, real_coef_dict=real_coef_dict)
 
 # Results comparison of a single run
-print('Results comparison single run')
-rep_dict, times_dict, counts_df = repetitive_fitters(rep=1, n_patients=50000, n_cov=5,
-                                                     d_times=30, j_events=2, pid_col='pid', test_size=0.25,
-                                                     verbose=0, real_coef_dict=real_coef_dict, censoring_prob=0.8,
-                                                     allow_fails=2)
-
-new_res_dict = plot_reps_coef_std(rep_dict, True)
+new_res_dict = plot_jss_reps_coef_std(rep_dict, True)
 a = new_res_dict['alpha']
 b = new_res_dict['beta']
 times = [t+1 for t in list(a[1].reset_index().index)]
@@ -385,34 +251,7 @@ plt.show()
 
 
 # Table 3
-beta_comparison_table = pd.DataFrame(index=['True', 'Mean (Lee et al.)', 'SE (Lee et al.)',
-                                              'Mean (two-step)', 'SE (two-step)'])
-for j in [1, 2]:
-    for i in range(1, 6):
-        tmp_df = pd.DataFrame()
-        for idx, k in enumerate(sorted(rep_dict.keys())):
-            lee = rep_dict[k]['beta'][j].loc[f"Z{i}_{j}"]['Lee']
-            ours = rep_dict[k]['beta'][j].loc[f"Z{i}_{j}"]['Ours']
-            true = rep_dict[k]['beta'][j].loc[f"Z{i}_{j}"]['real']
-            row = pd.Series({'True': true, 'Lee': lee, 'Ours': ours}, name=f"Z{i}_{j}_{k}")
-            tmp_df = pd.concat([tmp_df, row], axis=1)
-        beta_row = pd.Series({
-            'True': tmp_df.iloc[0,0],
-            'Mean (Lee et al.)': tmp_df.iloc[1].mean(),
-            'SE (Lee et al.)': tmp_df.iloc[1].std(),
-            'Mean (two-step)': tmp_df.iloc[2].mean(),
-            'SE (two-step)': tmp_df.iloc[2].std()
-        }, name=f'Z{i}_{j}')
-        beta_comparison_table = pd.concat([beta_comparison_table, beta_row], axis=1)
-
-beta_comparison_table = beta_comparison_table.round(3).T
-beta_comparison_table.columns = pd.MultiIndex.from_tuples(
-    [('True', ''), ('Lee et al.', 'Estimate'), ('Lee et al.', 'SE'), ('two-step', 'Estimate'), ('two-step', 'SE')])
-beta_comparison_table.index = [r'$\beta_{11}$', r'$\beta_{12}$', r'$\beta_{13}$', r'$\beta_{14}$', r'$\beta_{15}$',
-                               r'$\beta_{21}$', r'$\beta_{22}$', r'$\beta_{23}$', r'$\beta_{24}$', r'$\beta_{25}$']
-beta_comparison_table.index.name = r'$\beta_{jk}$'
-
-print(beta_comparison_table)
+print(beta_summary_comparison)
 beta_summary_comparison.astype(float).round(3).to_csv(os.path.join(OUTPUT_DIR, 'table_3.csv'))
 #print(beta_comparison_table.to_latex(escape=False))
 
@@ -426,7 +265,7 @@ rep_dict, times_dict, counts_df = repetitive_fitters(rep=rep, n_patients=50000, 
                                                      allow_fails=20)
 
 # Figure 6
-new_res_dict = plot_reps_coef_std(rep_dict, True, filename=os.path.join(OUTPUT_DIR, 'figure_6.png'))
+new_res_dict = plot_jss_reps_coef_std(rep_dict, True, filename=os.path.join(OUTPUT_DIR, 'figure_6.png'))
 plt.show()
 a = new_res_dict['alpha']
 b = new_res_dict['beta']
@@ -483,10 +322,6 @@ for idc, d in enumerate([15, 30, 45, 60, 100]):
     _times_dict['two-step'] = times_dict['Ours']
     ax = plot_times(_times_dict, ax=ax, color=colors[idc])
 
-# major_ticks = np.arange(0, 136, 20)
-# minor_ticks = np.arange(0, 136, 5)
-# ax.set_yticks(major_ticks)
-# ax.set_yticks(minor_ticks, minor=True)
 ax.grid(which='minor', alpha=0.4)
 ax.grid(which='major', alpha=0.7)
 labels = ['d=15', 'd=30', 'd=45', 'd=60', 'd=100']
@@ -577,9 +412,6 @@ fig.savefig(os.path.join(OUTPUT_DIR, 'figure_8.png'), dpi=300)
 # MIMIC-IV v2.0 data is required
 
 if mimic_data_dir is not None:
-
-    from src.pydts.examples_utils.mimic_consts import *
-
     patients_file = os.path.join(mimic_data_dir, 'hosp', 'patients.csv.gz')
     admissions_file = os.path.join(mimic_data_dir, 'hosp', 'admissions.csv.gz')
     lab_file = os.path.join(mimic_data_dir, 'hosp', 'labevents.csv.gz')

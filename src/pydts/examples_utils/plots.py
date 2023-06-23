@@ -192,7 +192,7 @@ def plot_models_coefficients(alpha_dict: dict, beta_dict: dict, times: Iterable,
     ax.set_ylim([-1.5, 1])
     fig.tight_layout()
     if filename is not None:
-        fig.savefig(os.path.join(OUTPUT_DIR, filename), dpi=300)
+        fig.savefig(filename, dpi=300)
 
 
 def plot_LOS_simulation_figure1(data_df):
@@ -519,6 +519,50 @@ def plot_reps_coef_std(rep_dict: dict, return_summary: bool = True, filename: st
 
     if return_summary:
         return res_dict
+
+
+def plot_jss_reps_coef_std(rep_dict: dict, return_summary: bool = True, filename: str = None, paper_plots: bool = False):
+    alphabet_list = list(string.ascii_lowercase)
+    first_key = next(iter(rep_dict))    # deal with cases where there isn't 0 in samples
+    coef_types = list(rep_dict[first_key].keys())  # alpha, beta
+    event_types = rep_dict[first_key][coef_types[0]].keys()
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+    res_dict = {coef: {event_type: None for event_type in event_types} for coef in coef_types}
+    for idct, coef_type in enumerate(coef_types):
+        for idet, event_type in enumerate(event_types):
+            if coef_type == 'alpha':
+                ax = axes[event_type - 1]
+                add_panel_text(ax=ax, text=alphabet_list[idct*len(event_types)+idet])
+                ax.tick_params(axis='both', which='major', labelsize=15)
+                ax.tick_params(axis='both', which='minor', labelsize=15)
+            df = pd.concat([dfs[coef_type][event_type] for dfs in rep_dict.values()])
+            temp_df = df.groupby(df.index).agg(["mean", "std"])
+            prefix = "a" if coef_type == "alpha" else "Z"
+            temp_df = temp_df.loc[[f"{prefix}{idx}_{event_type}" for idx in range(1, temp_df.shape[0]+1)]]
+            temp_df.columns = temp_df.columns.get_level_values(0) + "_" + temp_df.columns.get_level_values(1)
+            res_dict[coef_type][event_type] = temp_df.copy()
+            if coef_type == 'alpha':
+                temp_df.plot(x="Lee_std", y="Ours_std", kind="scatter", ax=ax)
+                ax.set_xlabel("Lee et al. std", fontsize=18)
+                ax.set_ylabel("two-step std", fontsize=18)
+                ax.plot([0, 1], [0, 1], "--", transform=ax.transAxes, alpha=0.3, color="tab:green");
+                ax.grid()
+                if ((idct == 0) and (idet == 0)):
+                    ax.set_xlim([0, 0.2])
+                    ax.set_ylim([0, 0.2])
+                elif ((idct == 0) and (idet == 1)):
+                    ax.set_xlim([0, 0.25])
+                    ax.set_ylim([0, 0.25])
+                latter = "\\alpha" if coef_type == "alpha" else "\\beta"
+                ax.set_title(f"${latter}{event_type}$", fontsize=18)
+    fig.tight_layout()
+    fig.show()
+    if filename is not None:
+        fig.savefig(filename, dpi=300)
+
+    if return_summary:
+        return res_dict
+
 
 
 def plot_times(times_dict: dict,
