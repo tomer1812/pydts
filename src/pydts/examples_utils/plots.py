@@ -1,8 +1,6 @@
 from typing import Iterable, Tuple
 
 import numpy as np
-from pydts.examples_utils.plots import add_panel_text
-
 from .simulations_data_config import *
 from matplotlib import pyplot as plt
 import matplotlib.gridspec as gridspec

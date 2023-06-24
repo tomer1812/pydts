@@ -38,10 +38,10 @@ nb_start = time()
 # Estimated total running time (Apple MacBook Pro 32Gb RAM):
 # lean_version = True:
 # lean_version = False: 63650 seconds
-lean_version = False
+lean_version = True
 
 # Provide the MIMIC-IV v2.0 data dir to replicate the use-case section results.
-mimic_data_dir = None
+mimic_data_dir = None #'/Users/tomer/git/DiscreteTimeSurvivalPenalization/data/mimic-iv-2.0'
 OUTPUT_DIR = ''
 PYPLOT_SHOW = True
 
