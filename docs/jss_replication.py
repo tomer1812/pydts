@@ -37,11 +37,11 @@ nb_start = time()
 # The figures and tables of the paper were generated with lean_version=False.
 # Estimated total running time (Apple MacBook Pro 32Gb RAM):
 # lean_version = True:
-# lean_version = False: 63651 seconds
+# lean_version = False: 63650 seconds
 lean_version = False
 
 # Provide the MIMIC-IV v2.0 data dir to replicate the use-case section results.
-mimic_data_dir = '/Users/tomer/git/DiscreteTimeSurvivalPenalization/data/mimic-iv-2.0'
+mimic_data_dir = None
 OUTPUT_DIR = ''
 PYPLOT_SHOW = True
 
@@ -193,7 +193,6 @@ beta_summary_comparison.insert(loc=0, column='True', value=true_col)
 beta_summary_comparison.astype(float).round(3).to_csv(os.path.join(OUTPUT_DIR, 'table_3.csv'))
 #print(beta_comparison_table.to_latex(escape=False))
 
-beta_summary_comparison =
 print(beta_summary_comparison)
 
 pred_df = new_fitter.predict_cumulative_incident_function(
