@@ -8,7 +8,8 @@
 from time import time
 from pydts.data_generation import EventTimesSampler
 from pydts.examples_utils.plots import add_panel_text, plot_events_occurrence, plot_example_pred_output, \
-    plot_models_coefficients, plot_times, compare_beta_models_for_example, plot_jss_reps_coef_std
+    plot_models_coefficients, plot_times, compare_beta_models_for_example, plot_jss_reps_coef_std, \
+    plot_sampled_covariates_figure
 from pydts.examples_utils.generate_simulations_data import generate_quick_start_df
 from pydts.fitters import DataExpansionFitter, TwoStagesFitter, repetitive_fitters
 from pydts.model_selection import PenaltyGridSearch
@@ -23,6 +24,7 @@ import warnings
 import os
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+
 slicer = pd.IndexSlice
 
 pd.set_option("display.max_rows", 500)
@@ -36,17 +38,16 @@ nb_start = time()
 # Estimated total running time (Apple MacBook Pro 32Gb RAM):
 # lean_version = True:
 # lean_version = False: 63651 seconds
-lean_version = True  # False
+lean_version = False
 
 # Provide the MIMIC-IV v2.0 data dir to replicate the use-case section results.
-mimic_data_dir = None  # '/Users/tomer/git/DiscreteTimeSurvivalPenalization/data/mimic-iv-2.0'
+mimic_data_dir = '/Users/tomer/git/DiscreteTimeSurvivalPenalization/data/mimic-iv-2.0'
 OUTPUT_DIR = ''
-
+PYPLOT_SHOW = True
 
 # Section 3: Simulating discrete time survival data with competing events
 ############################################################################
 
-# Section 3.1 - Covariates sampling
 ets = EventTimesSampler(d_times=7, j_event_types=2)
 n_observations = 10000
 np.random.seed(0)
@@ -63,43 +64,12 @@ observations_df['Z3'] = 1 + np.random.poisson(lam=4, size=n_observations)
 
 
 # Figure 1
+plot_sampled_covariates_figure(observations_df, fname=os.path.join(OUTPUT_DIR, 'figure_1.png'),
+                               show=PYPLOT_SHOW)
 
-fontsize = 17
-fig, axes = plt.subplots(1, 3, figsize=(16, 4))
-ax = axes[0]
-ax.tick_params(axis='both', which='major', labelsize=15)
-ax.tick_params(axis='both', which='minor', labelsize=15)
-add_panel_text(ax=ax, text='a')
-ax.bar(observations_df['Z1'].value_counts().index, observations_df['Z1'].value_counts().values, width=0.4)
-ax.set_xlabel('Z1', fontsize=fontsize)
-ax.set_ylabel('Number of observations', fontsize=fontsize)
+prob_lof_at_t = [0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05]
+observations_df = ets.sample_independent_lof_censoring(observations_df, prob_lof_at_t)
 
-ax = axes[1]
-ax.tick_params(axis='both', which='major', labelsize=15)
-ax.tick_params(axis='both', which='minor', labelsize=15)
-add_panel_text(ax=ax, text='b')
-ax.hist(observations_df[observations_df['Z1'] == 0]['Z2'], bins=np.arange(30, 130, step=2), color='tab:orange',
-        label=r'$Z_1=0$', alpha=0.4)
-ax.hist(observations_df[observations_df['Z1'] == 1]['Z2'], bins=np.arange(30, 130, step=2), color='tab:green',
-        label=r'$Z_1=1$', alpha=0.4)
-ax.legend(fontsize=16)
-ax.set_xlabel('Z2', fontsize=fontsize)
-ax.set_ylabel('Number of observations', fontsize=fontsize)
-
-ax = axes[2]
-ax.tick_params(axis='both', which='major', labelsize=15)
-ax.tick_params(axis='both', which='minor', labelsize=15)
-add_panel_text(ax=ax, text='c')
-ax.bar(observations_df['Z3'].value_counts().index, observations_df['Z3'].value_counts().values, width=0.4)
-ax.set_xlabel('Z3', fontsize=fontsize)
-ax.set_ylabel('Number of observations', fontsize=fontsize)
-
-fig.tight_layout()
-fig.savefig(os.path.join(OUTPUT_DIR, 'figure_1.png'), dpi=300)
-plt.show()
-
-
-# Sections 3.2-3.3: Censoring sampling options and event times
 ets = EventTimesSampler(d_times=7, j_event_types=2)
 censoring_coef_dict = {
     "alpha": {
@@ -112,10 +82,6 @@ censoring_coef_dict = {
 
 observations_df = ets.sample_hazard_lof_censoring(observations_df, censoring_coef_dict)
 
-
-prob_lof_at_t = [0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05]
-observations_df = ets.sample_independent_lof_censoring(observations_df, prob_lof_at_t)
-
 coefficients_dict = {
     "alpha": {
         1: lambda t: -1 - 0.3 * np.log(t),
@@ -126,8 +92,10 @@ coefficients_dict = {
         2: -np.log([1, 0.95, 2])
     }
 }
+
 observations_df = ets.sample_event_times(observations_df, coefficients_dict)
 observations_df = ets.update_event_or_lof(observations_df)
+
 
 # Table 2
 tmp = observations_df.astype({'Z1': int, 'Z2': float, 'Z3': int, 'X': int,
@@ -156,7 +124,8 @@ patients_df = generate_quick_start_df(n_patients=50000, n_cov=5, d_times=30, j_e
 
 # Figure 2
 plot_events_occurrence(patients_df, fname=os.path.join(OUTPUT_DIR, 'figure_2.png'))
-plt.show()
+if PYPLOT_SHOW:
+    plt.show()
 
 
 patients_df.groupby(['J', 'X'])['pid'].count().unstack('J')
@@ -191,6 +160,7 @@ pred_df.columns = ['ID=0', 'ID=1', 'ID=2']
 
 print(pred_df)
 
+# Two-step example
 print('Estimating two-step')
 new_fitter = TwoStagesFitter()
 new_fitter.fit(df=patients_df.drop(['C', 'T'], axis=1))
@@ -199,10 +169,9 @@ new_fitter.print_summary()
 print(new_fitter.get_beta_SE())
 
 twostep_beta_summary = new_fitter.get_beta_SE()
+
 twostep_beta1_summary = twostep_beta_summary.iloc[:, [0, 1]]
 twostep_beta2_summary = twostep_beta_summary.iloc[:, [2, 3]]
-
-lee_beta1_summary.round(3)
 
 lee_beta1_summary = lee_beta1_summary.iloc[:, [0, 1]].round(3)
 lee_beta2_summary = lee_beta2_summary.iloc[:, [0, 1]].round(3)
@@ -221,7 +190,11 @@ beta_summary_comparison.index.name =  r'$\beta_{jk}$'
 
 true_col = -np.log([0.8, 3, 3, 2.5, 2, 1, 3, 4, 3, 2])
 beta_summary_comparison.insert(loc=0, column='True', value=true_col)
+beta_summary_comparison.astype(float).round(3).to_csv(os.path.join(OUTPUT_DIR, 'table_3.csv'))
+#print(beta_comparison_table.to_latex(escape=False))
 
+beta_summary_comparison =
+print(beta_summary_comparison)
 
 pred_df = new_fitter.predict_cumulative_incident_function(
     patients_df.drop(['J', 'T', 'C', 'X'], axis=1).head(3)).set_index('pid').T
@@ -231,7 +204,8 @@ pred_df.columns = ['ID=0', 'ID=1', 'ID=2']
 
 # Figure 4
 plot_example_pred_output(pred_df, fname=os.path.join(OUTPUT_DIR, 'figure_4.png'))
-plt.show()
+if PYPLOT_SHOW:
+    plt.show()
 
 # Single build single run rep dict
 rep_dict = {}
@@ -247,33 +221,30 @@ times = [t+1 for t in list(a[1].reset_index().index)]
 
 # Figure 3
 plot_models_coefficients(a, b, times, counts_df, filename=os.path.join(OUTPUT_DIR, 'figure_3.png'))
-plt.show()
-
-
-# Table 3
-print(beta_summary_comparison)
-beta_summary_comparison.astype(float).round(3).to_csv(os.path.join(OUTPUT_DIR, 'table_3.csv'))
-#print(beta_comparison_table.to_latex(escape=False))
+if PYPLOT_SHOW:
+    plt.show()
 
 
 # Results comparison of 100 repetitions
 print('Results comparison multiple runs')
 rep = 2 if lean_version else 100
 rep_dict, times_dict, counts_df = repetitive_fitters(rep=rep, n_patients=50000, n_cov=5,
-                                                     d_times=30, j_events=2, pid_col='pid', test_size=0.25,
+                                                     d_times=30, j_events=2, pid_col='pid',
                                                      verbose=0, real_coef_dict=real_coef_dict, censoring_prob=0.8,
                                                      allow_fails=20)
 
 # Figure 6
 new_res_dict = plot_jss_reps_coef_std(rep_dict, True, filename=os.path.join(OUTPUT_DIR, 'figure_6.png'))
-plt.show()
+if PYPLOT_SHOW:
+    plt.show()
 a = new_res_dict['alpha']
 b = new_res_dict['beta']
 times = [t+1 for t in list(a[1].reset_index().index)]
 
 # Figure 5
 plot_models_coefficients(a, b, times, counts_df, filename=os.path.join(OUTPUT_DIR, 'figure_5.png'))
-plt.show()
+if PYPLOT_SHOW:
+    plt.show()
 
 # Table 4
 beta_comparison_table = pd.DataFrame(index=['True', 'Mean (Lee et al.)', 'SE (Lee et al.)',
@@ -312,10 +283,11 @@ beta_comparison_table.astype(float).round(3).to_csv(os.path.join(OUTPUT_DIR, 'ta
 colors = ['tab:blue', 'tab:green', 'tab:red', 'tab:cyan', 'tab:purple']
 _times_dict = {}
 fig, ax = plt.subplots(1, 1, figsize=(6, 4))
+rep = 3 if lean_version else 10
 for idc, d in enumerate([15, 30, 45, 60, 100]):
     print(f'Estimating timing: d={d}')
-    rep_dict, times_dict, counts_df = repetitive_fitters(rep=10, n_patients=50000, n_cov=5,
-                                                         d_times=d, j_events=2, pid_col='pid', test_size=0.25,
+    rep_dict, times_dict, counts_df = repetitive_fitters(rep=rep, n_patients=50000, n_cov=5,
+                                                         d_times=d, j_events=2, pid_col='pid',
                                                          verbose=0, real_coef_dict=real_coef_dict, censoring_prob=0.8,
                                                          allow_fails=20)
     _times_dict['Lee et al.'] = times_dict['Lee']
@@ -330,7 +302,8 @@ leg = ax.get_legend()
 for i in range(len(labels)):
     leg.legendHandles[i].set_color(colors[i])
 fig.tight_layout()
-plt.show()
+if PYPLOT_SHOW:
+    plt.show()
 fig.savefig(os.path.join(OUTPUT_DIR, 'figure_7.png'), dpi=300)
 
 
@@ -928,7 +901,9 @@ if mimic_data_dir is not None:
         auc_t = events_auc_at_t(pred_df)
         chosen_auc_df = pd.concat([chosen_auc_df, pd.concat([auc_t], keys=[i_fold])])
 
-    # %%
+    counts = fitters_table.groupby(['J', 'X'])['pid'].count().unstack('J').fillna(0)
+
+
     ticksize = 15
     axes_title_fontsize = 17
     legend_size = 13
@@ -1035,12 +1010,8 @@ if mimic_data_dir is not None:
     true_colors = ['tab:blue', 'tab:green', 'tab:red']
 
     fig, ax = plt.subplots(1, 1, figsize=(10, 8))
-
-    counts = fitters_table.groupby(['J', 'X'])['pid'].count().unstack('J').fillna(0)
-
     two_step_alpha_k_results = pd.read_csv(os.path.join(OUTPUT_DIR, f'{case}_two_step_alpha.csv'),
                                            index_col=['J', 'X'])
-
     lee_alpha_k_results = pd.read_csv(os.path.join(OUTPUT_DIR, f'{case}_lee_alpha.csv'),
                                       index_col=[0, 1, 2])
 

@@ -1,6 +1,8 @@
 from typing import Iterable, Tuple
 
 import numpy as np
+from pydts.examples_utils.plots import add_panel_text
+
 from .simulations_data_config import *
 from matplotlib import pyplot as plt
 import matplotlib.gridspec as gridspec
@@ -723,3 +725,37 @@ def plot_example_estimated_params(fitter, fname: str = None):
     fig.tight_layout()
     if fname is not None:
         fig.savefig(fname, dpi=300)
+
+
+def plot_sampled_covariates_figure(observations_df, fname, show=True):
+    fontsize = 17
+    fig, axes = plt.subplots(1, 3, figsize=(16, 4))
+    ax = axes[0]
+    ax.tick_params(axis='both', which='major', labelsize=15)
+    ax.tick_params(axis='both', which='minor', labelsize=15)
+    add_panel_text(ax=ax, text='a')
+    ax.bar(observations_df['Z1'].value_counts().index, observations_df['Z1'].value_counts().values, width=0.4)
+    ax.set_xlabel('Z1', fontsize=fontsize)
+    ax.set_ylabel('Number of observations', fontsize=fontsize)
+    ax = axes[1]
+    ax.tick_params(axis='both', which='major', labelsize=15)
+    ax.tick_params(axis='both', which='minor', labelsize=15)
+    add_panel_text(ax=ax, text='b')
+    ax.hist(observations_df[observations_df['Z1'] == 0]['Z2'], bins=np.arange(30, 130, step=2), color='tab:orange',
+            label=r'$Z_1=0$', alpha=0.4)
+    ax.hist(observations_df[observations_df['Z1'] == 1]['Z2'], bins=np.arange(30, 130, step=2), color='tab:green',
+            label=r'$Z_1=1$', alpha=0.4)
+    ax.legend(fontsize=16)
+    ax.set_xlabel('Z2', fontsize=fontsize)
+    ax.set_ylabel('Number of observations', fontsize=fontsize)
+    ax = axes[2]
+    ax.tick_params(axis='both', which='major', labelsize=15)
+    ax.tick_params(axis='both', which='minor', labelsize=15)
+    add_panel_text(ax=ax, text='c')
+    ax.bar(observations_df['Z3'].value_counts().index, observations_df['Z3'].value_counts().values, width=0.4)
+    ax.set_xlabel('Z3', fontsize=fontsize)
+    ax.set_ylabel('Number of observations', fontsize=fontsize)
+    fig.tight_layout()
+    fig.savefig(fname, dpi=300)
+    if show:
+        plt.show()
