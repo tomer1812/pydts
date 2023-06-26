@@ -118,7 +118,8 @@ def plot_models_coefficients(alpha_dict: dict, beta_dict: dict, times: Iterable,
                              n_cov: int = 5,
                              first_model_name: str = 'Lee et al.',
                              second_model_name: str = 'two-step',
-                             filename: str = None) -> None:
+                             filename: str = None,
+                             show: bool = True) -> None:
     """
     This method takes the repetitive runs results and plotting the comparison between the methods coefs
 
@@ -193,6 +194,8 @@ def plot_models_coefficients(alpha_dict: dict, beta_dict: dict, times: Iterable,
     fig.tight_layout()
     if filename is not None:
         fig.savefig(filename, dpi=300)
+    if show:
+        plt.show()
 
 
 def plot_LOS_simulation_figure1(data_df):
@@ -521,7 +524,7 @@ def plot_reps_coef_std(rep_dict: dict, return_summary: bool = True, filename: st
         return res_dict
 
 
-def plot_jss_reps_coef_std(rep_dict: dict, return_summary: bool = True, filename: str = None, paper_plots: bool = False):
+def plot_jss_reps_coef_std(rep_dict: dict, return_summary: bool = True, filename: str = None, show: bool = True):
     alphabet_list = list(string.ascii_lowercase)
     first_key = next(iter(rep_dict))    # deal with cases where there isn't 0 in samples
     coef_types = list(rep_dict[first_key].keys())  # alpha, beta
@@ -556,10 +559,10 @@ def plot_jss_reps_coef_std(rep_dict: dict, return_summary: bool = True, filename
                 latter = "\\alpha" if coef_type == "alpha" else "\\beta"
                 ax.set_title(f"${latter}{event_type}$", fontsize=18)
     fig.tight_layout()
-    fig.show()
+    if show:
+        plt.show()
     if filename is not None:
         fig.savefig(filename, dpi=300)
-
     if return_summary:
         return res_dict
 
@@ -567,7 +570,8 @@ def plot_jss_reps_coef_std(rep_dict: dict, return_summary: bool = True, filename
 
 def plot_times(times_dict: dict,
                filename: str = None,
-               ax = None, color='tab:blue') -> None:
+               ax = None, color='tab:blue',
+               show: bool = True) -> None:
     if ax is None:
 
         ax = pd.DataFrame.from_dict(times_dict).boxplot(figsize=(8, 6), boxprops={"lw": 1.5, "color": "tab:blue"},
@@ -586,7 +590,8 @@ def plot_times(times_dict: dict,
 
     #ax.tick_params(labelsize=14, grid_lw=0.5, grid_alpha=0.6)
     plt.tight_layout()
-    plt.show()
+    if show:
+        plt.show()
     if filename is not None:
         ax.figure.savefig(os.path.join(OUTPUT_DIR, filename), dpi=300)
     return ax
@@ -637,7 +642,8 @@ def get_y_perc_limits(df: pd.DataFrame, cols: Iterable, pad: float = 0.15, scale
 
 
 def plot_events_occurrence(patients_df: pd.DataFrame, ax: plt.Axes = None, event_type_col: str = 'J',
-                           pid_col: str = 'pid', event_time_col: str = 'X', fname: str = None):
+                           pid_col: str = 'pid', event_time_col: str = 'X', fname: str = None,
+                           show: bool = True):
     if ax is None:
         tight = True
         fig, ax = plt.subplots(1, 1, figsize=(10, 4))
@@ -654,10 +660,12 @@ def plot_events_occurrence(patients_df: pd.DataFrame, ax: plt.Axes = None, event
         fig.tight_layout()
     if fname is not None:
         fig.savefig(fname, dpi=300)
+    if show:
+        plt.show()
     return ax
 
 
-def plot_example_pred_output(pred_df, fname: str = None):
+def plot_example_pred_output(pred_df, fname: str = None, show: bool = True):
     gs = gridspec.GridSpec(4, 4)
     ax1 = plt.subplot(gs[0, 0:2])
     ax2 = plt.subplot(gs[0, 2:])
@@ -707,6 +715,8 @@ def plot_example_pred_output(pred_df, fname: str = None):
     fig.tight_layout()
     if fname is not None:
         fig.savefig(fname, dpi=300)
+    if show:
+        plt.show()
 
 
 def plot_example_estimated_params(fitter, fname: str = None):

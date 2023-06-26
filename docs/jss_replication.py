@@ -14,8 +14,8 @@ from pydts.examples_utils.generate_simulations_data import generate_quick_start_
 from pydts.fitters import DataExpansionFitter, TwoStagesFitter, repetitive_fitters
 from pydts.model_selection import PenaltyGridSearch
 from pydts.cross_validation import PenaltyGridSearchCV, TwoStagesCV
-from pydts.evaluation import events_auc_at_t
 from pydts.examples_utils.mimic_consts import *
+from pydts.evaluation import *
 from tableone import TableOne
 import numpy as np
 import pandas as pd
@@ -29,21 +29,30 @@ slicer = pd.IndexSlice
 
 pd.set_option("display.max_rows", 500)
 warnings.filterwarnings('ignore')
-
 nb_start = time()
 
 
-# This option is time-consuming and will increase running time to
-# The figures and tables of the paper were generated with lean_version=False.
+# The figures and tables of the paper were generated with lean_version = False.
 # Estimated total running time (Apple MacBook Pro 32Gb RAM):
-# lean_version = True:
-# lean_version = False: 63650 seconds
+# lean_version = True: 3.5 hours
+# lean_version = False: 11 hours without MIMIC, 17.5 hours with MIMIC
 lean_version = True
 
-# Provide the MIMIC-IV v2.0 data dir to replicate the use-case section results.
-mimic_data_dir = None #'/Users/tomer/git/DiscreteTimeSurvivalPenalization/data/mimic-iv-2.0'
+# Optional settings:
+# 1. Provide the MIMIC-IV v2.0 data directory (mimic-iv-2.0) to replicate the use-case section results.
+# Leaving mimic_data_dir = None skips the replication of Section 5.
+# For example:  mimic_data_dir = '/Users/tomer/data/mimic-iv-2.0'
+# The MIMIC dataset is accessible at https://physionet.org/content/mimiciv/2.0/ and subjected to PhysioNet credentials.
+mimic_data_dir = None
+
+# 2. Figures\tables output directory
 OUTPUT_DIR = ''
+
+# 3. Show figures using plt.show():
 PYPLOT_SHOW = True
+
+
+
 
 # Section 3: Simulating discrete time survival data with competing events
 ############################################################################
@@ -123,15 +132,12 @@ patients_df = generate_quick_start_df(n_patients=50000, n_cov=5, d_times=30, j_e
                                       real_coef_dict=real_coef_dict)
 
 # Figure 2
-plot_events_occurrence(patients_df, fname=os.path.join(OUTPUT_DIR, 'figure_2.png'))
-if PYPLOT_SHOW:
-    plt.show()
+plot_events_occurrence(patients_df, fname=os.path.join(OUTPUT_DIR, 'figure_2.png'), show=PYPLOT_SHOW)
+
+print(patients_df.groupby(['J', 'X'])['pid'].count().unstack('J'))
 
 
-patients_df.groupby(['J', 'X'])['pid'].count().unstack('J')
-
-
-# Estimation using Lee et al.
+# Estimation using Lee et al. 2018
 print('Estimating Lee et al.')
 fitter = DataExpansionFitter()
 fitter.fit(df=patients_df.drop(['C', 'T'], axis=1))
@@ -198,19 +204,18 @@ print(beta_summary_comparison)
 pred_df = new_fitter.predict_cumulative_incident_function(
     patients_df.drop(['J', 'T', 'C', 'X'], axis=1).head(3)).set_index('pid').T
 pred_df.index.name = ''
-pred_df.columns = ['ID=0', 'ID=1', 'ID=2']
+pred_df.columns = ['ID = 0', 'ID = 1', 'ID = 2']
 
 
 # Figure 4
-plot_example_pred_output(pred_df, fname=os.path.join(OUTPUT_DIR, 'figure_4.png'))
-if PYPLOT_SHOW:
-    plt.show()
+plot_example_pred_output(pred_df, fname=os.path.join(OUTPUT_DIR, 'figure_4.png'), show=plot_events_occurrence)
+
 
 # Single build single run rep dict
 rep_dict = {}
 counts_df = patients_df[patients_df['X'] <= 30].groupby(['J', 'X']).size().to_frame(0)
 rep_dict[0] = compare_beta_models_for_example(fitter.event_models,
-                                           new_fitter.event_models, real_coef_dict=real_coef_dict)
+                                              new_fitter.event_models, real_coef_dict=real_coef_dict)
 
 # Results comparison of a single run
 new_res_dict = plot_jss_reps_coef_std(rep_dict, True)
@@ -219,12 +224,9 @@ b = new_res_dict['beta']
 times = [t+1 for t in list(a[1].reset_index().index)]
 
 # Figure 3
-plot_models_coefficients(a, b, times, counts_df, filename=os.path.join(OUTPUT_DIR, 'figure_3.png'))
-if PYPLOT_SHOW:
-    plt.show()
+plot_models_coefficients(a, b, times, counts_df, filename=os.path.join(OUTPUT_DIR, 'figure_3.png'), show=PYPLOT_SHOW)
 
-
-# Results comparison of 100 repetitions
+# Results comparison of 100 repetitions (2 repetitions of lean_version = True)
 print('Results comparison multiple runs')
 rep = 2 if lean_version else 100
 rep_dict, times_dict, counts_df = repetitive_fitters(rep=rep, n_patients=50000, n_cov=5,
@@ -233,21 +235,19 @@ rep_dict, times_dict, counts_df = repetitive_fitters(rep=rep, n_patients=50000, 
                                                      allow_fails=20)
 
 # Figure 6
-new_res_dict = plot_jss_reps_coef_std(rep_dict, True, filename=os.path.join(OUTPUT_DIR, 'figure_6.png'))
-if PYPLOT_SHOW:
-    plt.show()
+new_res_dict = plot_jss_reps_coef_std(rep_dict, True, filename=os.path.join(OUTPUT_DIR, 'figure_6.png'),
+                                      show=PYPLOT_SHOW)
 a = new_res_dict['alpha']
 b = new_res_dict['beta']
 times = [t+1 for t in list(a[1].reset_index().index)]
 
 # Figure 5
-plot_models_coefficients(a, b, times, counts_df, filename=os.path.join(OUTPUT_DIR, 'figure_5.png'))
-if PYPLOT_SHOW:
-    plt.show()
+plot_models_coefficients(a, b, times, counts_df, filename=os.path.join(OUTPUT_DIR, 'figure_5.png'),
+                         show=PYPLOT_SHOW)
 
 # Table 4
 beta_comparison_table = pd.DataFrame(index=['True', 'Mean (Lee et al.)', 'SE (Lee et al.)',
-                                              'Mean (two-step)', 'SE (two-step)'])
+                                            'Mean (two-step)', 'SE (two-step)'])
 for j in [1, 2]:
     for i in range(1, 6):
         tmp_df = pd.DataFrame()
@@ -291,7 +291,7 @@ for idc, d in enumerate([15, 30, 45, 60, 100]):
                                                          allow_fails=20)
     _times_dict['Lee et al.'] = times_dict['Lee']
     _times_dict['two-step'] = times_dict['Ours']
-    ax = plot_times(_times_dict, ax=ax, color=colors[idc])
+    ax = plot_times(_times_dict, ax=ax, color=colors[idc], show=False)
 
 ax.grid(which='minor', alpha=0.4)
 ax.grid(which='major', alpha=0.7)
@@ -346,7 +346,7 @@ results_df = grid_search_cv.cross_validate(patients_df, l1_ratio=1,
                                 penalizers=penalizers, n_splits=5,
                                 metrics=['IBS', 'GBS', 'IAUC', 'GAUC'])
 
-results_df['Mean'].idxmax()
+print(results_df['Mean'].idxmax())
 
 results_df_ = results_df.copy().reset_index()
 results_df_.iloc[:, :2] = np.log(results_df_.iloc[:, :2])
@@ -357,6 +357,27 @@ print(results_df_)
 results_df_.to_csv(os.path.join(OUTPUT_DIR, 'cv_results.csv'))
 
 
+# Section 4.2: Performance measures
+
+fitter = TwoStagesFitter()
+fitter.fit(df=train_df.drop(['C', 'T'], axis=1))
+pred_df = fitter.predict_prob_event_j_all(test_df.drop(['C', 'T'], axis=1), event=1)
+auc_1 = event_specific_auc_at_t_all(pred_df, event=1)
+
+pred_df = fitter.predict_prob_events(test_df)
+ibs_1 = event_specific_integrated_brier_score(pred_df, event=1)
+iauc_1 = event_specific_integrated_auc(pred_df, event=1)
+bs = global_brier_score(pred_df)
+auc = global_auc(pred_df)
+
+cross_validator = TwoStagesCV()
+cross_validator.cross_validate(full_df=patients_df.drop(['C', 'T'],
+                               axis=1),
+                               n_splits=5, seed=0,
+                               metrics=['BS', 'IBS', 'GBS',
+                                        'AUC', 'IAUC', 'GAUC'])
+
+
 # Section 4.3: Data regrouping
 
 df = generate_quick_start_df(n_patients=1000, n_cov=5, d_times=30, j_events=2, pid_col='pid', seed=0,
@@ -365,7 +386,7 @@ df = generate_quick_start_df(n_patients=1000, n_cov=5, d_times=30, j_events=2, p
 regrouped_df = df.copy()
 regrouped_df['X'].clip(upper=21, inplace=True)
 
-fig, axes = plt.subplots(2,1, figsize=(10,8))
+fig, axes = plt.subplots(2, 1, figsize=(10, 8))
 ax = axes[0]
 ax = plot_events_occurrence(df, ax=ax)
 add_panel_text(ax, 'a')
@@ -377,6 +398,8 @@ ax.set_xticklabels(labels)
 add_panel_text(ax, 'b')
 fig.tight_layout()
 fig.savefig(os.path.join(OUTPUT_DIR, 'figure_8.png'), dpi=300)
+if PYPLOT_SHOW:
+    plt.show()
 
 
 
@@ -997,6 +1020,8 @@ if mimic_data_dir is not None:
     fig.tight_layout()
 
     fig.savefig(os.path.join(OUTPUT_DIR, 'figure_10.png'), dpi=300)
+    if PYPLOT_SHOW:
+        plt.show()
 
     first_model_name = 'Lee et al.'
     second_model_name = 'two-step'
@@ -1062,7 +1087,8 @@ if mimic_data_dir is not None:
 
     fig.tight_layout()
     fig.savefig(os.path.join(OUTPUT_DIR, 'figure_9.png'), dpi=300)
-
+    if PYPLOT_SHOW:
+        plt.show()
 nb_end = time()
 
 print(f'Total running time: {int(nb_end-nb_start)} seconds.')
