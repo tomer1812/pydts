@@ -36,7 +36,7 @@ nb_start = time()
 # Estimated total running time (Apple MacBook Pro 32Gb RAM):
 # lean_version = True: 3.5 hours
 # lean_version = False: 11 hours without MIMIC, 17.5 hours with MIMIC
-lean_version = True
+lean_version = False
 
 # Optional settings:
 # 1. Provide the MIMIC-IV v2.0 data directory (mimic-iv-2.0) to replicate the use-case section results.
