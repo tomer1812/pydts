@@ -43,15 +43,15 @@ nav:
       - Definitions and Estimation: methods.md
       - Evaluation Metrics: methods_evaluation.md
     - Examples:
-      - Event Time Sampler: EventTimesSampler.ipynb
-      - Usage Example:
+      - Event Times Sampler: EventTimesSampler.ipynb
+      - Estimation Example:
         - Introduction: UsageExample-Intro.ipynb
         - Data Preparation: UsageExample-DataPreparation.ipynb
         - Estimation with TwoStagesFitter: UsageExample-FittingTwoStagesFitter.ipynb
         - Estimation with DataExpansionFitter: UsageExample-FittingDataExpansionFitter.ipynb
       - Data Regrouping Example: UsageExample-RegroupingData.ipynb
       - Comparing the Estimation Methods: ModelsComparison.ipynb
-      - Performance Measures: PerformanceMeasures.ipynb
+      - Evaluation: PerformanceMeasures.ipynb
       - Regularization: Regularization.ipynb
       - Hospitalization LOS Simulation: SimulatedDataset.ipynb
     - API:
