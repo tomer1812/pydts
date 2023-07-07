@@ -39,9 +39,9 @@ extra_javascript:
 nav:
     - Home: 'index.md'
     - Introduction: intro.md
-    - Methods: methods_intro.md
+    - Methods: methodsintro.md
       - Definitions and Estimation: methods.md
-      - Evaluation Metrics: methods_evaluation.md
+      - Evaluation Metrics: methodsevaluation.md
     - Examples:
       - Event Times Sampler: EventTimesSampler.ipynb
       - Estimation Example:
