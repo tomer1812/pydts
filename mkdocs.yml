@@ -39,7 +39,8 @@ extra_javascript:
 nav:
     - Home: 'index.md'
     - Introduction: intro.md
-    - Methods: methodsintro.md
+    - Methods:
+      - Introduction: methodsintro.md
       - Definitions and Estimation: methods.md
       - Evaluation Metrics: methodsevaluation.md
     - Examples:
