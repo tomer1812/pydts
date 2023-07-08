@@ -1,11 +1,11 @@
 # Evaluation Measures
-
+Let
 $$
 \pi_{ij}(t) = \widehat{\Pr}(T_i=t, J_i=j \mid Z_i) = \widehat{\lambda}_j (t \mid Z_i) \widehat{S}(t-1 \mid Z_i)
 $$
 and
 $$
-D_{ij} (t) = I(T_i = t, J_i = j) \, .
+D_{ij} (t) = I(T_i = t, J_i = j) 
 $$
 The cause-specific incidence/dynamic area under the receiver operating characteristics curve (AUC) is defined and estimated in the spirit of Heagerty and Zheng (2005) \cite{heagerty2005survival} and Blanche et al. (2015) \cite{blanche2015quantifying} as the probability of a random observation with observed event $j$ at time $t$ having a higher risk prediction for cause $j$ than a randomly selected observation $m$, at risk at time $t$, without the observed event $j$ at time $t$. Namely,
 $$
@@ -30,6 +30,7 @@ An integrated cause-specific AUC can be estimated as a weighted sum  by
 $$
 \widehat{\mbox{AUC}}_j = \sum_t \widehat{\mbox{AUC}}_j (t) w_j (t) \, ,
 $$
+
 and we adopt a simple  data-driven weight function of the form 
 $$
 w_j(t) = \frac{N_j(t)}{\sum_t N_j(t)} \, .
