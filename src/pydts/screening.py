@@ -90,6 +90,7 @@ class PSISTwoStagesFitter(object):
         self.pid_col = None
         self.times = None
         self.null_model_df = None
+        self.final_model = None
 
     def fit_marginal_model(self,
                            expanded_df,
@@ -304,7 +305,8 @@ class PSISTwoStagesFitter(object):
             fit_beta_kwargs: dict = {},
             verbose: int = 2,
             nb_workers: int = WORKERS,
-            seed: int = None):
+            seed: int = None,
+            fit_final_model: bool = True):
 
         """
         This method performs the principled sure independence screening (PSIS) process of Zhao et al. (2012) for discrete-time data with data-driven threshold.
@@ -330,6 +332,7 @@ class PSISTwoStagesFitter(object):
             verbose (int, Optional): The verbosity level of pandaallel
             nb_workers (int, Optional): The number of workers to pandaallel. If not sepcified, defaults to the number of workers available.
             seed (int): pseudo random state.
+            fit_final_model (boolean): True if to fit and return the TwoStagesFitter with the selected covariates.
         Returns:
             final_model (TwoStagesFitter): estimated model with the chosen covariates after PSIS.
         """
@@ -377,15 +380,16 @@ class PSISTwoStagesFitter(object):
 
         self.chosen_covariates = sorted(np.unique(chosen_covariates))
 
-        self.final_model = TwoStagesFitter()
-        self.final_model.fit(df=df,
-                             covariates=self.chosen_covariates,
-                             event_type_col=event_type_col,
-                             duration_col=duration_col,
-                             pid_col=pid_col,
-                             x0=x0,
-                             fit_beta_kwargs=fit_beta_kwargs,
-                             verbose=verbose,
-                             nb_workers=nb_workers)
+        if fit_final_model:
+            self.final_model = TwoStagesFitter()
+            self.final_model.fit(df=df,
+                                 covariates=self.chosen_covariates,
+                                 event_type_col=event_type_col,
+                                 duration_col=duration_col,
+                                 pid_col=pid_col,
+                                 x0=x0,
+                                 fit_beta_kwargs=fit_beta_kwargs,
+                                 verbose=verbose,
+                                 nb_workers=nb_workers)
 
         return self.final_model
