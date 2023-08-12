@@ -354,7 +354,7 @@ class PSISTwoStagesFitter(object):
                                                         verbose=verbose,
                                                         nb_workers=nb_workers,
                                                         seed=seed)
-
+        self.df = df
         self.expanded_df = get_expanded_df(df=df,
                                            event_type_col=event_type_col,
                                            duration_col=duration_col,
