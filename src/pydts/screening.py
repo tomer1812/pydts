@@ -91,6 +91,8 @@ class PSISTwoStagesFitter(object):
         self.times = None
         self.null_model_df = None
         self.final_model = None
+        self.chosen_covariates_j = None
+        self.chosen_covariates = None
 
     def fit_marginal_model(self,
                            expanded_df,
@@ -374,11 +376,13 @@ class PSISTwoStagesFitter(object):
                                                                  nb_workers=nb_workers)
 
         chosen_covariates = []
+        chosen_covariates_j = {}
         for c in self.threshold.index:
-             chosen_covariates.extend(
-                 self.marginal_estimates_df[self.marginal_estimates_df[c].abs() >= self.threshold[c]].index.tolist())
+            chosen_covariates_j[c] = self.marginal_estimates_df[self.marginal_estimates_df[c].abs() >= self.threshold[c]].index.tolist()
+            chosen_covariates.extend(chosen_covariates_j[c])
 
         self.chosen_covariates = sorted(np.unique(chosen_covariates))
+        self.chosen_covariates_j = chosen_covariates_j
 
         if fit_final_model:
             self.final_model = TwoStagesFitter()
