@@ -293,11 +293,12 @@ class PSISTwoStagesFitter(object):
                                                          fit_beta_kwargs=fit_beta_kwargs,
                                                          nb_workers=nb_workers)
         _params_cols = [c for c in self.null_model_df.columns if 'params' in c]
-        self.threshold = self.null_model_df[_params_cols].abs().quantile(quantile, axis=0)
+        self.threshold = np.quantile(self.null_model_df[_params_cols].abs().values, q=quantile)
         return self.threshold
 
     def fit(self,
             df: pd.DataFrame,
+            threshold: float = None,
             quantile: float = 1,
             covariates: List = None,
             event_type_col: str = 'J',
@@ -315,7 +316,10 @@ class PSISTwoStagesFitter(object):
 
         Args:
             df (pd.DataFrame): training data for fitting the model
-            quantile (float): represents the quantile of the absolute values of the coefficients from the null model that determines the data-driven threshold.
+            threshold (float): a user defined threshold.
+                               Defaults to None, i.e. data-driven threshold
+            quantile (float): the quantile of the absolute values of the coefficients from the null model that determines the data-driven threshold.
+                              Only in use when threshold = None.
                               Defaults to 1, which corresponds to the maximum absolute value of the null model's coefficients.
             covariates (list): list of covariates to estimate the marginal regression coefficient for.
             event_type_col (str): The event type column name (must be a column in df),
@@ -348,17 +352,20 @@ class PSISTwoStagesFitter(object):
         self.pid_col = pid_col
         self.times = sorted(df[duration_col].unique())
 
-        self.threshold = self.get_data_driven_threshold(df=df,
-                                                        covariates=covariates,
-                                                        quantile=quantile,
-                                                        event_type_col=event_type_col,
-                                                        duration_col=duration_col,
-                                                        pid_col=pid_col,
-                                                        x0=x0,
-                                                        fit_beta_kwargs=fit_beta_kwargs,
-                                                        verbose=verbose,
-                                                        nb_workers=nb_workers,
-                                                        seed=seed)
+        if threshold is not None:
+            self.threshold = threshold
+        else:
+            self.threshold = self.get_data_driven_threshold(df=df,
+                                                            covariates=covariates,
+                                                            quantile=quantile,
+                                                            event_type_col=event_type_col,
+                                                            duration_col=duration_col,
+                                                            pid_col=pid_col,
+                                                            x0=x0,
+                                                            fit_beta_kwargs=fit_beta_kwargs,
+                                                            verbose=verbose,
+                                                            nb_workers=nb_workers,
+                                                            seed=seed)
         self.df = df
         self.expanded_df = get_expanded_df(df=df,
                                            event_type_col=event_type_col,
@@ -377,8 +384,9 @@ class PSISTwoStagesFitter(object):
 
         chosen_covariates = []
         chosen_covariates_j = {}
-        for c in self.threshold.index:
-            chosen_covariates_j[c] = self.marginal_estimates_df[self.marginal_estimates_df[c].abs() >= self.threshold[c]].index.tolist()
+        _params_cols = [c for c in self.marginal_estimates_df.columns if 'params' in c]
+        for c in _params_cols:
+            chosen_covariates_j[c] = self.marginal_estimates_df[self.marginal_estimates_df[c].abs() >= self.threshold].index.tolist()
             chosen_covariates.extend(chosen_covariates_j[c])
 
         self.chosen_covariates = sorted(np.unique(chosen_covariates))

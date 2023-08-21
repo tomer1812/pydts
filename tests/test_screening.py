@@ -68,6 +68,10 @@ class TestEvaluation(unittest.TestCase):
         fitter = PSISTwoStagesFitter()
         fitter.get_data_driven_threshold(df=self.patients_df.drop(['C', 'T'], axis=1))
 
-    def test_psis_fit(self):
+    def test_psis_fit_data_driven_threshold(self):
         fitter = PSISTwoStagesFitter()
-        fitter.fit(df=self.patients_df.drop(['C', 'T'], axis=1))
+        fitter.fit(df=self.patients_df.drop(['C', 'T'], axis=1), quantile=0.95)
+
+    def test_psis_fit_user_defined_threshold(self):
+        fitter = PSISTwoStagesFitter()
+        fitter.fit(df=self.patients_df.drop(['C', 'T'], axis=1), threshold=0.15)
