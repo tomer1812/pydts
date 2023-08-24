@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pydts"
-version = "0.8.4"
+version = "0.8.5"
 description = "Discrete time survival analysis with competing risks"
 authors = ["Tomer Meir <tomer1812@gmail.com>", "Rom Gutman <rom.gutman1@gmail.com>", "Malka Gorfine <malkago12@gmail.com>"]
 license = "GNU GPLv3"
@@ -27,6 +27,7 @@ ipython = "^8.2.0"
 numpy = ">=1.23.4"
 psutil = "^5.9.4"
 setuptools = "^68.0.0"
+seaborn = "^0.12.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.0.1"
@@ -37,7 +38,6 @@ mkdocs-material = "^8.2.4"
 mknotebooks = "^0.7.1"
 mkdocstrings = "^0.18.1"
 jupyter = "^1.0.0"
-seaborn = "^0.11.2"
 scikit-survival = "^0.17.1"
 tableone = "^0.7.10"
 
