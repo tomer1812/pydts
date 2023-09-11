@@ -226,8 +226,9 @@ class PSISTwoStagesFitter(object):
 
         permuted_df = df.copy()
         np.random.seed(seed)
-        permuted_df[duration_col] = np.random.permutation(permuted_df[duration_col].values)
-        permuted_df[event_type_col] = np.random.permutation(permuted_df[event_type_col].values)
+        permuted_index = np.random.permutation(permuted_df.index)
+        permuted_df.loc[:, duration_col] = df.loc[permuted_index, duration_col].values
+        permuted_df.loc[:, event_type_col] = df.loc[permuted_index, event_type_col].values
         self.permuted_df = permuted_df
         self.permuted_expanded_df = get_expanded_df(df=self.permuted_df,
                                                     event_type_col=event_type_col,
