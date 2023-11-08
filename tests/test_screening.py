@@ -51,27 +51,27 @@ class TestEvaluation(unittest.TestCase):
         self.patients_df = patients_df.reset_index()
 
     def test_psis_permute_df(self):
-        fitter = PSISTwoStagesFitter()
+        fitter = SISTwoStagesFitter()
         fitter.permute_df(df=self.patients_df)
 
     def test_psis_fit_marginal_model(self):
-        fitter = PSISTwoStagesFitter()
+        fitter = SISTwoStagesFitter()
         expanded_df = get_expanded_df(self.patients_df.drop(['C', 'T'], axis=1))
         fitter.fit_marginal_model(expanded_df, covariate='Z1')
 
     def test_psis_get_marginal_estimates(self):
-        fitter = PSISTwoStagesFitter()
+        fitter = SISTwoStagesFitter()
         expanded_df = get_expanded_df(self.patients_df.drop(['C', 'T'], axis=1))
         fitter.get_marginal_estimates(expanded_df)
 
     def test_psis_get_data_driven_treshold(self):
-        fitter = PSISTwoStagesFitter()
+        fitter = SISTwoStagesFitter()
         fitter.get_data_driven_threshold(df=self.patients_df.drop(['C', 'T'], axis=1))
 
     def test_psis_fit_data_driven_threshold(self):
-        fitter = PSISTwoStagesFitter()
+        fitter = SISTwoStagesFitter()
         fitter.fit(df=self.patients_df.drop(['C', 'T'], axis=1), quantile=0.95)
 
     def test_psis_fit_user_defined_threshold(self):
-        fitter = PSISTwoStagesFitter()
+        fitter = SISTwoStagesFitter()
         fitter.fit(df=self.patients_df.drop(['C', 'T'], axis=1), threshold=0.15)

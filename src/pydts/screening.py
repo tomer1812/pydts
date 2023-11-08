@@ -49,12 +49,8 @@ class MarginalTwoStagesFitter(TwoStagesFitter):
         """
 
         self._validate_cols(expanded_df, event_type_col, duration_col, pid_col)
-        if covariates is not None:
-            cov_not_in_df = [cov for cov in covariates if cov not in expanded_df.columns]
-            if len(cov_not_in_df) > 0:
-                raise ValueError(f"Error during fit - missing covariates from df: {cov_not_in_df}")
-
         self.events = [c for c in sorted(expanded_df[event_type_col].unique()) if c != 0]
+
         if covariates is None:
             covariates = [col for col in expanded_df if col not in [event_type_col, duration_col, pid_col]]
         self.covariates = covariates
@@ -70,7 +66,7 @@ class MarginalTwoStagesFitter(TwoStagesFitter):
         return self.beta_models
 
 
-class PSISTwoStagesFitter(object):
+class SISTwoStagesFitter(object):
 
     """
     This class implements the principled sure independence screening (PSIS) process of Zhao et al. (2012) for discrete-time data using the TwoStagesFitter and data-driven threshold.
@@ -152,7 +148,7 @@ class PSISTwoStagesFitter(object):
 
     def get_marginal_estimates(self,
                                expanded_df,
-                               covariates: List = None,
+                               covariates: Union[List, dict] = None,
                                event_type_col: str = 'J',
                                duration_col: str = 'X',
                                pid_col: str = 'pid',
@@ -195,11 +191,22 @@ class PSISTwoStagesFitter(object):
                           [f'j_{e}' for e in self.events])]
 
         parallel = Parallel(n_jobs=nb_workers, verbose=verbose)
-        _results = parallel(delayed(self.fit_marginal_model)(expanded_df, cov,
-                                                             event_type_col, duration_col, pid_col,
-                                                             x0, fit_beta_kwargs, verbose, nb_workers)
-                                                             for cov in covariates)
-        results_df = pd.concat(_results)
+        results_df = pd.DataFrame()
+        if isinstance(covariates, list):
+            _results = parallel(delayed(self.fit_marginal_model)(expanded_df, cov,
+                                                                 event_type_col, duration_col, pid_col,
+                                                                 x0, fit_beta_kwargs, verbose, nb_workers)
+                                                                 for cov in covariates)
+            results_df = pd.concat(_results)
+        elif isinstance(covariates, dict):
+            for event in self.events:
+                _results = parallel(delayed(self.fit_marginal_model)(expanded_df, cov,
+                                                                     event_type_col, duration_col, pid_col,
+                                                                     x0, fit_beta_kwargs, verbose, nb_workers)
+                                                                     for cov in covariates[event])
+                event_results_df = pd.concat(_results)
+                results_df = pd.concat([results_df, event_results_df], axis=1)
+
         return results_df
 
     def permute_df(self,
@@ -387,8 +394,9 @@ class PSISTwoStagesFitter(object):
         chosen_covariates_j = {}
         _params_cols = [c for c in self.marginal_estimates_df.columns if 'params' in c]
         for c in _params_cols:
-            chosen_covariates_j[c] = self.marginal_estimates_df[self.marginal_estimates_df[c].abs() >= self.threshold].index.tolist()
-            chosen_covariates.extend(chosen_covariates_j[c])
+            event = int(c[1:].split('_')[0])
+            chosen_covariates_j[event] = self.marginal_estimates_df[self.marginal_estimates_df[c].abs() >= self.threshold].index.tolist()
+            chosen_covariates.extend(chosen_covariates_j[event])
 
         self.chosen_covariates = sorted(np.unique(chosen_covariates))
         self.chosen_covariates_j = chosen_covariates_j
@@ -396,7 +404,7 @@ class PSISTwoStagesFitter(object):
         if fit_final_model:
             self.final_model = TwoStagesFitter()
             self.final_model.fit(df=df,
-                                 covariates=self.chosen_covariates,
+                                 covariates=self.chosen_covariates_j,
                                  event_type_col=event_type_col,
                                  duration_col=duration_col,
                                  pid_col=pid_col,

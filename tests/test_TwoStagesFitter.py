@@ -226,7 +226,7 @@ class TestTwoStagesFitter(unittest.TestCase):
         a_jt = ((1 / rel_y_t) * np.sum(expit(x + expit_add)) - (n_jt / rel_y_t)) ** 2
         a_jt_from_func = self.fitted_model._alpha_jt(x=x, df=df,
                                                      y_t=rel_y_t, beta_j=rel_beta,
-                                                     n_jt=n_jt, t=t)
+                                                     n_jt=n_jt, t=t, event=j)
         self.assertEqual(a_jt.item(), a_jt_from_func.item())
 
     def test_predict_event_jt_case_t1_not_hazard(self):
@@ -272,3 +272,21 @@ class TestTwoStagesFitter(unittest.TestCase):
         }
 
         L1_regularized_fitter.fit(df=self.df.drop(['C', 'T'], axis=1), fit_beta_kwargs=fit_beta_kwargs)
+
+    def test_different_covariates_to_each_beta_model(self):
+        twostages_fitter = TwoStagesFitter()
+        covariates = {
+            1: ['Z1', 'Z2', 'Z3'],
+            2: ['Z2', 'Z3', 'Z4', 'Z5']
+        }
+        twostages_fitter.fit(df=self.df.drop(['C', 'T'], axis=1), covariates=covariates)
+
+    def test_different_covariates_to_each_beta_model_prediction(self):
+        twostages_fitter = TwoStagesFitter()
+        covariates = {
+            1: ['Z1', 'Z2', 'Z3'],
+            2: ['Z2', 'Z3', 'Z4', 'Z5']
+        }
+        twostages_fitter.fit(df=self.df.drop(['C', 'T'], axis=1), covariates=covariates)
+        twostages_fitter.predict_cumulative_incident_function(df=self.df.drop(['C', 'T'], axis=1))
+

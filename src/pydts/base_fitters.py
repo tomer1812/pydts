@@ -45,7 +45,13 @@ class BaseFitter:
         return t
 
     def _validate_covariates_in_df(self, df):
-        cov_not_fitted = [cov for cov in self.covariates if cov not in df.columns]
+        cov_not_fitted = []
+        if isinstance(self.covariates, list):
+            cov_not_fitted = [cov for cov in self.covariates if cov not in df.columns]
+        elif isinstance(self.covariates, dict):
+            for event in self.events:
+                event_cov_not_fitted = [cov for cov in self.covariates[event] if cov not in df.columns]
+                cov_not_fitted.extend(event_cov_not_fitted)
         assert len(cov_not_fitted) == 0, \
             f"Cannot predict - required covariates are missing from df: {cov_not_fitted}"
 

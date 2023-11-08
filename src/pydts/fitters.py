@@ -226,21 +226,34 @@ class TwoStagesFitter(ExpansionBasedFitter):
         self.alpha_df = pd.DataFrame()
         self.beta_models = {}
 
-    def _alpha_jt(self, x, df, y_t, beta_j, n_jt, t):
+    def _alpha_jt(self, x, df, y_t, beta_j, n_jt, t, event):
         # Alpha_jt optimization objective
         partial_df = df[df[self.duration_col] >= t]
-        expit_add = np.dot(partial_df[self.covariates], beta_j)
+        if isinstance(self.covariates, list):
+            expit_add = np.dot(partial_df[self.covariates], beta_j)
+        elif isinstance(self.covariates, dict):
+            expit_add = np.dot(partial_df[self.covariates[event]], beta_j)
+        else:
+            raise ValueError
         return ((1 / y_t) * np.sum(expit(x + expit_add)) - (n_jt / y_t)) ** 2
 
     def _fit_event_beta(self, expanded_df, event, model=CoxPHFitter, model_kwargs={}, model_fit_kwargs={}):
         # Model fitting for conditional estimation of Beta_j for specific event
-        strata_df = expanded_df[self.covariates + [f'j_{event}', self.duration_col]]
+        if isinstance(self.covariates, list):
+            strata_df = expanded_df[self.covariates + [f'j_{event}', self.duration_col]]
+        elif isinstance(self.covariates, dict):
+            strata_df = expanded_df[self.covariates[event] + [f'j_{event}', self.duration_col]]
         strata_df[f'{self.duration_col}_copy'] = np.ones_like(expanded_df[self.duration_col])
 
         beta_j_model = model(**model_kwargs)
-        beta_j_model.fit(df=strata_df[self.covariates + [f'{self.duration_col}', f'{self.duration_col}_copy', f'j_{event}']],
-                         duration_col=f'{self.duration_col}_copy', event_col=f'j_{event}', strata=self.duration_col,
-                         **model_fit_kwargs, batch_mode=False)
+        if isinstance(self.covariates, list):
+            beta_j_model.fit(df=strata_df[self.covariates + [f'{self.duration_col}', f'{self.duration_col}_copy', f'j_{event}']],
+                             duration_col=f'{self.duration_col}_copy', event_col=f'j_{event}', strata=self.duration_col,
+                             **model_fit_kwargs, batch_mode=False)
+        elif isinstance(self.covariates, dict):
+            beta_j_model.fit(df=strata_df[self.covariates[event] + [f'{self.duration_col}', f'{self.duration_col}_copy', f'j_{event}']],
+                             duration_col=f'{self.duration_col}_copy', event_col=f'j_{event}', strata=self.duration_col,
+                             **model_fit_kwargs, batch_mode=False)
         return beta_j_model
 
     def _fit_beta(self, expanded_df, events, model=CoxPHFitter, model_kwargs={}, model_fit_kwargs={}):
@@ -256,7 +269,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
 
     def fit(self,
             df: pd.DataFrame,
-            covariates: List = None,
+            covariates: Union[list, dict] = None,
             event_type_col: str = 'J',
             duration_col: str = 'X',
             pid_col: str = 'pid',
@@ -290,13 +303,19 @@ class TwoStagesFitter(ExpansionBasedFitter):
         """
 
         self._validate_cols(df, event_type_col, duration_col, pid_col)
-        if covariates is not None:
-            cov_not_in_df = [cov for cov in covariates if cov not in df.columns]
+        self.events = [c for c in sorted(df[event_type_col].unique()) if c != 0]
+        if (covariates is not None):
+            cov_not_in_df = []
+            if isinstance(covariates, list):
+                cov_not_in_df = [cov for cov in covariates if cov not in df.columns]
+            elif isinstance(covariates, dict):
+                for event in self.events:
+                    event_cov_not_in_df = [cov for cov in covariates[event] if cov not in df.columns]
+                    cov_not_in_df.extend(event_cov_not_in_df)
             if len(cov_not_in_df) > 0:
                 raise ValueError(f"Error during fit - missing covariates from df: {cov_not_in_df}")
 
         pandarallel.initialize(verbose=verbose, nb_workers=nb_workers)
-        self.events = [c for c in sorted(df[event_type_col].unique()) if c != 0]
         if covariates is None:
             covariates = [col for col in df if col not in [event_type_col, duration_col, pid_col]]
         self.covariates = covariates
@@ -323,7 +342,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
             n_et = n_jt[n_jt[event_type_col] == event]
             n_et['opt_res'] = n_et.parallel_apply(lambda row: minimize(self._alpha_jt, x0=x0,
                                     args=(df, y_t.loc[row[duration_col]], self.beta_models[event].params_, row['n_jt'],
-                                    row[duration_col]), method='BFGS',
+                                    row[duration_col], event), method='BFGS',
                                     options={'gtol': 1e-7, 'eps': 1.5e-08, 'maxiter': 200}), axis=1)
             n_et['success'] = n_et['opt_res'].parallel_apply(lambda val: val.success)
             n_et['alpha_jt'] = n_et['opt_res'].parallel_apply(lambda val: val.x[0])
@@ -454,7 +473,10 @@ class TwoStagesFitter(ExpansionBasedFitter):
         if len(_t) == 0:
             return df
         temp_df = df.copy()
-        beta_j_x = temp_df[self.covariates].dot(model[0].params_)
+        if isinstance(self.covariates, list):
+            beta_j_x = temp_df[self.covariates].dot(model[0].params_)
+        elif isinstance(self.covariates, dict):
+            beta_j_x = temp_df[self.covariates[event]].dot(model[0].params_)
         temp_df[[f'hazard_j{event}_t{c}' for c in _t]] = pd.concat(
             [self._hazard_inverse_transformation(alpha_df[c] + beta_j_x) for c in _t], axis=1).values
         return temp_df
