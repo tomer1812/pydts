@@ -62,6 +62,7 @@ class DataExpansionFitter(ExpansionBasedFitter):
             event_type_col: str = 'J',
             duration_col: str = 'X',
             pid_col: str = 'pid',
+            skip_expansion: bool = False,
             covariates: Optional[list] = None,
             formula: Optional[str] = None,
             models_kwargs: Optional[dict] = None,
@@ -75,6 +76,8 @@ class DataExpansionFitter(ExpansionBasedFitter):
                                   Right censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
             duration_col (str): Last follow up time column name (must be a column in df).
             pid_col (str): Sample ID column name (must be a column in df).
+            skip_expansion (boolean): Skips the dataframe expansion step. Use this option only if the provided dataframe (df) is already correctly expanded (see [1]).
+                                      When set to True, the df is expected to be in the format produced by the pydts.utils.get_expanded_df() method, as if it were applied to the unexpanded data.
             covariates (list, Optional): A list of covariates, all must be columns in df.
                                          Defaults to all the columns of df except event_type_col, duration_col, and pid_col.
             formula (str, Optional): Model formula to be fitted. Patsy format string.
@@ -83,6 +86,9 @@ class DataExpansionFitter(ExpansionBasedFitter):
 
         Returns:
             event_models (dict): Fitted models dictionary. Keys - event names, Values - fitted models for the event.
+
+        References:
+            [1] Meir, Tomer and Gorfine, Malka, "Discrete-time Competing-Risks Regression with or without Penalization", https://arxiv.org/abs/2303.01186
         """
 
         if models_kwargs is not None:
@@ -101,8 +107,13 @@ class DataExpansionFitter(ExpansionBasedFitter):
                           if covariates is None else covariates
         self.times = sorted(df[duration_col].unique())
 
-        self.expanded_df = self._expand_data(df=df, event_type_col=event_type_col, duration_col=duration_col,
-                                             pid_col=pid_col)
+        if not skip_expansion:
+            self.expanded_df = self._expand_data(df=df, event_type_col=event_type_col, duration_col=duration_col,
+                                                 pid_col=pid_col)
+        else:
+            print('Skipping data expansion step, only use this option if the provided dataframe (df) is already correctly expanded.')
+            self.expanded_df = df
+
         for event in self.events:
             cov = ' + '.join(self.covariates)
             _formula = f'j_{event} ~ {formula}' if formula is not None else \
@@ -273,6 +284,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
             event_type_col: str = 'J',
             duration_col: str = 'X',
             pid_col: str = 'pid',
+            skip_expansion: bool = False,
             x0: Union[np.array, int] = 0,
             fit_beta_kwargs: dict = {},
             verbose: int = 2,
@@ -287,6 +299,8 @@ class TwoStagesFitter(ExpansionBasedFitter):
                                   Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
             duration_col (str): Last follow up time column name (must be a column in df).
             pid_col (str): Sample ID column name (must be a column in df).
+            skip_expansion (boolean): Skips the dataframe expansion step. Use this option only if the provided dataframe (df) is already correctly expanded (see [1]).
+                                      When set to True, the df is expected to be in the format produced by the pydts.utils.get_expanded_df() method, as if it were applied to the unexpanded data.
             x0 (Union[numpy.array, int], Optional): initial guess to pass to scipy.optimize.minimize function
             fit_beta_kwargs (dict, Optional): Keyword arguments to pass on to the estimation procedure.
                                               If different model for beta is desired, it can be defined here.
@@ -300,6 +314,9 @@ class TwoStagesFitter(ExpansionBasedFitter):
             nb_workers (int, Optional): The number of workers to pandaallel. If not sepcified, defaults to the number of workers available.
         Returns:
             event_models (dict): Fitted models dictionary. Keys - event names, Values - fitted models for the event.
+
+        References:
+            [1] Meir, Tomer and Gorfine, Malka, "Discrete-time Competing-Risks Regression with or without Penalization", https://arxiv.org/abs/2303.01186
         """
 
         self._validate_cols(df, event_type_col, duration_col, pid_col)
@@ -324,8 +341,12 @@ class TwoStagesFitter(ExpansionBasedFitter):
         self.pid_col = pid_col
         self.times = sorted(df[duration_col].unique())
 
-        expanded_df = self._expand_data(df=df, event_type_col=event_type_col, duration_col=duration_col,
-                                        pid_col=pid_col)
+        if not skip_expansion:
+            expanded_df = self._expand_data(df=df, event_type_col=event_type_col, duration_col=duration_col,
+                                                 pid_col=pid_col)
+        else:
+            print('Skipping data expansion step, only use this option if the provided dataframe (df) is already correctly expanded.')
+            expanded_df = df
 
         self.beta_models = self._fit_beta(expanded_df, self.events, **fit_beta_kwargs)
 

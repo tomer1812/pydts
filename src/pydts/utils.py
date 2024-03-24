@@ -8,7 +8,7 @@ from scipy.special import expit
 def get_expanded_df(df, event_type_col='J', duration_col='X', pid_col='pid'):
     """
     This function gets a dataframe describing each sample the time of the observed events,
-    and returns an expanded dataframe as explained in TODO add reference
+    and returns an expanded dataframe as explained in [1]-[2].
     Right censoring is allowed and must be marked as event type 0.
 
     :param df: original dataframe (pd.DataFrame)
@@ -17,6 +17,10 @@ def get_expanded_df(df, event_type_col='J', duration_col='X', pid_col='pid'):
     :param pid_col: patient id column name (str)
 
     :return: result_df: expanded dataframe
+
+    References:
+        [1] Meir, Tomer and Gorfine, Malka, "Discrete-time Competing-Risks Regression with or without Penalization", https://arxiv.org/abs/2303.01186
+        [2] Meir, Tomer and Gutman, Rom and Gorfine, Malka "PyDTS: A Python Package for Discrete-Time Survival (Regularized) Regression with Competing Risks", https://arxiv.org/abs/2204.05731
     """
     unique_times = df[duration_col].sort_values().unique()
     result_df = df.reindex(df.index.repeat(df[duration_col]))
