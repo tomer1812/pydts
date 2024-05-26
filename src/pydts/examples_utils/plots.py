@@ -688,7 +688,7 @@ def plot_example_pred_output(pred_df, fname: str = None, show: bool = True):
             ax = ax_lst[idp*2+ide]
             add_panel_text(ax, letters[idp*2+ide])
             for patient in pred_df.columns:
-                times = [m for m in range(1, 31)]
+                times = [m for m in range(1, 30)]
                 if pref == 'overall_survival':
                     index_val = [f'{pref}_t{m}' for m in times]
                 elif pref == 'hazard':
