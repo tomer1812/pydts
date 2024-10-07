@@ -2,6 +2,7 @@ from typing import Iterable, Tuple
 
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
+from statsmodels.discrete.conditional_models import ConditionalLogit, ConditionalResultsWrapper
 from .base_fitters import ExpansionBasedFitter
 from scipy.optimize import minimize
 from scipy.special import logit, expit
@@ -236,6 +237,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
         super().__init__()
         self.alpha_df = pd.DataFrame()
         self.beta_models = {}
+        self.beta_models_params_attr = 'params_'
 
     def _alpha_jt(self, x, df, y_t, beta_j, n_jt, t, event):
         # Alpha_jt optimization objective
@@ -251,10 +253,12 @@ class TwoStagesFitter(ExpansionBasedFitter):
     def _fit_event_beta(self, expanded_df, event, model=CoxPHFitter, model_kwargs={}, model_fit_kwargs={}):
         # Model fitting for conditional estimation of Beta_j for specific event
         if isinstance(self.covariates, list):
-            strata_df = expanded_df[self.covariates + [f'j_{event}', self.duration_col]]
+            strata_df = expanded_df[self.covariates + [f'j_{event}', self.duration_col]].copy()
         elif isinstance(self.covariates, dict):
-            strata_df = expanded_df[self.covariates[event] + [f'j_{event}', self.duration_col]]
-        strata_df[f'{self.duration_col}_copy'] = np.ones_like(expanded_df[self.duration_col])
+            strata_df = expanded_df[self.covariates[event] + [f'j_{event}', self.duration_col]].copy()
+        else:
+            raise TypeError
+        strata_df.loc[:, f'{self.duration_col}_copy'] = np.ones_like(expanded_df[self.duration_col])
 
         beta_j_model = model(**model_kwargs)
         if isinstance(self.covariates, list):
@@ -332,7 +336,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
             if len(cov_not_in_df) > 0:
                 raise ValueError(f"Error during fit - missing covariates from df: {cov_not_in_df}")
 
-        pandarallel.initialize(verbose=verbose, nb_workers=nb_workers)
+        #pandarallel.initialize(verbose=verbose, nb_workers=nb_workers)
         if covariates is None:
             covariates = [col for col in df if col not in [event_type_col, duration_col, pid_col]]
         self.covariates = covariates
@@ -360,13 +364,51 @@ class TwoStagesFitter(ExpansionBasedFitter):
         n_jt.columns = [event_type_col, duration_col, 'n_jt']
 
         for event in self.events:
-            n_et = n_jt[n_jt[event_type_col] == event]
-            n_et['opt_res'] = n_et.parallel_apply(lambda row: minimize(self._alpha_jt, x0=x0,
-                                    args=(df, y_t.loc[row[duration_col]], self.beta_models[event].params_, row['n_jt'],
-                                    row[duration_col], event), method='BFGS',
-                                    options={'gtol': 1e-7, 'eps': 1.5e-08, 'maxiter': 200}), axis=1)
-            n_et['success'] = n_et['opt_res'].parallel_apply(lambda val: val.success)
-            n_et['alpha_jt'] = n_et['opt_res'].parallel_apply(lambda val: val.x[0])
+
+            n_et = n_jt[n_jt[event_type_col] == event].copy()
+
+            if isinstance(self.beta_models[event], CoxPHFitter):
+                self.beta_models_params_attr = 'params_'
+                _res = Parallel(n_jobs=nb_workers)(delayed(minimize)(self._alpha_jt, x0=x0,
+                                                                     args=(df, y_t.loc[row[duration_col]],
+                                                                           getattr(self.beta_models[event],
+                                                                                   self.beta_models_params_attr),
+                                                                           row['n_jt'],
+                                                                           row[duration_col], event),
+                                                                     method='BFGS',
+                                                                     options={'gtol': 1e-7, 'eps': 1.5e-08,
+                                                                              'maxiter': 200})
+                                                                     for _, row in n_et.iterrows())
+                n_et['success'] = Parallel(n_jobs=nb_workers)(delayed(lambda row: row.success)(val)
+                                                              for val in _res)
+                n_et['alpha_jt'] = Parallel(n_jobs=nb_workers)(delayed(lambda row: row.x[0])(val)
+                                                               for val in _res)
+
+            elif isinstance(self.beta_models[event], ConditionalResultsWrapper):
+                self.beta_models_params_attr = 'params'
+                for idx, row in n_et.iterrows():
+                    _res = minimize(self._alpha_jt,
+                                    x0=x0,
+                                    args=(df,
+                                          y_t.loc[row[duration_col]],
+                                          getattr(self.beta_models[event], self.beta_models_params_attr),
+                                          row['n_jt'],
+                                          row[duration_col],
+                                          event),
+                                    method='BFGS',
+                                    options={'gtol': 1e-7, 'eps': 1.5e-08, 'maxiter': 200})
+                    n_et.loc[idx, 'success'] = _res.success
+                    n_et.loc[idx, 'alpha_jt'] = _res.x[0]
+            else:
+                raise ValueError
+
+            # n_et['opt_res'] = n_et.parallel_apply(lambda row: minimize(self._alpha_jt, x0=x0,
+            #                         args=(df, y_t.loc[row[duration_col]], event_beta_params, row['n_jt'],
+            #                         row[duration_col], event), method='BFGS',
+            #                         options={'gtol': 1e-7, 'eps': 1.5e-08, 'maxiter': 200}), axis=1)
+            # n_et['success'] = n_et['opt_res'].parallel_apply(lambda val: val.success)
+            # n_et['alpha_jt'] = n_et['opt_res'].parallel_apply(lambda val: val.x[0])
+
             assert_fit(n_et, self.times[:-1], event_type_col=event_type_col, duration_col=duration_col)  # todo move basic input validation before any optimization
             self.event_models[event] = [self.beta_models[event], n_et]
             self.alpha_df = pd.concat([self.alpha_df, n_et], ignore_index=True)
@@ -390,7 +432,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
 
         for event, model in self.event_models.items():
             print(f'\n\nModel summary for event: {event}')
-            display(model[1].drop('opt_res', axis=1).set_index([self.event_type_col, self.duration_col]))
+            display(model[1].set_index([self.event_type_col, self.duration_col]))
 
 
     def plot_event_alpha(self, event: Union[str, int], ax: plt.Axes = None, scatter_kwargs: dict = {},
@@ -495,9 +537,9 @@ class TwoStagesFitter(ExpansionBasedFitter):
             return df
         temp_df = df.copy()
         if isinstance(self.covariates, list):
-            beta_j_x = temp_df[self.covariates].dot(model[0].params_)
+            beta_j_x = temp_df[self.covariates].dot(getattr(model[0], self.beta_models_params_attr))
         elif isinstance(self.covariates, dict):
-            beta_j_x = temp_df[self.covariates[event]].dot(model[0].params_)
+            beta_j_x = temp_df[self.covariates[event]].dot(getattr(model[0], self.beta_models_params_attr))
         temp_df[[f'hazard_j{event}_t{c}' for c in _t]] = pd.concat(
             [self._hazard_inverse_transformation(alpha_df[c] + beta_j_x) for c in _t], axis=1).values
         return temp_df
@@ -559,7 +601,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
 
         alpha_df = pd.DataFrame()
         for event, model in self.event_models.items():
-            model_alpha_df = model[1].drop('opt_res', axis=1).set_index([self.event_type_col, self.duration_col])
+            model_alpha_df = model[1].set_index([self.event_type_col, self.duration_col])
             model_alpha_df.columns = pd.MultiIndex.from_product([[event], model_alpha_df.columns])
             alpha_df = pd.concat([alpha_df, model_alpha_df], axis=1)
 
@@ -703,3 +745,40 @@ def repetitive_fitters(rep: int, n_patients: int, n_cov: int, d_times: int, j_ev
     print(f'final: {final}')
     ret_df = pd.concat(counts_df_list, axis=1).fillna(0).mean(axis=1).apply(np.ceil).to_frame()
     return rep_dict, times, ret_df
+
+
+class TwoStagesFitterExact(TwoStagesFitter):
+
+    def _fit_event_beta(self, expanded_df, event, model=ConditionalLogit, model_kwargs={}, model_fit_kwargs={}):
+        # Model fitting for conditional estimation of Beta_j for specific event
+        if isinstance(self.covariates, dict):
+            _covs = self.covariates[event]
+        else:
+            _covs = self.covariates
+
+        beta_j_model = ConditionalLogit(endog=expanded_df[f'j_{event}'],
+                                        exog=expanded_df[_covs],
+                                        groups=expanded_df[self.duration_col])
+
+        beta_j_model = beta_j_model.fit()
+        #print(beta_j_model.summary())
+        return beta_j_model
+
+    def get_beta_SE(self):
+        """
+        This function returns the Beta coefficients and their Standard Errors for all the events.
+
+        Returns:
+            se_df (pandas.DataFrame): Beta coefficients and Standard Errors Dataframe
+
+        """
+
+        full_table = pd.DataFrame()
+        for event in self.events:
+            summary = self.event_models[event][0].summary()
+            summary_df = pd.DataFrame([x.split(',') for x in summary.tables[1].as_csv().split('\n')])
+            summary_df.columns = summary_df.iloc[0]
+            summary_df = summary_df.iloc[1:].set_index(summary_df.columns[0])
+            summary_df.columns = pd.MultiIndex.from_product([[event], summary_df.columns])
+            full_table = pd.concat([full_table, summary_df.iloc[-len(self.covariates):]], axis=1)
+        return full_table
