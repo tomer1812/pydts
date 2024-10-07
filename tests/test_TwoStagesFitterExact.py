@@ -257,30 +257,50 @@ class TestTwoStagesFitterExact(unittest.TestCase):
 
         fit_beta_kwargs = {
             'model_kwargs': {
-                'penalizer': 0.003,
-                'l1_ratio': 1
+                'alpha': 0.03,
+                'L1_wt': 1
             }
         }
 
         L1_regularized_fitter.fit(df=self.df.drop(['C', 'T'], axis=1), fit_beta_kwargs=fit_beta_kwargs)
+        print(L1_regularized_fitter.get_beta_SE())
 
     def test_regularization_different_to_each_beta_model(self):
         L1_regularized_fitter = TwoStagesFitterExact()
 
         fit_beta_kwargs = {
-            'model_kwargs': {
+            'model_fit_kwargs': {
                 1: {
-                        'penalizer': 0.003,
-                        'l1_ratio': 1
+                        'alpha': 0.003,
+                        'L1_wt': 1
                 },
                 2: {
-                        'penalizer': 0.005,
-                        'l1_ratio': 1
+                        'alpha': 0.005,
+                        'L1_wt': 1
                 }
             }
         }
 
         L1_regularized_fitter.fit(df=self.df.drop(['C', 'T'], axis=1), fit_beta_kwargs=fit_beta_kwargs)
+        # print(L1_regularized_fitter.get_beta_SE())
+
+        L2_regularized_fitter = TwoStagesFitterExact()
+
+        fit_beta_kwargs = {
+            'model_fit_kwargs': {
+                1: {
+                        'alpha': 0.003,
+                        'L1_wt': 0
+                },
+                2: {
+                        'alpha': 0.005,
+                        'L1_wt': 0
+                }
+            }
+        }
+
+        L2_regularized_fitter.fit(df=self.df.drop(['C', 'T'], axis=1), fit_beta_kwargs=fit_beta_kwargs)
+        # print(L2_regularized_fitter.get_beta_SE())
 
     def test_different_covariates_to_each_beta_model(self):
         twostages_fitter = TwoStagesFitterExact()

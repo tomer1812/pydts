@@ -3,6 +3,7 @@ from typing import Iterable, Tuple
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
 from statsmodels.discrete.conditional_models import ConditionalLogit, ConditionalResultsWrapper
+from statsmodels.base.elastic_net import RegularizedResultsWrapper
 from .base_fitters import ExpansionBasedFitter
 from scipy.optimize import minimize
 from scipy.special import logit, expit
@@ -274,12 +275,14 @@ class TwoStagesFitter(ExpansionBasedFitter):
     def _fit_beta(self, expanded_df, events, model=CoxPHFitter, model_kwargs={}, model_fit_kwargs={}):
         # Model fitting for conditional estimation of Beta_j for all events
         _model_kwargs_per_event = np.any([event in model_kwargs.keys() for event in events])
+        _model_fit_kwargs_per_event = np.any([event in model_fit_kwargs.keys() for event in events])
         beta_models = {}
         for event in events:
             _model_kwargs = model_kwargs[event] if _model_kwargs_per_event else model_kwargs
+            _model_fit_kwargs = model_fit_kwargs[event] if _model_fit_kwargs_per_event else model_fit_kwargs
             beta_models[event] = self._fit_event_beta(expanded_df=expanded_df, event=event,
                                                       model=model, model_kwargs=_model_kwargs,
-                                                      model_fit_kwargs=model_fit_kwargs)
+                                                      model_fit_kwargs=_model_fit_kwargs)
         return beta_models
 
     def fit(self,
@@ -384,7 +387,8 @@ class TwoStagesFitter(ExpansionBasedFitter):
                 n_et['alpha_jt'] = Parallel(n_jobs=nb_workers)(delayed(lambda row: row.x[0])(val)
                                                                for val in _res)
 
-            elif isinstance(self.beta_models[event], ConditionalResultsWrapper):
+            elif isinstance(self.beta_models[event], ConditionalResultsWrapper) or \
+                    isinstance(self.beta_models[event], RegularizedResultsWrapper):
                 self.beta_models_params_attr = 'params'
                 for idx, row in n_et.iterrows():
                     _res = minimize(self._alpha_jt,
@@ -758,10 +762,16 @@ class TwoStagesFitterExact(TwoStagesFitter):
 
         beta_j_model = ConditionalLogit(endog=expanded_df[f'j_{event}'],
                                         exog=expanded_df[_covs],
-                                        groups=expanded_df[self.duration_col])
+                                        groups=expanded_df[self.duration_col],
+                                        **model_kwargs)
 
-        beta_j_model = beta_j_model.fit()
-        #print(beta_j_model.summary())
+        if ('alpha' in model_fit_kwargs.keys()):
+            # Use 0 <= L1_wt <= 1 parameter to switch between L2 (L1_wt = 0) and L1 (L1_wt = 1) or elastic net.
+            # alpha is the the penalty weight.
+            beta_j_model = beta_j_model.fit_regularized(**model_fit_kwargs)
+        else:
+            beta_j_model = beta_j_model.fit(**model_fit_kwargs)
+
         return beta_j_model
 
     def get_beta_SE(self):
@@ -775,10 +785,17 @@ class TwoStagesFitterExact(TwoStagesFitter):
 
         full_table = pd.DataFrame()
         for event in self.events:
-            summary = self.event_models[event][0].summary()
-            summary_df = pd.DataFrame([x.split(',') for x in summary.tables[1].as_csv().split('\n')])
-            summary_df.columns = summary_df.iloc[0]
-            summary_df = summary_df.iloc[1:].set_index(summary_df.columns[0])
-            summary_df.columns = pd.MultiIndex.from_product([[event], summary_df.columns])
-            full_table = pd.concat([full_table, summary_df.iloc[-len(self.covariates):]], axis=1)
+            if isinstance(self.event_models[event][0], RegularizedResultsWrapper):
+                _p = self.event_models[event][0].params.copy()
+                _p.name = 'coef'
+                full_table = pd.concat([full_table,
+                                        pd.concat([_p], keys=[event], axis=1)],
+                                       axis=1)
+            else:
+                summary = self.event_models[event][0].summary()
+                summary_df = pd.DataFrame([x.split(',') for x in summary.tables[1].as_csv().split('\n')])
+                summary_df.columns = summary_df.iloc[0]
+                summary_df = summary_df.iloc[1:].set_index(summary_df.columns[0])
+                summary_df.columns = pd.MultiIndex.from_product([[event], summary_df.columns])
+                full_table = pd.concat([full_table, summary_df.iloc[-len(self.covariates):]], axis=1)
         return full_table
