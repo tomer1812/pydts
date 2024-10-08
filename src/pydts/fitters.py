@@ -785,14 +785,14 @@ class TwoStagesFitterExact(TwoStagesFitter):
 
         full_table = pd.DataFrame()
         for event in self.events:
-            if isinstance(self.event_models[event][0], RegularizedResultsWrapper):
-                _p = self.event_models[event][0].params.copy()
+            if isinstance(self.beta_models[event], RegularizedResultsWrapper):
+                _p = self.beta_models[event].params.copy()
                 _p.name = 'coef'
                 full_table = pd.concat([full_table,
                                         pd.concat([_p], keys=[event], axis=1)],
                                        axis=1)
             else:
-                summary = self.event_models[event][0].summary()
+                summary = self.beta_models[event].summary()
                 summary_df = pd.DataFrame([x.split(',') for x in summary.tables[1].as_csv().split('\n')])
                 summary_df.columns = summary_df.iloc[0]
                 summary_df = summary_df.iloc[1:].set_index(summary_df.columns[0])
