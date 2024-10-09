@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from .fitters import TwoStagesFitter
+from .fitters import TwoStagesFitter, TwoStagesFitterExact
 import warnings
 from copy import deepcopy
 from sklearn.model_selection import KFold
@@ -17,9 +17,9 @@ from time import time
 WORKERS = psutil.cpu_count(logical=False)
 
 
-class TwoStagesCV(object):
+class BaseTwoStagesCV(object):
     """
-    This class implements K-fold cross-validation using TwoStagesFitters
+    This class implements K-fold cross-validation using TwoStagesFitters and TwoStagesFittersExact
     """
 
     def __init__(self):
@@ -30,6 +30,7 @@ class TwoStagesCV(object):
         self.integrated_auc = {}
         self.global_bs = {}
         self.integrated_bs = {}
+        self.TwoStagesFitter_type = 'CoxPHFitter'
 
     def cross_validate(self,
                        full_df: pd.DataFrame,
@@ -89,7 +90,10 @@ class TwoStagesCV(object):
         for i_fold, (train_index, test_index) in enumerate(self.kfold_cv.split(full_df)):
             self.test_pids[i_fold] = full_df.iloc[test_index][pid_col].values
             train_df, test_df = full_df.iloc[train_index], full_df.iloc[test_index]
-            fold_fitter = TwoStagesFitter()
+            if self.TwoStagesFitter_type == 'Exact':
+                fold_fitter = TwoStagesFitterExact()
+            else:
+                fold_fitter = TwoStagesFitter()
             print(f'Fitting fold {i_fold+1}/{n_splits}')
             fold_fitter.fit(df=train_df,
                             covariates=covariates,
@@ -101,7 +105,8 @@ class TwoStagesCV(object):
                             verbose=verbose,
                             nb_workers=nb_workers)
 
-            self.models[i_fold] = deepcopy(fold_fitter)
+            #self.models[i_fold] = deepcopy(fold_fitter)
+            self.models[i_fold] = fold_fitter
 
             pred_df = self.models[i_fold].predict_prob_events(test_df)
 
@@ -237,3 +242,17 @@ class PenaltyGridSearchCV(object):
         else:
             gauc_output_df = pd.DataFrame()
         return gauc_output_df
+
+
+class TwoStagesCV(BaseTwoStagesCV):
+
+    def __init__(self):
+        super().__init__()
+        self.TwoStagesFitter_type = 'CoxPHFitter'
+
+
+class TwoStagesCVExact(BaseTwoStagesCV):
+
+    def __init__(self):
+        super().__init__()
+        self.TwoStagesFitter_type = 'Exact'
