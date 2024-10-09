@@ -753,6 +753,10 @@ def repetitive_fitters(rep: int, n_patients: int, n_cov: int, d_times: int, j_ev
 
 class TwoStagesFitterExact(TwoStagesFitter):
 
+    def __init__(self):
+        super().__init__()
+        self.beta_models_params_attr = 'params'
+
     def _fit_event_beta(self, expanded_df, event, model=ConditionalLogit, model_kwargs={}, model_fit_kwargs={}):
         # Model fitting for conditional estimation of Beta_j for specific event
         if isinstance(self.covariates, dict):

@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from itertools import product
-from .fitters import TwoStagesFitter
+from .fitters import TwoStagesFitter, TwoStagesFitterExact
 import warnings
 from copy import deepcopy
 pd.set_option("display.max_rows", 500)
@@ -12,7 +12,7 @@ slicer = pd.IndexSlice
 from .evaluation import events_integrated_brier_score, global_brier_score, events_integrated_auc, global_auc
 
 
-class PenaltyGridSearch(object):
+class BasePenaltyGridSearch(object):
 
     """ This class implements the penalty parameter grid search. """
 
@@ -27,6 +27,7 @@ class PenaltyGridSearch(object):
         self.integrated_auc = {}
         self.global_bs = {}
         self.integrated_bs = {}
+        self.TwoStagesFitter_type = 'CoxPHFitter'
 
     def evaluate(self,
                  train_df: pd.DataFrame,
@@ -71,13 +72,13 @@ class PenaltyGridSearch(object):
         np.random.seed(seed)
 
         for idp, penalizer in enumerate(penalizers):
-            fit_beta_kwargs = {
-                'model_kwargs': {
-                    'penalizer': penalizer,
-                    'l1_ratio': l1_ratio
-                },
-            }
-            self.meta_models[penalizer] = TwoStagesFitter()
+
+            fit_beta_kwargs = self._get_model_fit_kwargs(penalizer, l1_ratio)
+
+            if self.TwoStagesFitter_type == 'Exact':
+                self.meta_models[penalizer] = TwoStagesFitterExact()
+            else:
+                self.meta_models[penalizer] = TwoStagesFitter()
             print(f"Started estimating the coefficients for penalizer {penalizer} ({idp+1}/{len(penalizers)})")
             start = time()
             self.meta_models[penalizer].fit(df=train_df, fit_beta_kwargs=fit_beta_kwargs,
@@ -142,7 +143,11 @@ class PenaltyGridSearch(object):
 
         events = self.meta_models[penalizers_combination[0]].events
         event_type_col = self.meta_models[penalizers_combination[0]].event_type_col
-        mixed_two_stages = TwoStagesFitter()
+        if self.TwoStagesFitter_type == 'Exact':
+            mixed_two_stages = TwoStagesFitterExact()
+        else:
+            mixed_two_stages = TwoStagesFitter()
+
         for ide, event in enumerate(sorted(events)):
             if ide == 0:
                 mixed_two_stages.covariates = self.meta_models[penalizers_combination[ide]].covariates
@@ -152,9 +157,9 @@ class PenaltyGridSearch(object):
                 mixed_two_stages.pid_col = self.meta_models[penalizers_combination[ide]].pid_col
                 mixed_two_stages.times = self.meta_models[penalizers_combination[ide]].times
 
-            mixed_two_stages.beta_models[event] = deepcopy(self.meta_models[penalizers_combination[ide]].beta_models[event])
+            mixed_two_stages.beta_models[event] = self.meta_models[penalizers_combination[ide]].beta_models[event]
             mixed_two_stages.event_models[event] = []
-            mixed_two_stages.event_models[event].append(deepcopy(self.meta_models[penalizers_combination[ide]].beta_models[event]))
+            mixed_two_stages.event_models[event].append(self.meta_models[penalizers_combination[ide]].beta_models[event])
 
             event_alpha = self.meta_models[penalizers_combination[ide]].alpha_df.copy()
             event_alpha = event_alpha[event_alpha[event_type_col] == event]
@@ -162,3 +167,34 @@ class PenaltyGridSearch(object):
             mixed_two_stages.event_models[event].append(event_alpha)
 
         return mixed_two_stages
+
+    def _get_model_fit_kwargs(self, penalizer, l1_ratio):
+        if self.TwoStagesFitter_type == 'Exact':
+            fit_beta_kwargs = {
+                'model_kwargs': {
+                    'alpha': penalizer,
+                    'L1_wt': l1_ratio
+                }
+            }
+        else:
+            fit_beta_kwargs = {
+                'model_kwargs': {
+                    'penalizer': penalizer,
+                    'l1_ratio': l1_ratio
+                },
+            }
+        return fit_beta_kwargs
+
+
+class PenaltyGridSearch(BasePenaltyGridSearch):
+
+    def __init__(self):
+        super().__init__()
+        self.TwoStagesFitter_type = 'CoxPHFitter'
+
+
+class PenaltyGridSearchExact(BasePenaltyGridSearch):
+
+    def __init__(self):
+        super().__init__()
+        self.TwoStagesFitter_type = 'Exact'
