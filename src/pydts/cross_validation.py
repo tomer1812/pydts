@@ -11,7 +11,7 @@ from typing import Optional, List, Union
 import psutil
 from .evaluation import events_brier_score_at_t, events_integrated_brier_score, global_brier_score, \
     events_integrated_auc, global_auc, events_auc_at_t
-from .model_selection import PenaltyGridSearch
+from .model_selection import PenaltyGridSearch, PenaltyGridSearchExact
 from time import time
 
 WORKERS = psutil.cpu_count(logical=False)
@@ -139,7 +139,7 @@ class BaseTwoStagesCV(object):
         return self.results
 
 
-class PenaltyGridSearchCV(object):
+class BasePenaltyGridSearchCV(object):
     """
     This class implements K-fold cross-validation of the PenaltyGridSearch
     """
@@ -151,6 +151,7 @@ class PenaltyGridSearchCV(object):
         self.integrated_auc = {}
         self.global_bs = {}
         self.integrated_bs = {}
+        self.TwoStagesFitter_type = 'CoxPHFitter'
 
     def cross_validate(self,
                        full_df: pd.DataFrame,
@@ -206,7 +207,10 @@ class PenaltyGridSearchCV(object):
             start = time()
             self.test_pids[i_fold] = full_df.iloc[test_index][pid_col].values
             train_df, test_df = full_df.iloc[train_index], full_df.iloc[test_index]
-            fold_pgs = PenaltyGridSearch()
+            if self.TwoStagesFitter_type == 'Exact':
+                fold_pgs = PenaltyGridSearchExact()
+            else:
+                fold_pgs = PenaltyGridSearch()
 
             fold_pgs.evaluate(train_df=train_df,
                               test_df=test_df,
@@ -219,7 +223,7 @@ class PenaltyGridSearchCV(object):
                               pid_col=pid_col,
                               twostages_fit_kwargs=twostages_fit_kwargs)
 
-            self.folds_grids[i_fold] = deepcopy(fold_pgs)
+            self.folds_grids[i_fold] = fold_pgs
 
             for metric in metrics:
                 if metric == 'GAUC':
@@ -242,6 +246,20 @@ class PenaltyGridSearchCV(object):
         else:
             gauc_output_df = pd.DataFrame()
         return gauc_output_df
+
+
+class PenaltyGridSearchCV(BasePenaltyGridSearchCV):
+
+    def __init__(self):
+        super().__init__()
+        self.TwoStagesFitter_type = 'CoxPHFitter'
+
+
+class PenaltyGridSearchCVExact(BasePenaltyGridSearchCV):
+
+    def __init__(self):
+        super().__init__()
+        self.TwoStagesFitter_type = 'Exact'
 
 
 class TwoStagesCV(BaseTwoStagesCV):
