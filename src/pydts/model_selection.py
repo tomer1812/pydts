@@ -171,7 +171,7 @@ class BasePenaltyGridSearch(object):
     def _get_model_fit_kwargs(self, penalizer, l1_ratio):
         if self.TwoStagesFitter_type == 'Exact':
             fit_beta_kwargs = {
-                'model_kwargs': {
+                'model_fit_kwargs': {
                     'alpha': penalizer,
                     'L1_wt': l1_ratio
                 }
