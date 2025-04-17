@@ -33,13 +33,27 @@ jobs:
 
           # Return pytest exit code
           exit $test_status
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v2
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-          CODECOV_VERSION: 'v0.1.15'
-        with:
-          files: coverage.xml
-          token: ${{ secrets.CODECOV_TOKEN }}
-          version: ${{ env.CODECOV_VERSION }}
-          fail_ci_if_error: true
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v2
+      with:
+        version: "v0.1.15"
+        token: ${{ secrets.CODECOV_TOKEN }}
+        directory: ./coverage/reports/
+        env_vars: OS,PYTHON
+        fail_ci_if_error: true
+        # files: ./coverage1.xml,./coverage2.xml
+        files: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        path_to_write_report: ./coverage/codecov_report.txt
+        verbose: true
+#      - name: Upload coverage reports to Codecov
+#        uses: codecov/codecov-action@v2
+#        env:
+#          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+#          CODECOV_VERSION: 'v0.1.15'
+#        with:
+#          files: coverage.xml
+#          token: ${{ secrets.CODECOV_TOKEN }}
+#          version: ${{ env.CODECOV_VERSION }}
+#          fail_ci_if_error: true
