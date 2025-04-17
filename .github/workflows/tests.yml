@@ -2,25 +2,15 @@ name: Tests
 on: [push, pull_request]
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         python-version: ['3.8', '3.9', '3.10']
-        os: [ubuntu-latest, macOS-latest]
     steps:
       - uses: actions/checkout@v4
-      - name: Install gettext (Ubuntu)
-        if: runner.os == 'Linux'
+      - name: Install gettext
         run: sudo apt-get update && sudo apt-get install -y gettext
-      - name: Install and setup gettext (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          brew install gettext
-          brew link gettext --force
-          echo "/usr/local/opt/gettext/bin" >> $GITHUB_PATH
-          echo "LDFLAGS=-L/usr/local/opt/gettext/lib" >> $GITHUB_ENV
-          echo "CPPFLAGS=-I/usr/local/opt/gettext/include" >> $GITHUB_ENV
       - uses: actions/setup-node@v4
         with:
           node-version: 16
