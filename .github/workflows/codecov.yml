@@ -20,7 +20,19 @@ jobs:
           poetry install
       - name: Run tests with coverage
         run: |
+          # Start a background loop to print a message every 60 seconds
+          while true; do echo "Running tests... still working at $(date)"; sleep 60; done &
+          keep_alive=$!
+
+          # Run tests
           poetry run pytest tests/ -v --cov=src/pydts --cov-report=xml
+          test_status=$?
+
+          # Stop keep-alive loop
+          kill $keep_alive
+
+          # Return pytest exit code
+          exit $test_status
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
         env:
