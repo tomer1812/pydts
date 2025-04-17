@@ -3,6 +3,7 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 120  # Set explicit timeout of 2 hours
     strategy:
       fail-fast: false
       matrix:

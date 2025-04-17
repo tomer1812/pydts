@@ -3,6 +3,7 @@ on: [push, pull_request]
 jobs:
   run:
     runs-on: ubuntu-latest
+    timeout-minutes: 120  # Set explicit timeout of 2 hours
     env:
       PYTHON: '3.10'
     steps:
