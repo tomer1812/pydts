@@ -3,37 +3,26 @@ on: [push, pull_request]
 jobs:
   run:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
     env:
-      OS: ${{ matrix.os }}
-      PYTHON: '3.8'
+      PYTHON: '3.11'
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 16
-      - name: Setup Python
-        uses: actions/setup-python@v4
+      - uses: actions/setup-python@v4
         with:
-          python-version: 3.8
+          python-version: ${{ env.PYTHON }}
       - name: Install gettext
         run: sudo apt-get update && sudo apt-get install -y gettext
       - name: Generate coverage report
         run: |
-          pip install poetry==1.5.1
+          pip install poetry
           poetry install
           poetry run pytest --cov=./ --cov-report=xml
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          directory: ./coverage/reports/
-          env_vars: OS,PYTHON
-          fail_ci_if_error: true
           files: ./coverage.xml
-          flags: unittests
-          name: codecov-umbrella
-          path_to_write_report: ./coverage/codecov_report.txt
-          verbose: true
+          fail_ci_if_error: true
