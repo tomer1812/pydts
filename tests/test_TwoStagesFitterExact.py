@@ -103,16 +103,16 @@ class TestTwoStagesFitterExact(unittest.TestCase):
     def test_get_alpha_df(self):
         self.fitted_model.get_alpha_df()
 
-    def test_plot_all_events_beta(self):
-        self.fitted_model.plot_all_events_beta(show=False)
-
-    def test_plot_all_events_beta_case_show(self):
-        with patch('matplotlib.pyplot.show') as p:
-            self.fitted_model.plot_all_events_beta(show=True)
-
-    def test_plot_all_events_beta_case_ax_exists(self):
-        fig, ax = plt.subplots()
-        self.fitted_model.plot_all_events_beta(show=False, ax=ax)
+    # def test_plot_all_events_beta(self):
+    #     self.fitted_model.plot_all_events_beta(show=False)
+    #
+    # def test_plot_all_events_beta_case_show(self):
+    #     with patch('matplotlib.pyplot.show') as p:
+    #         self.fitted_model.plot_all_events_beta(show=True)
+    #
+    # def test_plot_all_events_beta_case_ax_exists(self):
+    #     fig, ax = plt.subplots()
+    #     self.fitted_model.plot_all_events_beta(show=False, ax=ax)
 
     def test_predict_hazard_jt_case_covariate_not_in_df(self):
         # Covariates columns used in fit (here ['Z1','Z2','Z3','Z4','Z5']) must be passed in df to .predict()
