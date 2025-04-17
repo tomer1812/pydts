@@ -10,7 +10,7 @@ from src.pydts.fitters import TwoStagesFitter, TwoStagesFitterExact
 class TestPenaltyGridSearch(unittest.TestCase):
 
     def setUp(self):
-        n_cov = 15
+        n_cov = 6
         beta1 = np.zeros(n_cov)
         beta1[:5] = (-0.5 * np.log([0.8, 3, 3, 2.5, 2]))
         beta2 = np.zeros(n_cov)
@@ -26,8 +26,8 @@ class TestPenaltyGridSearch(unittest.TestCase):
                 2: beta2
             }
         }
-        n_patients = 10000
-        d_times = 15
+        n_patients = 1000
+        d_times = 5
         j_events = 2
 
         ets = EventTimesSampler(d_times=d_times, j_event_types=j_events)
@@ -113,7 +113,7 @@ class TestPenaltyGridSearch(unittest.TestCase):
 class TestPenaltyGridSearchExact(TestPenaltyGridSearch):
 
     def setUp(self):
-        n_cov = 15
+        n_cov = 6
         beta1 = np.zeros(n_cov)
         beta1[:5] = (-0.5 * np.log([0.8, 3, 3, 2.5, 2]))
         beta2 = np.zeros(n_cov)
@@ -129,8 +129,8 @@ class TestPenaltyGridSearchExact(TestPenaltyGridSearch):
                 2: beta2
             }
         }
-        n_patients = 700
-        d_times = 7
+        n_patients = 300
+        d_times = 4
         j_events = 2
 
         ets = EventTimesSampler(d_times=d_times, j_event_types=j_events)

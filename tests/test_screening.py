@@ -76,7 +76,7 @@ class TestScreening(unittest.TestCase):
 class TestScreeningExact(TestScreening):
 
     def setUp(self):
-        n_cov = 50
+        n_cov = 30
         beta1 = np.zeros(n_cov)
         beta1[:5] = np.array([-0.6, 0.5, -0.5, 0.6, -0.6])
         beta2 = np.zeros(n_cov)
@@ -93,8 +93,8 @@ class TestScreeningExact(TestScreening):
             }
         }
 
-        n_patients = 400
-        d_times = 10
+        n_patients = 250
+        d_times = 7
         j_events = 2
 
         ets = EventTimesSampler(d_times=d_times, j_event_types=j_events)

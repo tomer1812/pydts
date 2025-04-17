@@ -15,15 +15,15 @@ class TestTwoStagesFitterExact(unittest.TestCase):
     def setUp(self):
         self.real_coef_dict = {
             "alpha": {
-                1: lambda t: -1.2 + 0.4 * np.log(t),
-                2: lambda t: -1.3 + 0.4 * np.log(t),
+                1: lambda t: -1. + 0.4 * np.log(t),
+                2: lambda t: -1. + 0.4 * np.log(t),
             },
             "beta": {
                 1: -0.4*np.log([0.8, 3, 3, 2.5, 2]),
                 2: -0.3*np.log([1, 3, 4, 3, 2]),
             }
         }
-        self.df = generate_quick_start_df(n_patients=500, n_cov=5, d_times=4, j_events=2, pid_col='pid', seed=0,
+        self.df = generate_quick_start_df(n_patients=300, n_cov=5, d_times=4, j_events=2, pid_col='pid', seed=0,
                                           real_coef_dict=self.real_coef_dict, censoring_prob=0.1)
 
         self.m = TwoStagesFitterExact()

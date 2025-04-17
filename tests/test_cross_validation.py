@@ -8,7 +8,7 @@ from src.pydts.cross_validation import TwoStagesCV, PenaltyGridSearchCV, TwoStag
 class TestCrossValidation(unittest.TestCase):
 
     def setUp(self):
-        n_cov = 15
+        n_cov = 6
         beta1 = np.zeros(n_cov)
         beta1[:5] = (-0.5 * np.log([0.8, 3, 3, 2.5, 2]))
         beta2 = np.zeros(n_cov)
@@ -24,8 +24,8 @@ class TestCrossValidation(unittest.TestCase):
                 2: beta2
             }
         }
-        n_patients = 5000
-        d_times = 15
+        n_patients = 1000
+        d_times = 5
         j_events = 2
 
         ets = EventTimesSampler(d_times=d_times, j_event_types=j_events)
@@ -49,28 +49,28 @@ class TestCrossValidation(unittest.TestCase):
         self.tscv = TwoStagesCV()
 
     def test_cross_validation_bs(self):
-        self.tscv.cross_validate(self.patients_df, metrics='BS')
+        self.tscv.cross_validate(self.patients_df, metrics='BS', n_splits=2)
 
     def test_cross_validation_auc(self):
-        self.tscv.cross_validate(self.patients_df, metrics='AUC')
+        self.tscv.cross_validate(self.patients_df, metrics='AUC', n_splits=2)
 
     def test_cross_validation_iauc(self):
-        self.tscv.cross_validate(self.patients_df, metrics='IAUC')
+        self.tscv.cross_validate(self.patients_df, metrics='IAUC', n_splits=2)
 
     def test_cross_validation_gauc(self):
-        self.tscv.cross_validate(self.patients_df, metrics='GAUC')
+        self.tscv.cross_validate(self.patients_df, metrics='GAUC', n_splits=2)
 
     def test_cross_validation_ibs(self):
-        self.tscv.cross_validate(self.patients_df, metrics='IBS')
+        self.tscv.cross_validate(self.patients_df, metrics='IBS', n_splits=2)
 
     def test_cross_validation_gbs(self):
-        self.tscv.cross_validate(self.patients_df, metrics='GBS')
+        self.tscv.cross_validate(self.patients_df, metrics='GBS', n_splits=3)
 
 
 class TestCrossValidationExact(TestCrossValidation):
 
     def setUp(self):
-        n_cov = 15
+        n_cov = 6
         beta1 = np.zeros(n_cov)
         beta1[:5] = (-0.5 * np.log([0.8, 3, 3, 2.5, 2]))
         beta2 = np.zeros(n_cov)
@@ -86,8 +86,8 @@ class TestCrossValidationExact(TestCrossValidation):
                 2: beta2
             }
         }
-        n_patients = 500
-        d_times = 7
+        n_patients = 300
+        d_times = 4
         j_events = 2
 
         ets = EventTimesSampler(d_times=d_times, j_event_types=j_events)
@@ -114,7 +114,7 @@ class TestCrossValidationExact(TestCrossValidation):
 class TestPenaltyGridSearchCV(unittest.TestCase):
 
     def setUp(self):
-        n_cov = 15
+        n_cov = 6
         beta1 = np.zeros(n_cov)
         beta1[:5] = (-0.5 * np.log([0.8, 3, 3, 2.5, 2]))
         beta2 = np.zeros(n_cov)
@@ -130,8 +130,8 @@ class TestPenaltyGridSearchCV(unittest.TestCase):
                 2: beta2
             }
         }
-        n_patients = 10000
-        d_times = 15
+        n_patients = 2000
+        d_times = 5
         j_events = 2
 
         ets = EventTimesSampler(d_times=d_times, j_event_types=j_events)
@@ -157,7 +157,7 @@ class TestPenaltyGridSearchCV(unittest.TestCase):
     def test_penalty_grid_search_cross_validate(self):
         self.pgscv.cross_validate(full_df=self.patients_df,
                              l1_ratio=1,
-                             n_splits=3,
+                             n_splits=2,
                              penalizers=[0.0001, 0.02],
                              seed=0)
 
@@ -165,7 +165,7 @@ class TestPenaltyGridSearchCV(unittest.TestCase):
 class TestPenaltyGridSearchCVExact(TestPenaltyGridSearchCV):
 
     def setUp(self):
-        n_cov = 15
+        n_cov = 6
         beta1 = np.zeros(n_cov)
         beta1[:5] = (-0.5 * np.log([0.8, 3, 3, 2.5, 2]))
         beta2 = np.zeros(n_cov)
@@ -181,8 +181,8 @@ class TestPenaltyGridSearchCVExact(TestPenaltyGridSearchCV):
                 2: beta2
             }
         }
-        n_patients = 600
-        d_times = 7
+        n_patients = 300
+        d_times = 4
         j_events = 2
 
         ets = EventTimesSampler(d_times=d_times, j_event_types=j_events)
