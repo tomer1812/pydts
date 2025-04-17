@@ -157,7 +157,7 @@ class TestPenaltyGridSearchCV(unittest.TestCase):
     def test_penalty_grid_search_cross_validate(self):
         self.pgscv.cross_validate(full_df=self.patients_df,
                              l1_ratio=1,
-                             n_splits=4,
+                             n_splits=3,
                              penalizers=[0.0001, 0.02],
                              seed=0)
 
@@ -173,8 +173,8 @@ class TestPenaltyGridSearchCVExact(TestPenaltyGridSearchCV):
 
         real_coef_dict = {
             "alpha": {
-                1: lambda t: -2.1 + 0.2 * np.log(t),
-                2: lambda t: -2.2 + 0.2 * np.log(t)
+                1: lambda t: -3.1 + 0.2 * np.log(t),
+                2: lambda t: -3.2 + 0.2 * np.log(t)
             },
             "beta": {
                 1: beta1,

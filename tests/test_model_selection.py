@@ -166,10 +166,17 @@ class TestPenaltyGridSearchExact(TestPenaltyGridSearch):
         mixed_params = pd.concat([mixed_two_stages.beta_models[1].params,
                                   mixed_two_stages.beta_models[2].params], axis=1)
 
+
         fit_beta_kwargs = {
-            'model_kwargs': {
-                1: {'penalizer': 0.005, 'l1_ratio': 1},
-                2: {'penalizer': 0.02, 'l1_ratio': 1},
+            'model_fit_kwargs': {
+                1: {
+                        'alpha': 0.005,
+                        'L1_wt': 1
+                },
+                2: {
+                        'alpha': 0.02,
+                        'L1_wt': 1
+                }
             }
         }
 
