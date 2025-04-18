@@ -1,6 +1,6 @@
 import unittest
 from src.pydts.data_generation import EventTimesSampler
-from src.pydts.screening import *
+from src.pydts.screening import SISTwoStagesFitterExact, SISTwoStagesFitter, get_expanded_df
 import numpy as np
 import pandas as pd
 
