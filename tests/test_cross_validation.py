@@ -167,21 +167,21 @@ class TestPenaltyGridSearchCVExact(TestPenaltyGridSearchCV):
     def setUp(self):
         n_cov = 6
         beta1 = np.zeros(n_cov)
-        beta1[:5] = (-0.5 * np.log([0.8, 3, 3, 2.5, 2]))
+        beta1[:5] = (-0.3 * np.log([0.8, 3, 3, 2.5, 2]))
         beta2 = np.zeros(n_cov)
-        beta2[:5] = (-0.5 * np.log([1, 3, 4, 3, 2]))
+        beta2[:5] = (-0.3 * np.log([1, 3, 4, 3, 2]))
 
         real_coef_dict = {
             "alpha": {
-                1: lambda t: -3.1 + 0.2 * np.log(t),
-                2: lambda t: -3.2 + 0.2 * np.log(t)
+                1: lambda t: -1.9 + 0.2 * np.log(t),
+                2: lambda t: -1.9 + 0.2 * np.log(t)
             },
             "beta": {
                 1: beta1,
                 2: beta2
             }
         }
-        n_patients = 300
+        n_patients = 350
         d_times = 4
         j_events = 2
 
