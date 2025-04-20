@@ -35,5 +35,5 @@ ISBN: 978-1-118-03123-0
 <a id="6">[6]</a> 
 Klein, John P. and Moeschberger, Melvin L.
 "Survival Analysis",
-Springer (2003)
+Springer-Verlag (2003)
 ISBN: 978-0-387-95399-1

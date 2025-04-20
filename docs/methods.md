@@ -1,10 +1,5 @@
 # Methods
 
-Based on
-
-"PyDTS: A Python Package for Discrete-Time Survival Analysis with Competing Risks"
-
-Tomer Meir\*, Rom Gutman\*, and Malka Gorfine (2022) [[1]](#1).
 
 ## Definitions
 
@@ -60,7 +55,26 @@ $$
 	= \sum_{i=1}^n \sum_{m=1}^{X_i} \left\[  \delta_{1im} \log \lambda_1(m|Z_i)+\delta_{2im} \log \lambda_2(m|Z_i) \right\. +\left\. \lbrace 1-\delta_{1im}-\delta_{2im}\rbrace \log\lbrace 1-\lambda_1(m|Z_i)-\lambda_2(m|Z_i)\rbrace \right\] \, .
 $$
 
-Instead of maximizing the $M(d+p)$ parameters simultaneously based on the above log-likelihood, the collapsed log-likelihood of Lee et al. [[4]](#4) can be adopted. Specifically, the data are expanded  such that for each observation $i$ the expanded dataset includes $X_i$ rows, one row for each time $t$, $t \leq X_i$. At each time point $t$ the expanded data are conditionally multinomial with one of three possible outcomes $\{\delta_{1it},\delta_{2it},1-\delta_{1it}-\delta_{2it}\}$. Then, for estimating $\{\alpha_{11},\ldots,\alpha_{1d},\beta_1^T\}$, we combine $\delta_{2it}$ and $1-\delta_{1it}-\delta_{2it}$, and the collapsed log-likelihood for cause $J=1$ based on a binary regression model with $\delta_{1it}$ as the outcome is given by
+Instead of maximizing the $M(d+p)$ parameters simultaneously based on the above log-likelihood, the collapsed log-likelihood of Lee et al. [[4]](#4) can be adopted. Specifically, the data are expanded  such that for each observation $i$ the expanded dataset includes $X_i$ rows, one row for each time $t$, $t \leq X_i$. At each time point $t$ the expanded data are conditionally multinomial with one of three possible outcomes $\{\delta_{1it},\delta_{2it},1-\delta_{1it}-\delta_{2it}\}$, as in [Table 1](#tbl:expanded).
+
+<a id="tbl:expanded">Table 1:</a>  Original and expanded datasets with $M = 2$ competing events [[Lee et al. (2018)]](#4). 
+
+
+| $i$ | $X_i$ | $\delta_i$ | $Z_i$ | $i$ | $\tilde{X}_i$ | $\delta_{1it}$ | $\delta_{2it}$ | $1 - \delta_{1it} - \delta_{2it}$ | $Z_i$ |
+|-----|--------|--------------|-------|-----|----------------|----------------|----------------|-------------------------------|-------|
+| 1   | 2      | 1            | $Z_1$ | 1   | 1              | 0              | 0              | 1                             | $Z_1$ |
+|     |        |              |       | 1   | 2              | 1              | 0              | 0                             | $Z_1$ |
+| 2   | 3      | 2            | $Z_2$ | 2   | 1              | 0              | 0              | 1                             | $Z_2$ |
+|     |        |              |       | 2   | 2              | 0              | 0              | 1                             | $Z_2$ |
+|     |        |              |       | 2   | 3              | 0              | 1              | 0                             | $Z_2$ |
+| 3   | 3      | 0            | $Z_3$ | 3   | 1              | 0              | 0              | 1                             | $Z_3$ |
+|     |        |              |       | 3   | 2              | 0              | 0              | 1                             | $Z_3$ |
+|     |        |              |       | 3   | 3              | 0              | 0              | 1                             | $Z_3$ |
+
+
+
+
+Then, for estimating $\{\alpha_{11},\ldots,\alpha_{1d},\beta_1^T\}$, we combine $\delta_{2it}$ and $1-\delta_{1it}-\delta_{2it}$, and the collapsed log-likelihood for cause $J=1$ based on a binary regression model with $\delta_{1it}$ as the outcome is given by
 $$
 \log L_1 = \sum_{i=1}^n \sum_{m=1}^{X_i}\left\[ \delta_{1im} \log \lambda_1(m|Z_i)+(1-\delta_{1im})\log \lbrace 1-\lambda_1(m|Z_i)\rbrace \right\] \, .
 $$
@@ -93,6 +107,60 @@ The above equation consists minimizing the squared distance between the observed
 ($n_{tj}/y_t$) and the expected proportion of failures given model defined above for $\lambda_j$ and $\widehat{\beta}_j$. 
 The simulation results of section Simple Simulation reveals that the above two-step procedure performs well in terms of bias, and provides similar standard error of that of [[3]](#3). However, the improvement in computational time, by using our procedure, could be improved by a factor of 1.5-3.5 depending on d. Standard errors of $\widehat{\beta}_j$, $j \in \{1,\ldots,M\}$, can be derived directly from the stratified Cox analysis.
 
+### Time-dependent covariates
+
+Similarly to the continuous-time Cox model, the simplest way to code time-dependent covariates uses intervals of time [[Therneau et al. (2000)]](#6). Then, the data is encoded by breaking the individual’s time into multiple time intervals, with one row of data for each interval. Hence combining this data expansion step with the expansion demonstrated in [Table 1](#tbl:expanded) is straightforward.
+
+### Regularized regression models
+
+Penalized regression methods, such as lasso, adaptive lasso, and elastic net [[Hastie et al. 2009]](#7), place a constraint on the size of the regression coefficients. The estimation procedure of [[Meir and Gorfine (2023)]](#8) that separates the estimation of $\beta_j$ and $\alpha_{jt}$ can easily incorporate such constraints in Lagrangian form by minimizing
+
+$$
+-\log L_j^c(\beta_j)  + \eta_j P(\beta_j) \, , \quad j=1,\ldots,M \, ,
+$$
+
+where $P$ is a penalty function and $\eta_j \geq 0$ are shrinkage tuning parameters. The parameters $\alpha_{jt}$ are estimated once the regularization step is completed and $\beta_j$ are estimated.
+
+Clearly, any regularized Cox regression model routines can be used for estimating $\beta_j$, $j=1,\ldots,M$, based on the above equation, for example, the `CoxPHFitter` of the `lifelines` Python package [[Davidson-Pilon (2019)]](#9) with penalization.
+
+
+### Sure Independence Screening
+
+When the number of available covariates greatly exceeds the number of observations (as common in genetic datasets, for example), i.e., the ultra-high setting, most regularized methods suffer from the curse of dimensionality, high variance, and overfitting [[Hastie et al. (2009)]](#7). 
+Sure Independent Screening (SIS) is a marginal screening technique designed to filter out uninformative covariates. 
+Penalized regression methods can be applied after the marginal screening process to the remaining covariates.
+
+We start the SIS procedure by ranking all the covariates using a utility measure between the response and each covariate, and then retain only covariates with estimated coefficients that exceeds a threshold value. 
+We focus on SIS and SIS followed by lasso (SIS-L) [[Fan et al. (2010); Saldana and Feng (2018)]](#10) within the proposed two-step procedure.
+
+We start by fitting a marginal regression for each covariate by maximizing:
+
+$$
+L_j^{\mathcal{C}}(\beta_{jr}) \quad \text{for } j=1,\ldots,M, \quad r=1,\ldots,p 
+$$
+
+where $\boldsymbol{\beta}_j = (\beta_{j1},\ldots,\beta_{jp})^T$. 
+Then we rank the features based on the magnitude of their marginal regression coefficients. 
+The selected sets of variables are given by:
+
+$$
+\widehat{\mathcal{M}}_{j,w_n} = \left\{1 \leq k \leq p \, : \, |\widehat{\beta}_{jk}| \geq w_n \right\}, \quad j=1,\ldots,M,
+$$
+
+where $w_n$ is a threshold value. 
+We adopt the data-driven threshold of [[Saldana and Feng (2018)]](#11). 
+Given data of the form $\{X_i, \delta_i, J_i, \mathbf{Z}_i \, ; \, i = 1, \ldots, n\}$, a random permutation $\pi$ of $\{1,\ldots,n\}$ is used to decouple $\mathbf{Z}_i$ and $(X_i, \delta_i, J_i)$, so that the permuted data $\{X_i, \delta_i, J_i, \mathbf{Z}_{\pi(i)}\}$ follow a model where the covariates have no predictive power over the survival time of any event type.
+
+For the permuted data, we re-estimate individual regression coefficients and obtain $\widehat{\beta}^*_{jr}$. The data-driven threshold is defined as:
+
+$$
+w_n = \max_{1 \leq j \leq M, \, 1 \leq k \leq p} |\widehat{\beta}^*_{jk}|.
+$$
+
+For the SIS-L procedure, lasso regularization is then applied in the first step of the two-step procedure to the set of covariates selected by SIS. 
+
+
+
 ## References
 <a id="1">[1]</a> 
 Meir, Tomer\*, Gutman, Rom\*, and Gorfine, Malka 
@@ -123,3 +191,34 @@ Prentice, Ross L and Breslow, Norman E
 Biometrika (1978)
 doi: 10.1111/j.2517-6161.1972.tb00899.x
 
+<a id="6">[6]</a> 
+Therneau, Terry M and Grambsch, Patricia M,
+"Modeling Survival Data: Extending the Cox Model", Springer-Verlag,
+(2000)
+
+<a id="7">[7]</a> 
+Hastie, Trevor and Tibshirani, Robert and Friedman, Jerome H,
+"The Elements of Statistical Learning: Data Mining, Inference, and Prediction.", Springer-Verlag,
+(2009)
+
+<a id="8">[8]</a> 
+Meir, Tomer and Gorfine, Malka, 
+"Discrete-time Competing-Risks Regression with or without Penalization"
+(2023)
+
+<a id="9">[9]</a> 
+Davidson-Pilon, Cameron,
+"lifelines: Survival Analysis in Python", Journal of Open Source Software,
+(2019)
+
+<a id="10">[10]</a> 
+Fan, J and Feng, Y and Wu, Y,
+"High-dimensional variable selection for Cox’s proportional hazards model", 
+Institute of Mathematical Statistics,
+(2010)
+
+<a id="11">[11]</a> 
+Saldana, DF and Feng, Y,
+"SIS: An R package for sure independence screening in ultrahigh-dimensional statistical models", 
+Journal of Statistical Software,
+(2018)
