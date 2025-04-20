@@ -657,98 +657,98 @@ class TwoStagesFitter(ExpansionBasedFitter):
         return ax
 
 
-def repetitive_fitters(rep: int, n_patients: int, n_cov: int, d_times: int, j_events: int, pid_col: str,
-                       drop_cols: Iterable = ("C", "T"),
-                       model1: ExpansionBasedFitter = DataExpansionFitter,
-                       model1_name="Lee",
-                       model2: ExpansionBasedFitter = TwoStagesFitter,
-                       model2_name: str = "Ours",
-                       allow_fails: int = 20,
-                       verbose: int = 2,
-                       real_coef_dict: dict = None,
-                       censoring_prob: float = 1.
-                       ) -> Tuple[dict, dict, pd.DataFrame]:
-    """
-    The function allows the user to generate N repetitions of model training (given data generating process),
-    to allow the user to compare the parameters stability and fitting time of the methods .
-
-    Args:
-        rep (int): number of repetitions to run the models
-        n_patients (int): number of sample to generate for each repetition
-        n_cov (int): number of covariates to generate for each repetition
-        d_times (int): how many times T to generate (i.e. times would be $t \in [1,\ldots,d]$)
-        j_events (int): number of events to generate for each repetition
-        pid_col (str): the name of the id column
-        test_size (float): the test size (percentage) for train/test splitting
-        drop_cols (Iterable):
-            Columns that shouldn't be visible for the model, from the generated sample.
-            default is drop the real event time (T) and censoring time (C)
-        model1 (ExpansionBasedFitter): Typically Lee et al. 2018 [1] model (DataExpansionFitter).
-            but can be any of base type ExpansionBasedFitter
-        model1_name (str): the name of the first model
-        model2 (ExpansionBasedFitter): Typically our suggested method (TwoStagesFitter).
-            but can be any of base type ExpansionBasedFitter
-        model2_name  (str): the name of the second model
-        allow_fails (int): number of allowed failed repetitions.
-            I.e. the method would run up to rep + allow_fails times.
-        verbose (int): verbosity level for the pandarallel module
-        real_coef_dict (dict): dictionary which represent the real coefficients to be generated for each repetition
-        censoring_prob (float): The probability to use the censoring method for each round of generation
-
-    Returns:
-        rep_dict (dict): Dictionary which contains for each round (key)
-            its beta/alpha/real coefficients dataframe (value).
-        times (dict): Dictionary which  contains for each model (key) a list of the training times (value).
-        ret_df (pd.DataFrame): Dataframe which contains for each time in d times, the average amount of events for it.
-
-    """
-
-    from .examples_utils.plots import compare_beta_models_for_example
-    from tqdm import trange
-    from time import time
-    assert real_coef_dict is not None, "The user should supply the coefficients of the experiment"
-    rep_dict = {}
-    times = {model1_name: [], model2_name: []}
-    counts_df_list = []
-    final = 0
-    failed = 0
-    for samp in trange(rep+allow_fails):
-        try:
-            patients_df = generate_quick_start_df(n_patients=n_patients, n_cov=n_cov, d_times=d_times,
-                                                  j_events=j_events,
-                                                  pid_col=pid_col, seed=samp, real_coef_dict=real_coef_dict,
-                                                  censoring_prob=censoring_prob )
-            counts_df = patients_df[patients_df['X'] <= d_times].groupby(['J', 'X']).size().to_frame(samp)
-            assert not (counts_df.reset_index()['X'].value_counts() < (j_events + 1)).any(), "Not enough events"
-            counts_df_list.append(counts_df)
-            drop_cols = pd.Index(drop_cols)
-            start_1 = time()
-            fitter = model1()
-            fitter.fit(df=patients_df.drop(drop_cols, axis=1))
-            end_1 = time()
-            start_2 = time()
-            new_fitter = model2()
-            if isinstance(new_fitter, TwoStagesFitter):
-                new_fitter.fit(df=patients_df.drop(drop_cols, axis=1), verbose=verbose)
-            else:
-                new_fitter.fit(df=patients_df.drop(drop_cols, axis=1))
-            end_2 = time()
-            times[model1_name].append(end_1 - start_1)
-            times[model2_name].append(end_2 - start_2)
-            res_dict = compare_beta_models_for_example(fitter.event_models,
-                                                       new_fitter.event_models, real_coef_dict=real_coef_dict)
-            rep_dict[samp] = res_dict
-            final += 1
-            if final == rep:
-                break
-        except Exception as e:
-            print(e)
-            failed += 1
-            print(f'Failed to fit sample {samp+1}, fail #{failed}')
-            continue
-    print(f'final: {final}')
-    ret_df = pd.concat(counts_df_list, axis=1).fillna(0).mean(axis=1).apply(np.ceil).to_frame()
-    return rep_dict, times, ret_df
+# def repetitive_fitters(rep: int, n_patients: int, n_cov: int, d_times: int, j_events: int, pid_col: str,
+#                        drop_cols: Iterable = ("C", "T"),
+#                        model1: ExpansionBasedFitter = DataExpansionFitter,
+#                        model1_name="Lee",
+#                        model2: ExpansionBasedFitter = TwoStagesFitter,
+#                        model2_name: str = "Ours",
+#                        allow_fails: int = 20,
+#                        verbose: int = 2,
+#                        real_coef_dict: dict = None,
+#                        censoring_prob: float = 1.
+#                        ) -> Tuple[dict, dict, pd.DataFrame]:
+#     """
+#     The function allows the user to generate N repetitions of model training (given data generating process),
+#     to allow the user to compare the parameters stability and fitting time of the methods .
+#
+#     Args:
+#         rep (int): number of repetitions to run the models
+#         n_patients (int): number of sample to generate for each repetition
+#         n_cov (int): number of covariates to generate for each repetition
+#         d_times (int): how many times T to generate (i.e. times would be $t \in [1,\ldots,d]$)
+#         j_events (int): number of events to generate for each repetition
+#         pid_col (str): the name of the id column
+#         test_size (float): the test size (percentage) for train/test splitting
+#         drop_cols (Iterable):
+#             Columns that shouldn't be visible for the model, from the generated sample.
+#             default is drop the real event time (T) and censoring time (C)
+#         model1 (ExpansionBasedFitter): Typically Lee et al. 2018 [1] model (DataExpansionFitter).
+#             but can be any of base type ExpansionBasedFitter
+#         model1_name (str): the name of the first model
+#         model2 (ExpansionBasedFitter): Typically our suggested method (TwoStagesFitter).
+#             but can be any of base type ExpansionBasedFitter
+#         model2_name  (str): the name of the second model
+#         allow_fails (int): number of allowed failed repetitions.
+#             I.e. the method would run up to rep + allow_fails times.
+#         verbose (int): verbosity level for the pandarallel module
+#         real_coef_dict (dict): dictionary which represent the real coefficients to be generated for each repetition
+#         censoring_prob (float): The probability to use the censoring method for each round of generation
+#
+#     Returns:
+#         rep_dict (dict): Dictionary which contains for each round (key)
+#             its beta/alpha/real coefficients dataframe (value).
+#         times (dict): Dictionary which  contains for each model (key) a list of the training times (value).
+#         ret_df (pd.DataFrame): Dataframe which contains for each time in d times, the average amount of events for it.
+#
+#     """
+#
+#     from .examples_utils.plots import compare_beta_models_for_example
+#     from tqdm import trange
+#     from time import time
+#     assert real_coef_dict is not None, "The user should supply the coefficients of the experiment"
+#     rep_dict = {}
+#     times = {model1_name: [], model2_name: []}
+#     counts_df_list = []
+#     final = 0
+#     failed = 0
+#     for samp in trange(rep+allow_fails):
+#         try:
+#             patients_df = generate_quick_start_df(n_patients=n_patients, n_cov=n_cov, d_times=d_times,
+#                                                   j_events=j_events,
+#                                                   pid_col=pid_col, seed=samp, real_coef_dict=real_coef_dict,
+#                                                   censoring_prob=censoring_prob )
+#             counts_df = patients_df[patients_df['X'] <= d_times].groupby(['J', 'X']).size().to_frame(samp)
+#             assert not (counts_df.reset_index()['X'].value_counts() < (j_events + 1)).any(), "Not enough events"
+#             counts_df_list.append(counts_df)
+#             drop_cols = pd.Index(drop_cols)
+#             start_1 = time()
+#             fitter = model1()
+#             fitter.fit(df=patients_df.drop(drop_cols, axis=1))
+#             end_1 = time()
+#             start_2 = time()
+#             new_fitter = model2()
+#             if isinstance(new_fitter, TwoStagesFitter):
+#                 new_fitter.fit(df=patients_df.drop(drop_cols, axis=1), verbose=verbose)
+#             else:
+#                 new_fitter.fit(df=patients_df.drop(drop_cols, axis=1))
+#             end_2 = time()
+#             times[model1_name].append(end_1 - start_1)
+#             times[model2_name].append(end_2 - start_2)
+#             res_dict = compare_beta_models_for_example(fitter.event_models,
+#                                                        new_fitter.event_models, real_coef_dict=real_coef_dict)
+#             rep_dict[samp] = res_dict
+#             final += 1
+#             if final == rep:
+#                 break
+#         except Exception as e:
+#             print(e)
+#             failed += 1
+#             print(f'Failed to fit sample {samp+1}, fail #{failed}')
+#             continue
+#     print(f'final: {final}')
+#     ret_df = pd.concat(counts_df_list, axis=1).fillna(0).mean(axis=1).apply(np.ceil).to_frame()
+#     return rep_dict, times, ret_df
 
 
 class TwoStagesFitterExact(TwoStagesFitter):
