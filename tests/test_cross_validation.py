@@ -78,15 +78,15 @@ class TestCrossValidationExact(TestCrossValidation):
 
         real_coef_dict = {
             "alpha": {
-                1: lambda t: -2.0 - 0.2 * np.log(t),
-                2: lambda t: -2.2 - 0.2 * np.log(t)
+                1: lambda t: -1.6 - 0.2 * np.log(t),
+                2: lambda t: -1.7 - 0.2 * np.log(t)
             },
             "beta": {
                 1: beta1,
                 2: beta2
             }
         }
-        n_patients = 300
+        n_patients = 400
         d_times = 4
         j_events = 2
 

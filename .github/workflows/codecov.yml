@@ -1,5 +1,4 @@
-
-name: API workflow
+name: Code cov
 
 on: [push, pull_request]
 
