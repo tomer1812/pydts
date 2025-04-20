@@ -16,8 +16,8 @@ class TestScreening(unittest.TestCase):
 
         real_coef_dict = {
             "alpha": {
-                1: lambda t: -3.1 + 0.1 * np.log(t),
-                2: lambda t: -3.2 + 0.2 * np.log(t)
+                1: lambda t: -2.6 + 0.1 * np.log(t),
+                2: lambda t: -2.7 + 0.2 * np.log(t)
             },
             "beta": {
                 1: beta1,
@@ -26,7 +26,7 @@ class TestScreening(unittest.TestCase):
         }
 
         n_patients = 400
-        d_times = 10
+        d_times = 7
         j_events = 2
 
         ets = EventTimesSampler(d_times=d_times, j_event_types=j_events)
@@ -93,7 +93,7 @@ class TestScreeningExact(TestScreening):
             }
         }
 
-        n_patients = 250
+        n_patients = 400
         d_times = 7
         j_events = 2
 

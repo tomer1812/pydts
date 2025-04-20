@@ -181,7 +181,7 @@ class TestPenaltyGridSearchCVExact(TestPenaltyGridSearchCV):
                 2: beta2
             }
         }
-        n_patients = 350
+        n_patients = 400
         d_times = 4
         j_events = 2
 
