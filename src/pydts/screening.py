@@ -260,13 +260,15 @@ class BaseSISTwoStages(object):
                                                                  for cov in covariates)
             results_df = pd.concat(_results)
         elif isinstance(covariates, dict):
-            for event in self.events:
-                _results = parallel(delayed(self.fit_marginal_model)(expanded_df, cov,
-                                                                     event_type_col, duration_col, pid_col,
-                                                                     x0, fit_beta_kwargs, verbose, nb_workers)
-                                                                     for cov in covariates[event])
-                event_results_df = pd.concat(_results)
-                results_df = pd.concat([results_df, event_results_df], axis=1)
+            raise ValueError("Please provide a list of covariates for the marginal testing, including the union of all possible options across all risks.")
+        # elif isinstance(covariates, dict):
+        #     for event in self.events:
+        #         _results = parallel(delayed(self.fit_marginal_model)(expanded_df, cov,
+        #                                                              event_type_col, duration_col, pid_col,
+        #                                                              x0, fit_beta_kwargs, verbose, nb_workers)
+        #                                                              for cov in covariates[event])
+        #         event_results_df = pd.concat(_results)
+        #         results_df = pd.concat([results_df, event_results_df], axis=1)
 
         return results_df.astype(float)
 

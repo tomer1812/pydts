@@ -49,7 +49,7 @@ class TestScreening(unittest.TestCase):
         patients_df = ets.update_event_or_lof(patients_df)
         patients_df.index.name = 'pid'
         self.patients_df = patients_df.reset_index()
-
+        self.covariates = covariates
         self.fitter = SISTwoStagesFitter()
 
     def test_psis_permute_df(self):
@@ -71,6 +71,11 @@ class TestScreening(unittest.TestCase):
 
     def test_psis_fit_user_defined_threshold(self):
         self.fitter.fit(df=self.patients_df.drop(['C', 'T'], axis=1), threshold=0.15)
+
+    def test_psis_covs_dict(self):
+        with self.assertRaises(ValueError):
+            self.fitter.fit(df=self.patients_df.drop(['C', 'T'], axis=1),
+                            covariates={1: self.covariates[:-3], 2: self.covariates[:-8]})
 
 
 class TestScreeningExact(TestScreening):
@@ -117,5 +122,5 @@ class TestScreeningExact(TestScreening):
         patients_df = ets.update_event_or_lof(patients_df)
         patients_df.index.name = 'pid'
         self.patients_df = patients_df.reset_index()
-
+        self.covariates = covariates
         self.fitter = SISTwoStagesFitterExact()
