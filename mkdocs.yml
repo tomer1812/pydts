@@ -54,7 +54,7 @@ nav:
       - Comparing the Estimation Methods: ModelsComparison.ipynb
       - Evaluation: PerformanceMeasures.ipynb
       - Regularization: Regularization.ipynb
-      - Small Sample Size Example: UsageExample-FittingDataExpansionFitterExact-Full.ipynb
+      - Small Sample Size Example: UsageExample-FittingTwoStagesFitterExact-FULL.ipynb
       - Screening Example: UsageExample-SIS-SIS-L.ipynb
       - Hospitalization LOS Simulation: SimulatedDataset.ipynb
     - API:
