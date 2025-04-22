@@ -81,6 +81,7 @@ plugins:
             show_root_heading: true
             show_source: true
             inherited_members: true
+            members: true
             docstring_style: google
             docstring_section_style: list
             merge_init_into_class: true
