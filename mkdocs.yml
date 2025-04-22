@@ -70,7 +70,14 @@ nav:
 plugins:
   - mknotebooks
   - search
-  - mkdocstrings
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_inheritance: true
+            show_root_heading: true
+            show_source: true
+            inherited_members: true
 
 extra:
   copyright: Copyright &copy; 2022 Tomer Meir, Rom Gutman, Malka Gorfine
