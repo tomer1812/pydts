@@ -5,4 +5,4 @@
 [//]: # (::: pydts.cross_validation.PenaltyGridSearchCV)
 
 [//]: # (::: pydts.cross_validation.PenaltyGridSearchCVExact)
-::: pydts.cross_validation	
+::: pydts.cross_validation
