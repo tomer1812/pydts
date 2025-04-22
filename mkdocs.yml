@@ -68,8 +68,9 @@ nav:
       - Model Selection: 'api/model_selection.md'
 
 plugins:
-  - mknotebooks
+#  - mknotebooks
   - search
+  - mkdocs-jupyter
   - mkdocstrings:
       python:
         options:
