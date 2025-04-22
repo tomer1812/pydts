@@ -78,7 +78,7 @@ plugins:
             show_root_heading: true
             show_source: true
             inherited_members: true
-            docstring_style: google  # or numpy
+            docstring_style: numpy
             merge_init_into_class: true
 
 extra:
