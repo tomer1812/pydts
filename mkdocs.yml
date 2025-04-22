@@ -71,20 +71,15 @@ plugins:
   - mknotebooks
   - search
   - mkdocstrings:
-      custom_templates: null
-      enable_inventory: false
       default_handler: python
       handlers:
         python:
+          paths: [ "src" ]
           options:
             show_inheritance: true
-            show_root_heading: true
-            show_source: true
             inherited_members: true
             members: true
             docstring_style: google
-            docstring_section_style: list
-            merge_init_into_class: true
 
 extra:
   copyright: Copyright &copy; 2022 Tomer Meir, Rom Gutman, Malka Gorfine
