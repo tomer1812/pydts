@@ -71,8 +71,7 @@ plugins:
   - mknotebooks
   - search
   - mkdocstrings:
-      handlers:
-        python:
+      python:
           options:
             show_inheritance: true
             show_root_heading: true
