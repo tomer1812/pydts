@@ -71,7 +71,11 @@ plugins:
   - mknotebooks
   - search
   - mkdocstrings:
-      python:
+      custom_templates: null
+      enable_inventory: false
+      default_handler: python
+      handlers:
+        python:
           options:
             show_inheritance: true
             show_root_heading: true
