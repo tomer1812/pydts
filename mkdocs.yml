@@ -78,6 +78,8 @@ plugins:
             show_root_heading: true
             show_source: true
             inherited_members: true
+            docstring_style: google  # or numpy
+            merge_init_into_class: true
 
 extra:
   copyright: Copyright &copy; 2022 Tomer Meir, Rom Gutman, Malka Gorfine
