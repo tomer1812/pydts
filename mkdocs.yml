@@ -86,9 +86,6 @@ plugins:
             merge_init_into_class: true
             docstring_style: google
 
-extra_javascript:
-  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
-
 extra:
   copyright: Copyright &copy; 2022 Tomer Meir, Rom Gutman, Malka Gorfine
   analytics:
