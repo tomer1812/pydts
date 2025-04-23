@@ -21,7 +21,6 @@ markdown_extensions:
     - pymdownx.inlinehilite
     - pymdownx.arithmatex:  # Render LaTeX via MathJax
         generic: true
-        inline_syntax: ['$', '$']
     - pymdownx.superfences  # Seems to enable syntax highlighting when used with the Material theme.
     - pymdownx.details  # Allowing hidden expandable regions denoted by ???
     - pymdownx.snippets:  # Include one Markdown file into another
@@ -35,8 +34,6 @@ extra_javascript:
   - javascripts/mathjax.js
   - https://polyfill.io/v3/polyfill.min.js?features=es6
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
-
-
 
 nav:
     - Home: 'index.md'
