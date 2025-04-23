@@ -52,28 +52,21 @@ class BaseTwoStagesCV(object):
 
         """
         This method implements K-fold cross-validation using TwoStagesFitters and full_df data.
+
         Args:
             full_df (pd.DataFrame): Data to cross validate.
             n_splits (int): Number of folds, defaults to 5.
-            shuffle (boolean): Shuffle samples before splitting to folds. Defaults to True.
+            shuffle (bool): Shuffle samples before splitting to folds. Defaults to True.
             seed: Pseudo-random seed to KFold instance. Defaults to None.
-            fit_beta_kwargs (dict, Optional): Keyword arguments to pass on to the estimation procedure.
-                                              If different model for beta is desired, it can be defined here.
+            fit_beta_kwargs (dict, Optional): Keyword arguments to pass on to the estimation procedure. If different model for beta is desired, it can be defined here.
             covariates (list): list of covariates to be used in estimating the regression coefficients.
-            event_type_col (str): The event type column name (must be a column in df),
-                                  Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+            event_type_col (str): The event type column name (must be a column in df), Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
             duration_col (str): Last follow up time column name (must be a column in full_df).
             pid_col (str): Sample ID column name (must be a column in full_df).
             x0 (Union[numpy.array, int], Optional): initial guess to pass to scipy.optimize.minimize function
             verbose (int, Optional): The verbosity level of pandaallel
             nb_workers (int, Optional): The number of workers to pandaallel. If not sepcified, defaults to the number of workers available.
-            metrics (str, list): Evaluation metrics. Available metrics:
-                                                    'AUC': AUC at t (will be added to TwoStagesCV.results),
-                                                    'IAUC': Integrated AUC (will be in TwoStagesCV.integrated_auc),
-                                                    'GAUC': Global AUC (will be in TwoStagesCV.global_auc).
-                                                    'BS': Brier score at t (will be added to TwoStagesCV.results),
-                                                    'IBS': Integrated Brier Score (will be in TwoStagesCV.integrated_bs),
-                                                    'GBS': Global Brier Score (will be in TwoStagesCV.global_bs).
+            metrics (str, list): Evaluation metrics.
 
         Returns:
             Results (pd.DataFrame): Cross validation metrics results
