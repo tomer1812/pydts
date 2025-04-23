@@ -68,9 +68,9 @@ nav:
       - Model Selection: 'api/model_selection.md'
 
 plugins:
-  - mknotebooks
+#  - mknotebooks
   - search
-#  - mkdocs-jupyter
+  - mkdocs-jupyter
   - mkdocstrings:
       handlers:
         python:
@@ -82,6 +82,9 @@ plugins:
             show_source: true
             merge_init_into_class: true
             docstring_style: google
+
+extra_javascript:
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
 
 extra:
   copyright: Copyright &copy; 2022 Tomer Meir, Rom Gutman, Malka Gorfine
