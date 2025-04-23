@@ -9,6 +9,7 @@ class EventTimesSampler(object):
     def __init__(self, d_times: int, j_event_types: int):
         """
         This class implements sampling procedure for discrete event times and censoring times for given observations.
+
         Args:
             d_times (int): number of possible event times
             j_event_types (int): number of possible event types
@@ -52,12 +53,14 @@ class EventTimesSampler(object):
 
     def calculate_overall_survival(self, hazards: list, numerical_error_tolerance: float = 0.001) -> pd.DataFrame:
         """
-        Calculates the overall survival function given the hazards
+        Calculates the overall survival function given the hazards.
+
         Args:
-            hazards (list): A list of hazards dataframes for each event type (as returned from EventTimesSampler.calculate_hazards function)
+            hazards (list): A list of hazards dataframes for each event type (as returned from EventTimesSampler.calculate_hazards function).
             numerical_error_tolerance (float): Tolerate numerical errors of probabilities up to this value.
+
         Returns:
-            overall_survival (pd.Dataframe): The overall survival functions
+            overall_survival (pd.Dataframe): The overall survival functions.
         """
         if (((sum(hazards)) > (1 + numerical_error_tolerance)).sum().sum() > 0):
             raise ValueError("The chosen sampling parameters result in negative values of the overall survival function")
@@ -76,6 +79,7 @@ class EventTimesSampler(object):
             hazards (list): A list of hazards dataframes for each event type (as returned from EventTimesSampler.calculate_hazards function)
             overall_survival (pd.Dataframe): The overall survival functions
             numerical_error_tolerance (float): Tolerate numerical errors of probabilities up to this value.
+
         Returns:
             prob_event_at_t (list): A list of dataframes, one for each event type, with the probability of event occurrance at time t to each of the observations.
         """
@@ -100,11 +104,13 @@ class EventTimesSampler(object):
 
     def calc_prob_t_given_j(self, prob_j_at_t, total_prob_j, numerical_error_tolerance=0.001):
         """
-        Calculates the conditional probability for event occurrance at time t given J_i=j
+        Calculates the conditional probability for event occurrance at time t given J_i=j.
+
         Args:
             prob_j_at_t (list): A list of dataframes, one for each event type, with the probability of event occurrance at time t to each of the observations.
             total_prob_j (list): A list of dataframes, one for each event type, with the total probability of event occurrance to each of the observations.
             numerical_error_tolerance (float): Tolerate numerical errors of probabilities up to this value.
+
         Returns:
             conditional_prob (list): A list of dataframes, one for each event type, with the conditional probability of event occurrance at t given event type j to each of the observations.
         """
@@ -118,12 +124,14 @@ class EventTimesSampler(object):
                                  events: Union[list, None] = None,
                                  seed: Union[int, None] = None) -> pd.DataFrame:
         """
-        Sample event type and event occurance times
+        Sample event type and event occurance times.
+
         Args:
             observations_df (pd.DataFrame): Dataframe with observations covariates.
             covariates (list): list of covariates name, must be a subset of observations_df.columns
             coefficients (dict): time coefficients and covariates coefficients for each event type.
             seed (int, None): numpy seed number for pseudo random sampling.
+
         Returns:
             observations_df (pd.DataFrame): Dataframe with additional columns for sampled event time (T) and event type (J).
         """
@@ -147,7 +155,8 @@ class EventTimesSampler(object):
 
     def sample_jt(self, total_prob_j: list, probs_t_given_j: list, numerical_error_tolerance: float = 0.001) -> pd.DataFrame:
         """
-        Sample event type and event time for each observation
+        Sample event type and event time for each observation.
+
         Args:
             total_prob_j (list): A list of dataframes, one for each event type, with the total probability of event occurrance to each of the observations.
             probs_t_given_j (list): A list of dataframes, one for each event type, with the conditional probability of event occurrance at t given event type j to each of the observations.
@@ -190,6 +199,7 @@ class EventTimesSampler(object):
                                          prob_lof_at_t: np.array, seed: Union[int, None] = None) -> pd.DataFrame:
         """
         Samples loss of follow-up censoring time from probabilities independent of covariates.
+
         Args:
             observations_df (pd.DataFrame): Dataframe with observations covariates.
             prob_lof_at_t (np.array): Array of probabilities for sampling each of the possible times.
@@ -218,11 +228,13 @@ class EventTimesSampler(object):
                                     covariates: Union[list, None] = None) -> pd.DataFrame:
         """
         Samples loss of follow-up censoring time from hazard coefficients.
+
         Args:
             observations_df (pd.DataFrame): Dataframe with observations covariates.
             censoring_hazard_coefs (dict): time coefficients and covariates coefficients for the censoring hazard.
             seed (int): pseudo random seed number for numpy.random.seed()
             covariates (list): list of covariates names, must be a subset of observations_df.columns
+
         Returns:
             observations_df (pd.DataFrame): Upadted dataframe including sampled censoring time.
         """

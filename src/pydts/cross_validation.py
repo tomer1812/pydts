@@ -172,16 +172,11 @@ class BasePenaltyGridSearchCV(object):
             n_splits (int): Number of folds, defaults to 5.
             shuffle (boolean): Shuffle samples before splitting to folds. Defaults to True.
             seed: Pseudo-random seed to KFold instance. Defaults to None.
-            event_type_col (str): The event type column name (must be a column in df),
-                                  Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+            event_type_col (str): The event type column name (must be a column in df), Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
             duration_col (str): Last follow up time column name (must be a column in full_df).
             pid_col (str): Sample ID column name (must be a column in full_df).
             twostages_fit_kwargs (dict): keyword arguments to pass to each TwoStagesFitter.
-            metrics (str, list): Evaluation metrics. Available metrics:
-                                                    'IAUC': Integrated AUC (will be in PenaltyGridSearchCV.integrated_auc),
-                                                    'GAUC': Global AUC (will be in PenaltyGridSearchCV.global_auc).
-                                                    'IBS': Integrated Brier Score (will be in PenaltyGridSearchCV.integrated_bs),
-                                                    'GBS': Global Brier Score (will be in PenaltyGridSearchCV.global_bs).
+            metrics (str, list): Evaluation metrics.
 
         Returns:
             gauc_output_df (pd.DataFrame): Global AUC k-fold mean and standard error for all possible combination of the penalizers.

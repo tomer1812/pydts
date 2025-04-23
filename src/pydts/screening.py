@@ -23,27 +23,19 @@ class MarginalTwoStagesFitter(TwoStagesFitter):
             verbose: int = 2,
             nb_workers: int = WORKERS) -> dict:
         """
-        This method estimates only the parameters of the covariates (beta_j) without the time parameters (alpha_jt).
-        Note that the expanded discrete-time data is expected as an input (see the Methods section of PyDTS documentation and pydts.utils.get_expanded_df).
+        This method estimates only the parameters of the covariates (beta_j) without the time parameters (alpha_jt). Note that the expanded discrete-time data is expected as an input (see the Methods section of PyDTS documentation and pydts.utils.get_expanded_df).
 
         Args:
             expanded_df (pd.DataFrame): expanded training data for fitting the model
             covariates (list): list of covariates to be used in estimating the regression coefficients
-            event_type_col (str): The event type column name (must be a column in df),
-                                  Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+            event_type_col (str): The event type column name (must be a column in df), Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
             duration_col (str): Last follow up time column name (must be a column in df).
             pid_col (str): Sample ID column name (must be a column in df).
             x0 (Union[numpy.array, int], Optional): initial guess to pass to scipy.optimize.minimize function
             fit_beta_kwargs (dict, Optional): Keyword arguments to pass on to the estimation procedure.
-                                              If different model for beta is desired, it can be defined here.
-                                              For example:
-                                              fit_beta_kwargs={
-                                                    model=CoxPHFitter, # model object
-                                                    model_kwargs={},  # keywords arguments to pass on to the model instance initiation
-                                                    model_fit_kwargs={}  # keywords arguments to pass on to model.fit() method
-                                              }
             verbose (int, Optional): The verbosity level of pandaallel
             nb_workers (int, Optional): The number of workers to pandaallel. If not sepcified, defaults to the number of workers available.
+
         Returns:
             event_models (dict): Fitted models dictionary. Keys - event names, Values - fitted models for the event.
         """
@@ -79,27 +71,19 @@ class MarginalTwoStagesFitterExact(TwoStagesFitterExact):
             verbose: int = 2,
             nb_workers: int = WORKERS) -> dict:
         """
-        This method estimates only the parameters of the covariates (beta_j) without the time parameters (alpha_jt).
-        Note that the expanded discrete-time data is expected as an input (see the Methods section of PyDTS documentation and pydts.utils.get_expanded_df).
+        This method estimates only the parameters of the covariates (beta_j) without the time parameters (alpha_jt). Note that the expanded discrete-time data is expected as an input (see the Methods section of PyDTS documentation and pydts.utils.get_expanded_df).
 
         Args:
             expanded_df (pd.DataFrame): expanded training data for fitting the model
             covariates (list): list of covariates to be used in estimating the regression coefficients
-            event_type_col (str): The event type column name (must be a column in df),
-                                  Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+            event_type_col (str): The event type column name (must be a column in df), Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
             duration_col (str): Last follow up time column name (must be a column in df).
             pid_col (str): Sample ID column name (must be a column in df).
             x0 (Union[numpy.array, int], Optional): initial guess to pass to scipy.optimize.minimize function
             fit_beta_kwargs (dict, Optional): Keyword arguments to pass on to the estimation procedure.
-                                              If different model for beta is desired, it can be defined here.
-                                              For example:
-                                              fit_beta_kwargs={
-                                                    model=CoxPHFitter, # model object
-                                                    model_kwargs={},  # keywords arguments to pass on to the model instance initiation
-                                                    model_fit_kwargs={}  # keywords arguments to pass on to model.fit() method
-                                              }
             verbose (int, Optional): The verbosity level of pandaallel
             nb_workers (int, Optional): The number of workers to pandaallel. If not sepcified, defaults to the number of workers available.
+
         Returns:
             event_models (dict): Fitted models dictionary. Keys - event names, Values - fitted models for the event.
         """
@@ -158,27 +142,19 @@ class BaseSISTwoStages(object):
                            verbose: int = 2,
                            nb_workers: int = 1):
         """
-        This method fits a marginal model to data using a single covariate.
-        Note that the expanded discrete-time data is expected as an input (see the Methods section of PyDTS documentation and pydts.utils.get_expanded_df).
+        This method fits a marginal model to data using a single covariate. Note that the expanded discrete-time data is expected as an input (see the Methods section of PyDTS documentation and pydts.utils.get_expanded_df).
 
         Args:
             expanded_df (pd.DataFrame): expanded training data for fitting the model
             covariate (str): a single covariate to be used in estimating the regression coefficients
-            event_type_col (str): The event type column name (must be a column in df),
-                                  Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+            event_type_col (str): The event type column name (must be a column in df), Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
             duration_col (str): Last follow up time column name (must be a column in df).
             pid_col (str): Sample ID column name (must be a column in df).
             x0 (Union[numpy.array, int], Optional): initial guess to pass to scipy.optimize.minimize function
             fit_beta_kwargs (dict, Optional): Keyword arguments to pass on to the estimation procedure.
-                                              If different model for beta is desired, it can be defined here.
-                                              For example:
-                                              fit_beta_kwargs={
-                                                    model=CoxPHFitter, # model object
-                                                    model_kwargs={},  # keywords arguments to pass on to the model instance initiation
-                                                    model_fit_kwargs={}  # keywords arguments to pass on to model.fit() method
-                                              }
             verbose (int, Optional): The verbosity level of pandaallel
             nb_workers (int, Optional): The number of workers to pandaallel. If not sepcified, defaults to the number of workers available.
+
         Returns:
             result (pd.DataFrame): Estimated parameter and standard errors. TwoStagesFitter.get_beta_SE() output.
         """
@@ -219,27 +195,19 @@ class BaseSISTwoStages(object):
                                nb_workers: int = WORKERS):
 
         """
-        This method fits a marginal model to data to each of the covariates.
-        Note that the expanded discrete-time data is expected as an input (see the Methods section of PyDTS documentation and pydts.utils.get_expanded_df).
+        This method fits a marginal model to data to each of the covariates. Note that the expanded discrete-time data is expected as an input (see the Methods section of PyDTS documentation and pydts.utils.get_expanded_df).
 
         Args:
             expanded_df (pd.DataFrame): expanded training data for fitting the model
             covariates (list): list of covariates to estimate the marginal regression coefficient for.
-            event_type_col (str): The event type column name (must be a column in df),
-                                  Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+            event_type_col (str): The event type column name (must be a column in df), Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
             duration_col (str): Last follow up time column name (must be a column in df).
             pid_col (str): Sample ID column name (must be a column in df).
             verbose (int, Optional): The verbosity level of pandaallel
             x0 (Union[numpy.array, int], Optional): initial guess to pass to scipy.optimize.minimize function
             fit_beta_kwargs (dict, Optional): Keyword arguments to pass on to the estimation procedure.
-                                              If different model for beta is desired, it can be defined here.
-                                              For example:
-                                              fit_beta_kwargs={
-                                                    model=CoxPHFitter, # model object
-                                                    model_kwargs={},  # keywords arguments to pass on to the model instance initiation
-                                                    model_fit_kwargs={}  # keywords arguments to pass on to model.fit() method
-                                              }
             nb_workers (int, Optional): The number of workers to pandaallel. If not sepcified, defaults to the number of workers available.
+
         Returns:
             results_df (pd.DataFrame): Estimated parameters and standard errors of the marginal models. A concatenation of all the TwoStagesFitter.get_beta_SE() outputs.
         """
@@ -284,12 +252,11 @@ class BaseSISTwoStages(object):
 
         Args:
             df (pd.DataFrame): training data for fitting the model
-            event_type_col (str): The event type column name (must be a column in df),
-                                  Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+            event_type_col (str): The event type column name (must be a column in df), Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
             duration_col (str): Last follow up time column name (must be a column in df).
             pid_col (str): Sample ID column name (must be a column in df).
-
             seed (int, Optional): pseudo random state.
+
         Returns:
             permuted_df (pd.DataFrame): null model data.
         """
@@ -325,24 +292,16 @@ class BaseSISTwoStages(object):
         Args:
             df (pd.DataFrame): training data for fitting the model
             covariates (list): list of covariates to estimate the marginal regression coefficient for.
-            quantile (float): represents the quantile of the absolute values of the coefficients from the null model that determines the data-driven threshold.
-                              Defaults to 1, which corresponds to the maximum absolute value of the null model's coefficients.
-            event_type_col (str): The event type column name (must be a column in df),
-                                  Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+            quantile (float): represents the quantile of the absolute values of the coefficients from the null model that determines the data-driven threshold. Defaults to 1, which corresponds to the maximum absolute value of the null model's coefficients.
+            event_type_col (str): The event type column name (must be a column in df), Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
             duration_col (str): Last follow up time column name (must be a column in df).
             pid_col (str): Sample ID column name (must be a column in df).
             x0 (Union[numpy.array, int], Optional): initial guess to pass to scipy.optimize.minimize function
             fit_beta_kwargs (dict, Optional): Keyword arguments to pass on to the estimation procedure.
-                                              If different model for beta is desired, it can be defined here.
-                                              For example:
-                                              fit_beta_kwargs={
-                                                    model=CoxPHFitter, # model object
-                                                    model_kwargs={},  # keywords arguments to pass on to the model instance initiation
-                                                    model_fit_kwargs={}  # keywords arguments to pass on to model.fit() method
-                                              }
             verbose (int, Optional): The verbosity level of pandaallel
             nb_workers (int, Optional): The number of workers to pandaallel. If not sepcified, defaults to the number of workers available.
             seed (int): pseudo random state.
+
         Returns:
             threshold (pd.Series): Estimated thresholds.
         """
@@ -388,29 +347,19 @@ class BaseSISTwoStages(object):
 
         Args:
             df (pd.DataFrame): training data for fitting the model
-            threshold (float): a user defined threshold.
-                               Defaults to None, i.e. data-driven threshold
-            quantile (float): the quantile of the absolute values of the coefficients from the null model that determines the data-driven threshold.
-                              Only in use when threshold = None.
-                              Defaults to 1, which corresponds to the maximum absolute value of the null model's coefficients.
+            threshold (float): a user defined threshold. Defaults to None, i.e. data-driven threshold
+            quantile (float): the quantile of the absolute values of the coefficients from the null model that determines the data-driven threshold. Only in use when threshold = None. Defaults to 1, which corresponds to the maximum absolute value of the null model's coefficients.
             covariates (list): list of covariates to estimate the marginal regression coefficient for.
-            event_type_col (str): The event type column name (must be a column in df),
-                                  Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+            event_type_col (str): The event type column name (must be a column in df), Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
             duration_col (str): Last follow up time column name (must be a column in df).
             pid_col (str): Sample ID column name (must be a column in df).
             x0 (Union[numpy.array, int], Optional): initial guess to pass to scipy.optimize.minimize function
             fit_beta_kwargs (dict, Optional): Keyword arguments to pass on to the estimation procedure.
-                                              If different model for beta is desired, it can be defined here.
-                                              For example:
-                                              fit_beta_kwargs={
-                                                    model=CoxPHFitter, # model object
-                                                    model_kwargs={},  # keywords arguments to pass on to the model instance initiation
-                                                    model_fit_kwargs={}  # keywords arguments to pass on to model.fit() method
-                                              }
             verbose (int, Optional): The verbosity level of pandaallel
             nb_workers (int, Optional): The number of workers to pandaallel. If not sepcified, defaults to the number of workers available.
             seed (int): pseudo random state.
             fit_final_model (boolean): True if to fit and return the TwoStagesFitter with the selected covariates.
+
         Returns:
             final_model (TwoStagesFitter): estimated model with the chosen covariates after PSIS.
         """

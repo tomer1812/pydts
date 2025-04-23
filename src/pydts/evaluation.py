@@ -17,13 +17,11 @@ def event_specific_weights(pred_df: pd.DataFrame,
     This function implements the calculation of the event specific time-weights.
 
     Args:
-        pred_df (pd.DataFrame): Data to calculate prediction error.
-                                Must contain the observed duration and event-type, and the probability of event at time t prediction results for the event.
-                                See TwoStagesFitter.predict_prob_events()
+        pred_df (pd.DataFrame): Data to calculate prediction error. Must contain the observed duration and event-type, and the probability of event at time t prediction results for the event. See TwoStagesFitter.predict_prob_events()
         event (int): Event-type to calculate the weights for.
         duration_col (str): Last follow up time column name (must be a column in pred_df).
-        event_type_col (str): The event type column name (must be a column in df),
-                              Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+        event_type_col (str): The event type column name (must be a column in df), Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+
     Returns:
         result (pd.Series): event specific weights.
     """
@@ -47,14 +45,12 @@ def event_specific_brier_score_at_t(pred_df: pd.DataFrame,
     This function implements the calculation of the event specific Brier Score at time t.
 
     Args:
-        pred_df (pd.DataFrame): Data to calculate Brier Score for.
-                                Must contain the observed duration and event-type, and the probability of event at time t prediction results for all events.
-                                See TwoStagesFitter.predict_prob_events()
+        pred_df (pd.DataFrame): Data to calculate Brier Score for. Must contain the observed duration and event-type, and the probability of event at time t prediction results for all events. See TwoStagesFitter.predict_prob_events()
         event (int): Event-type to calculate the Brier Score for.
         t (int): time to calculate the Brier Score for.
         duration_col (str): Last follow up time column name (must be a column in pred_df).
-        event_type_col (str): The event type column name (must be a column in df),
-                              Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+        event_type_col (str): The event type column name (must be a column in df), Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+
     Returns:
         result (pd.Series): event specific Brier Score at time t.
     """
@@ -77,13 +73,11 @@ def event_specific_brier_score_at_t_all(pred_df: pd.DataFrame,
     This function implements the calculation of the event specific Brier Score at time t for all times included in duration_col of pred_df.
 
     Args:
-        pred_df (pd.DataFrame): Data to calculate Brier Score.
-                                Must contain the observed duration and event-type, and the probability of event at time t prediction results for the event.
-                                See c
+        pred_df (pd.DataFrame): Data to calculate Brier Score. Must contain the observed duration and event-type, and the probability of event at time t prediction results for the event. TwoStagesFitter.predict_prob_events()
         event (int): Event-type to calculate the Brier Score for.
         duration_col (str): Last follow up time column name (must be a column in pred_df).
-        event_type_col (str): The event type column name (must be a column in df),
-                              Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+        event_type_col (str): The event type column name (must be a column in df), Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+
     Returns:
         result (pd.Series): event specific Brier Score for all times included in duration_col of pred_df.
     """
@@ -104,14 +98,12 @@ def event_specific_integrated_brier_score(pred_df: pd.DataFrame,
     This function implements the calculation of the event specific integrated Brier Score.
 
     Args:
-        pred_df (pd.DataFrame): Data to calculate Brier Score.
-                                Must contain the observed duration and event-type, and the probability of event at time t prediction results for the event.
-                                See TwoStagesFitter.predict_prob_events()
+        pred_df (pd.DataFrame): Data to calculate Brier Score. Must contain the observed duration and event-type, and the probability of event at time t prediction results for the event. See TwoStagesFitter.predict_prob_events()
         event (int): Event-type to calculate the integrated Brier Score for.
         duration_col (str): Last follow up time column name (must be a column in pred_df).
-        event_type_col (str): The event type column name (must be a column in df),
-                              Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+        event_type_col (str): The event type column name (must be a column in df), Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
         weights (pd.Series): Optional. Weights vector with time as index and weight as value. Length must be the number of possible event times.
+
     Returns:
         result (float): integrated Brier Score results.
     """
@@ -139,12 +131,10 @@ def global_brier_score(pred_df: pd.DataFrame,
     This function implements the calculation of the global Brier Score.
 
     Args:
-        pred_df (pd.DataFrame): Data to calculate Brier score.
-                                Must contain the observed duration and event-type, and the probability of event at time t prediction results for all events.
-                                See TwoStagesFitter.predict_prob_events()
+        pred_df (pd.DataFrame): Data to calculate Brier score. Must contain the observed duration and event-type, and the probability of event at time t prediction results for all events. See TwoStagesFitter.predict_prob_events()
         duration_col (str): Last follow up time column name (must be a column in pred_df).
-        event_type_col (str): The event type column name (must be a column in df),
-                              Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+        event_type_col (str): The event type column name (must be a column in df), Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+
     Returns:
         global_auc (float): global Brier Score results.
     """
@@ -165,12 +155,10 @@ def events_integrated_brier_score(pred_df: pd.DataFrame, event_type_col: str = '
     This function implements the calculation of the integrated Brier Score to all events.
 
     Args:
-        pred_df (pd.DataFrame): Data to calculate integrated Brier Score.
-                                Must contain the observed duration and event-type, and the probability of event at time t prediction results for all events.
-                                See TwoStagesFitter.predict_prob_events()
+        pred_df (pd.DataFrame): Data to calculate integrated Brier Score. Must contain the observed duration and event-type, and the probability of event at time t prediction results for all events. See TwoStagesFitter.predict_prob_events()
         duration_col (str): Last follow up time column name (must be a column in pred_df).
-        event_type_col (str): The event type column name (must be a column in df),
-                              Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+        event_type_col (str): The event type column name (must be a column in df), Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+
     Returns:
         integrated_brier_score (dict): integrated Brier Score results.
     """
@@ -192,12 +180,10 @@ def events_brier_score_at_t(pred_df: pd.DataFrame,
     This function implements the calculation of the events Brier score at t.
 
     Args:
-        pred_df (pd.DataFrame): Data to calculate prediction error.
-                                Must contain the observed duration and event-type, and the probability of event at time t prediction results for all events.
-                                See TwoStagesFitter.predict_prob_events()
+        pred_df (pd.DataFrame): Data to calculate prediction error. Must contain the observed duration and event-type, and the probability of event at time t prediction results for all events. See TwoStagesFitter.predict_prob_events()
         duration_col (str): Last follow up time column name (must be a column in pred_df).
-        event_type_col (str): The event type column name (must be a column in df),
-                              Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+        event_type_col (str): The event type column name (must be a column in df), Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+
     Returns:
         event_brier_score_at_t_df (pd.DataFrame): events Brier score at t results.
     """
@@ -222,12 +208,10 @@ def events_auc_at_t(pred_df: pd.DataFrame,
     This function implements the calculation of the events AUC at t.
 
     Args:
-        pred_df (pd.DataFrame): Data to calculate AUC.
-                                Must contain the observed duration and event-type, and the probability of event at time t prediction results for all events.
-                                See TwoStagesFitter.predict_prob_events()
+        pred_df (pd.DataFrame): Data to calculate AUC. Must contain the observed duration and event-type, and the probability of event at time t prediction results for all events. See TwoStagesFitter.predict_prob_events()
         duration_col (str): Last follow up time column name (must be a column in pred_df).
-        event_type_col (str): The event type column name (must be a column in df),
-                              Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+        event_type_col (str): The event type column name (must be a column in df), Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+
     Returns:
         event_auc_at_t_df (pd.DataFrame): events AUC at t results.
     """
@@ -253,14 +237,12 @@ def event_specific_auc_at_t(pred_df: pd.DataFrame,
     This function implements the calculation of the event specific AUC at time t.
 
     Args:
-        pred_df (pd.DataFrame): Data to calculate prediction error.
-                                Must contain the observed duration and event-type, and the probability of event at time t prediction results for the event.
-                                See TwoStagesFitter.predict_prob_events()
+        pred_df (pd.DataFrame): Data to calculate prediction error. Must contain the observed duration and event-type, and the probability of event at time t prediction results for the event. See TwoStagesFitter.predict_prob_events()
         event (int): Event-type to calculate the integrated AUC for.
         t (int): time to calculate the AUC for.
         duration_col (str): Last follow up time column name (must be a column in pred_df).
-        event_type_col (str): The event type column name (must be a column in df),
-                              Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+        event_type_col (str): The event type column name (must be a column in df), Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+
     Returns:
         result (pd.Series): event specific AUC for all times included in duration_col of pred_df.
     """
@@ -289,13 +271,11 @@ def event_specific_auc_at_t_all(pred_df: pd.DataFrame,
     This function implements the calculation of the event specific AUC at time t for all times included in duration_col of pred_df.
 
     Args:
-        pred_df (pd.DataFrame): Data to calculate prediction error.
-                                Must contain the observed duration and event-type, and the probability of event at time t prediction results for the event.
-                                See TwoStagesFitter.predict_prob_events()
+        pred_df (pd.DataFrame): Data to calculate prediction error. Must contain the observed duration and event-type, and the probability of event at time t prediction results for the event. See TwoStagesFitter.predict_prob_events()
         event (int): Event-type to calculate the AUC for.
         duration_col (str): Last follow up time column name (must be a column in pred_df).
-        event_type_col (str): The event type column name (must be a column in df),
-                              Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+        event_type_col (str): The event type column name (must be a column in df), Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+
     Returns:
         result (pd.Series): event specific AUC for all times included in duration_col of pred_df.
     """
@@ -316,14 +296,12 @@ def event_specific_integrated_auc(pred_df: pd.DataFrame,
     This function implements the calculation of the event specific integrated auc.
 
     Args:
-        pred_df (pd.DataFrame): Data to calculate prediction error.
-                                Must contain the observed duration and event-type, and the probability of event at time t prediction results for the event.
-                                See TwoStagesFitter.predict_prob_events()
+        pred_df (pd.DataFrame): Data to calculate prediction error. Must contain the observed duration and event-type, and the probability of event at time t prediction results for the event. See TwoStagesFitter.predict_prob_events()
         event (int): Event-type to calculate the integrated AUC for.
         duration_col (str): Last follow up time column name (must be a column in pred_df).
-        event_type_col (str): The event type column name (must be a column in df),
-                              Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+        event_type_col (str): The event type column name (must be a column in df), Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
         weights (pd.Series): Optional. Weights vector with time as index and weight as value. Length must be the number of possible event times.
+
     Returns:
         result (float): integrated AUC results.
     """
@@ -354,12 +332,10 @@ def global_auc(pred_df: pd.DataFrame,
     This function implements the calculation of the global AUC.
 
     Args:
-        pred_df (pd.DataFrame): Data to calculate prediction error.
-                                Must contain the observed duration and event-type, and the probability of event at time t prediction results for all events.
-                                See TwoStagesFitter.predict_prob_events()
+        pred_df (pd.DataFrame): Data to calculate prediction error. Must contain the observed duration and event-type, and the probability of event at time t prediction results for all events. See TwoStagesFitter.predict_prob_events()
         duration_col (str): Last follow up time column name (must be a column in pred_df).
-        event_type_col (str): The event type column name (must be a column in df),
-                              Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+        event_type_col (str): The event type column name (must be a column in df), Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+
     Returns:
         global_auc (float): global AUC results.
     """
@@ -380,12 +356,10 @@ def events_integrated_auc(pred_df: pd.DataFrame, event_type_col: str = 'J',
     This function implements the calculation of the integrated AUC to all events.
 
     Args:
-        pred_df (pd.DataFrame): Data to calculate prediction error.
-                                Must contain the observed duration and event-type, and the probability of event at time t prediction results for all events.
-                                See TwoStagesFitter.predict_prob_events()
+        pred_df (pd.DataFrame): Data to calculate prediction error. Must contain the observed duration and event-type, and the probability of event at time t prediction results for all events. See TwoStagesFitter.predict_prob_events()
         duration_col (str): Last follow up time column name (must be a column in pred_df).
-        event_type_col (str): The event type column name (must be a column in df),
-                              Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+        event_type_col (str): The event type column name (must be a column in df), Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+
     Returns:
         integrated_auc (dict): integrated AUC results.
     """

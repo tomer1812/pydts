@@ -5,18 +5,40 @@ import numpy as np
 from scipy.special import expit
 
 
-def get_expanded_df(df, event_type_col='J', duration_col='X', pid_col='pid'):
+# def get_expanded_df(df, event_type_col='J', duration_col='X', pid_col='pid'):
+#     """
+#     This function gets a dataframe describing each sample the time of the observed events,
+#     and returns an expanded dataframe as explained in [1]-[2].
+#     Right censoring is allowed and must be marked as event type 0.
+#
+#     :param df: original dataframe (pd.DataFrame)
+#     :param event_type_col: event type column name (str)
+#     :param duration_col: time column name (str)
+#     :param pid_col: patient id column name (str)
+#
+#     :return: result_df: expanded dataframe
+#
+#     References:
+#         [1] Meir, Tomer and Gorfine, Malka, "Discrete-time Competing-Risks Regression with or without Penalization", https://arxiv.org/abs/2303.01186
+#         [2] Meir, Tomer and Gutman, Rom and Gorfine, Malka "PyDTS: A Python Package for Discrete-Time Survival (Regularized) Regression with Competing Risks", https://arxiv.org/abs/2204.05731
+#     """
+
+def get_expanded_df(
+        df: pd.DataFrame,
+        event_type_col: str = 'J',
+        duration_col: str = 'X',
+        pid_col: str = 'pid') -> pd.DataFrame:
     """
-    This function gets a dataframe describing each sample the time of the observed events,
-    and returns an expanded dataframe as explained in [1]-[2].
-    Right censoring is allowed and must be marked as event type 0.
+    Expands a discrete-time survival dataset into a long-format dataframe suitable for modeling. This function receives a dataframe where each row corresponds to a subject with observed  event type and duration. It returns an expanded dataframe where each subject is represented  by multiple rows, one for each time point up to their observed time. Right censoring is allowed and should be indicated by event type 0.
 
-    :param df: original dataframe (pd.DataFrame)
-    :param event_type_col: event type column name (str)
-    :param duration_col: time column name (str)
-    :param pid_col: patient id column name (str)
+    Args:
+        df (pd.DataFrame): Original input dataframe containing one row per subject.
+        event_type_col (str): Name of the column indicating event type. Censoring is marked by 0.
+        duration_col (str): Name of the column indicating event or censoring time.
+        pid_col (str): Name of the column indicating subject/patient ID.
 
-    :return: result_df: expanded dataframe
+    Returns:
+        pd.DataFrame: Expanded dataframe in long format, with one row per subject-time pair.
 
     References:
         [1] Meir, Tomer and Gorfine, Malka, "Discrete-time Competing-Risks Regression with or without Penalization", https://arxiv.org/abs/2303.01186

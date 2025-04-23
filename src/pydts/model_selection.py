@@ -49,14 +49,9 @@ class BasePenaltyGridSearch(object):
             test_df (pd.DataFrame): testing data for evaluating the estimated model's performance.
             l1_ratio (float): regularization ratio for the CoxPHFitter (see lifelines.fitters.coxph_fitter.CoxPHFitter documentation).
             penalizers (list): penalizer options for each event (see lifelines.fitters.coxph_fitter.CoxPHFitter documentation).
-            metrics (str, list): Evaluation metrics. Available metrics:
-                                                    'IAUC': Integrated AUC (will be in PenaltyGridSearch.integrated_auc),
-                                                    'GAUC': Global AUC (will be in PenaltyGridSearch.global_auc).
-                                                    'IBS': Integrated Brier Score (will be in PenaltyGridSearch.integrated_bs),
-                                                    'GBS': Global Brier Score (will be in PenaltyGridSearch.global_bs).
+            metrics (str, list): Evaluation metrics.
             seed (int): pseudo random seed number for numpy.random.seed()
-            event_type_col (str): The event type column name (must be a column in df),
-                                  Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+            event_type_col (str): The event type column name (must be a column in df), Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
             duration_col (str): Last follow up time column name (must be a column in df).
             pid_col (str): Sample ID column name (must be a column in df).
             twostages_fit_kwargs (dict): keyword arguments to pass to the TwoStagesFitter.
@@ -117,6 +112,7 @@ class BasePenaltyGridSearch(object):
     def convert_results_dict_to_df(self, results_dict):
         """
         This function converts a results dictionary to a pd.DataFrame format.
+
         Args:
             results_dict: one of the class attributes: global_auc, integrated_auc, global_bs, integrated_bs.
 
@@ -131,8 +127,7 @@ class BasePenaltyGridSearch(object):
         This function creates a mixed TwoStagesFitter from the estimated meta models for a specific penalizers combination.
 
         Args:
-            penalizers_combination (list): List with length equals to the number of competing events. The penalizers value to each of the events.
-                                           Each of the values must be one of the values that was previously passed to the evaluate() method.
+            penalizers_combination (list): List with length equals to the number of competing events. The penalizers value to each of the events. Each of the values must be one of the values that was previously passed to the evaluate() method.
 
         Returns:
             mixed_two_stages (pydts.fitters.TwoStagesFitter): TwoStagesFitter for the required penalty combination.

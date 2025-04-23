@@ -66,6 +66,8 @@ nav:
       - Evaluation: 'api/evaluation.md'
       - Cross Validation: 'api/cross_validation.md'
       - Model Selection: 'api/model_selection.md'
+      - Sure Independent Screening: 'api/screening.md'
+      - Utils: 'api/utils.md'
 
 plugins:
 #  - mknotebooks

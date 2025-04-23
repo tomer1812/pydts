@@ -25,21 +25,20 @@ COLORS = list(mcolors.TABLEAU_COLORS.keys())
 WORKERS = psutil.cpu_count(logical=False)
 
 
+# Example:
+#     ```py linenums="1"
+#         from pydts.fitters import DataExpansionFitter
+#         fitter = DataExpansionFitter()
+#         fitter.fit(df=train_df, event_type_col='J', duration_col='X')
+#         fitter.print_summary()
+#     ```
+#
+# References:
+#     [1] Lee, Minjung and Feuer, Eric J. and Fine, Jason P., "On the analysis of discrete time competing risks data", Biometrics (2018) doi: 10.1111/biom.12881
+
 class DataExpansionFitter(ExpansionBasedFitter):
     """
-    This class implements the estimation procedure of Lee et al. (2018) [1].
-    See also the Example section.
-
-    Example:
-        ```py linenums="1"
-            from pydts.fitters import DataExpansionFitter
-            fitter = DataExpansionFitter()
-            fitter.fit(df=train_df, event_type_col='J', duration_col='X')
-            fitter.print_summary()
-        ```
-
-    References:
-        [1] Lee, Minjung and Feuer, Eric J. and Fine, Jason P., "On the analysis of discrete time competing risks data", Biometrics (2018) doi: 10.1111/biom.12881
+    This class implements the estimation procedure of Lee et al. (2018) [1]. See also the Example section.
     """
 
     def __init__(self):
@@ -74,23 +73,17 @@ class DataExpansionFitter(ExpansionBasedFitter):
 
         Args:
             df (pd.DataFrame): training data for fitting the model
-            event_type_col (str): The event type column name (must be a column in df),
-                                  Right censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+            event_type_col (str): The event type column name (must be a column in df), Right censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
             duration_col (str): Last follow up time column name (must be a column in df).
             pid_col (str): Sample ID column name (must be a column in df).
-            skip_expansion (boolean): Skips the dataframe expansion step. Use this option only if the provided dataframe (df) is already correctly expanded (see [1]).
-                                      When set to True, the df is expected to be in the format produced by the pydts.utils.get_expanded_df() method, as if it were applied to the unexpanded data.
-            covariates (list, Optional): A list of covariates, all must be columns in df.
-                                         Defaults to all the columns of df except event_type_col, duration_col, and pid_col.
+            skip_expansion (boolean): Skips the dataframe expansion step. Use this option only if the provided dataframe (df) is already correctly expanded. When set to True, the df is expected to be in the format produced by the pydts.utils.get_expanded_df() method, as if it were applied to the unexpanded data.
+            covariates (list, Optional): A list of covariates, all must be columns in df. Defaults to all the columns of df except event_type_col, duration_col, and pid_col.
             formula (str, Optional): Model formula to be fitted. Patsy format string.
             models_kwargs (dict, Optional): Keyword arguments to pass to model instance initiation.
             model_fit_kwargs (dict, Optional): Keyword arguments to pass to model.fit() method.
 
         Returns:
             event_models (dict): Fitted models dictionary. Keys - event names, Values - fitted models for the event.
-
-        References:
-            [1] Meir, Tomer and Gorfine, Malka, "Discrete-time Competing-Risks Regression with or without Penalization", https://arxiv.org/abs/2303.01186
         """
 
         if models_kwargs is not None:
@@ -151,14 +144,14 @@ class DataExpansionFitter(ExpansionBasedFitter):
                           t: Union[Iterable, int],
                           n_jobs: int = -1) -> pd.DataFrame:
         """
-        This method calculates the hazard for the given event at the given time values if they were included in
-        the training set of the event.
+        This method calculates the hazard for the given event at the given time values if they were included in the training set of the event.
 
         Args:
             df (pd.DataFrame): samples to predict for
             event (Union[str, int]): event name
             t (np.array): times to calculate the hazard for
             n_jobs: number of CPUs to use, defualt to every available CPU
+
         Returns:
             df (pd.DataFrame): samples with the prediction columns
         """
@@ -184,7 +177,6 @@ class DataExpansionFitter(ExpansionBasedFitter):
 
         Returns:
             se_df (pandas.DataFrame): Beta coefficients and Standard Errors Dataframe
-
         """
 
         full_table = pd.DataFrame()
@@ -203,7 +195,6 @@ class DataExpansionFitter(ExpansionBasedFitter):
 
         Returns:
             se_df (pandas.DataFrame): Alpha coefficients and Standard Errors Dataframe
-
         """
 
         full_table = pd.DataFrame()
@@ -217,21 +208,23 @@ class DataExpansionFitter(ExpansionBasedFitter):
         return full_table
 
 
+
+# Example:
+#     ```py linenums="1"
+#         from pydts.fitters import TwoStagesFitter
+#         fitter = TwoStagesFitter()
+#         fitter.fit(df=train_df, event_type_col='J', duration_col='X')
+#         fitter.print_summary()
+#     ```
+#
+# References:
+#     [1] Meir, Tomer\*, Gutman, Rom\*, and Gorfine, Malka, "PyDTS: A Python Package for Discrete-Time Survival Analysis with Competing Risks" (2022)
+
+
 class TwoStagesFitter(ExpansionBasedFitter):
 
     """
     This class implements the approach of Meir et al. (2022):
-
-    Example:
-        ```py linenums="1"
-            from pydts.fitters import TwoStagesFitter
-            fitter = TwoStagesFitter()
-            fitter.fit(df=train_df, event_type_col='J', duration_col='X')
-            fitter.print_summary()
-        ```
-
-    References:
-        [1] Meir, Tomer\*, Gutman, Rom\*, and Gorfine, Malka, "PyDTS: A Python Package for Discrete-Time Survival Analysis with Competing Risks" (2022)
     """
 
     def __init__(self):
@@ -302,28 +295,17 @@ class TwoStagesFitter(ExpansionBasedFitter):
         Args:
             df (pd.DataFrame): training data for fitting the model
             covariates (list): list of covariates to be used in estimating the regression coefficients
-            event_type_col (str): The event type column name (must be a column in df),
-                                  Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
+            event_type_col (str): The event type column name (must be a column in df), Right-censored sample (i) is indicated by event value 0, df.loc[i, event_type_col] = 0.
             duration_col (str): Last follow up time column name (must be a column in df).
             pid_col (str): Sample ID column name (must be a column in df).
-            skip_expansion (boolean): Skips the dataframe expansion step. Use this option only if the provided dataframe (df) is already correctly expanded (see [1]).
-                                      When set to True, the df is expected to be in the format produced by the pydts.utils.get_expanded_df() method, as if it were applied to the unexpanded data.
+            skip_expansion (boolean): Skips the dataframe expansion step. Use this option only if the provided dataframe (df) is already correctly expanded. When set to True, the df is expected to be in the format produced by the pydts.utils.get_expanded_df() method, as if it were applied to the unexpanded data.
             x0 (Union[numpy.array, int], Optional): initial guess to pass to scipy.optimize.minimize function
             fit_beta_kwargs (dict, Optional): Keyword arguments to pass on to the estimation procedure.
-                                              If different model for beta is desired, it can be defined here.
-                                              For example:
-                                              fit_beta_kwargs={
-                                                    model=CoxPHFitter, # model object
-                                                    model_kwargs={},  # keywords arguments to pass on to the model instance initiation
-                                                    model_fit_kwargs={}  # keywords arguments to pass on to model.fit() method
-                                              }
             verbose (int, Optional): The verbosity level of pandaallel
             nb_workers (int, Optional): The number of workers to pandaallel. If not sepcified, defaults to the number of workers available.
+
         Returns:
             event_models (dict): Fitted models dictionary. Keys - event names, Values - fitted models for the event.
-
-        References:
-            [1] Meir, Tomer and Gorfine, Malka, "Discrete-time Competing-Risks Regression with or without Penalization", https://arxiv.org/abs/2303.01186
         """
 
         self._validate_cols(df, event_type_col, duration_col, pid_col)
@@ -444,6 +426,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
                          color: str = None, label: str = None, ticklabelsize: int = 15) -> plt.Axes:
         """
         This function plots a scatter plot of the $ alpha_{jt} $ coefficients of a specific event.
+
         Args:
             event (Union[str, int]): event name
             ax (matplotlib.pyplot.Axes, Optional): ax to use
@@ -455,6 +438,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
             fontsize (int, Optional): axes title, xlabel, ylabel fontsize
             color (str, Optional): color name to use
             label (str, Optional): label name
+
         Returns:
             ax (matplotlib.pyplot.Axes): output figure
         """
@@ -483,6 +467,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
                               ylabel: str = r'$\alpha_{jt}$', fontsize: int = 18, ticklabelsize: int = 15) -> plt.Axes:
         """
         This function plots a scatter plot of the $ alpha_{jt} $ coefficients of all the events.
+
         Args:
             ax (matplotlib.pyplot.Axes, Optional): ax to use
             scatter_kwargs (dict, Optional): keywords to pass to the scatter function
@@ -517,8 +502,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
                           event: Union[str, int],
                           t: Union[Iterable, int]) -> pd.DataFrame:
         """
-        This method calculates the hazard for the given event at the given time values if they were included in
-        the training set of the event.
+        This method calculates the hazard for the given event at the given time values if they were included in the training set of the event.
 
         Args:
             df (pd.DataFrame): samples to predict for
@@ -551,8 +535,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
     def _hazard_transformation(self, a: Union[int, np.array, pd.Series, pd.DataFrame]) -> \
             Union[int, np.array, pd.Series, pd.DataFrame]:
         """
-        This function defines the transformation of the hazard function such that
-        $ h ( \lambda_j (t | Z) ) = \alpha_{jt} + Z^{T} \beta_{j} $
+        This function defines the transformation of the hazard function such that $ h ( \lambda_j (t | Z) ) = \alpha_{jt} + Z^{T} \beta_{j} $
 
         Args:
             a (Union[int, np.array, pd.Series, pd.DataFrame]):
@@ -567,8 +550,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
     def _hazard_inverse_transformation(self, a: Union[int, np.array, pd.Series, pd.DataFrame]) -> \
             Union[int, np.array, pd.Series, pd.DataFrame]:
         """
-        This function defines the inverse transformation of the hazard function such that
-        $\lambda_j (t | Z) = h^{-1} ( \alpha_{jt} + Z^{T} \beta_{j} )$
+        This function defines the inverse transformation of the hazard function such that $\lambda_j (t | Z) = h^{-1} ( \alpha_{jt} + Z^{T} \beta_{j} )$
 
         Args:
             a (Union[int, np.array, pd.Series, pd.DataFrame]):
@@ -585,7 +567,6 @@ class TwoStagesFitter(ExpansionBasedFitter):
 
         Returns:
             se_df (pandas.DataFrame): Beta coefficients and Standard Errors Dataframe
-
         """
         se_df = pd.DataFrame()
         for event, model in self.beta_models.items():
@@ -600,7 +581,6 @@ class TwoStagesFitter(ExpansionBasedFitter):
 
         Returns:
             alpha_df (pandas.DataFrame): Alpha coefficients Dataframe
-
         """
 
         alpha_df = pd.DataFrame()
@@ -616,6 +596,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
                              fontsize: int = 18, ticklabelsize: int = 15) -> plt.Axes:
         """
         This function plots the $ beta_{j} $ coefficients and standard errors of all the events.
+
         Args:
             ax (matplotlib.pyplot.Axes, Optional): ax to use
             colors (list, Optional): colors names
@@ -625,6 +606,7 @@ class TwoStagesFitter(ExpansionBasedFitter):
             ylabel (str, Optional): axes ylabel
             fontsize (int, Optional): axes title, xlabel, ylabel fontsize
             ticklabelsize (int, Optional): axes xticklabels, yticklabels fontsize
+
         Returns:
             ax (matplotlib.pyplot.Axes): output figure
         """
@@ -784,7 +766,6 @@ class TwoStagesFitterExact(TwoStagesFitter):
 
         Returns:
             se_df (pandas.DataFrame): Beta coefficients and Standard Errors Dataframe
-
         """
 
         full_table = pd.DataFrame()
