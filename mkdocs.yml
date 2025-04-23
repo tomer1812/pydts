@@ -89,7 +89,7 @@ nav:
 plugins:
   - mknotebooks
   - search
-  - mkdocs-jupyter
+#  - mkdocs-jupyter
   - mkdocstrings:
       handlers:
         python:
