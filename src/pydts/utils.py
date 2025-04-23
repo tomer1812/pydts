@@ -39,10 +39,6 @@ def get_expanded_df(
 
     Returns:
         pd.DataFrame: Expanded dataframe in long format, with one row per subject-time pair.
-
-    References:
-        [1] Meir, Tomer and Gorfine, Malka, "Discrete-time Competing-Risks Regression with or without Penalization", https://arxiv.org/abs/2303.01186
-        [2] Meir, Tomer and Gutman, Rom and Gorfine, Malka "PyDTS: A Python Package for Discrete-Time Survival (Regularized) Regression with Competing Risks", https://arxiv.org/abs/2204.05731
     """
     unique_times = df[duration_col].sort_values().unique()
     result_df = df.reindex(df.index.repeat(df[duration_col]))
