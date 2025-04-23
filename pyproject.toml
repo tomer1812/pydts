@@ -30,6 +30,7 @@ seaborn = "^0.12.2"
 mkdocstrings = "^0.28"
 mkdocstrings-python = "^1.16"
 mkdocs-jupyter = "^0.25.1"
+mknotebooks = "^0.8.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.0.1"
