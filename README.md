@@ -47,12 +47,15 @@ If you found PyDTS software useful to your research, please cite the papers:
     year = {2022}
 }
 
-@article{Meir_Gorfine_DTSP_2023,
+@article{Meir_Gorfine_DTSP_2025,
     author = {Meir, Tomer and Gorfine, Malka},
-    doi = {10.48550/arXiv.2303.01186},
-    title = {{Discrete-time Competing-Risks Regression with or without Penalization}},
-    url = {https://arxiv.org/abs/2303.01186},
-    year = {2023}
+    doi = {10.1093/biomtc/ujaf040},
+    title = {{Discrete-Time Competing-Risks Regression with or without Penalization}},
+    year = {2025},
+    journal = {Biometrics},
+    volume = {81},
+    number = {2},
+    url = {https://academic.oup.com/biometrics/article/81/2/ujaf040/8120014},
 }
 ```
 

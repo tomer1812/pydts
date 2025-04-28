@@ -203,8 +203,8 @@ Hastie, Trevor and Tibshirani, Robert and Friedman, Jerome H,
 
 <a id="8">[8]</a> 
 Meir, Tomer and Gorfine, Malka, 
-"Discrete-time Competing-Risks Regression with or without Penalization"
-(2023)
+"Discrete-time Competing-Risks Regression with or without Penalization", Biometrics (2025), doi: 10.1093/biomtc/ujaf040
+
 
 <a id="9">[9]</a> 
 Davidson-Pilon, Cameron,
