@@ -78,6 +78,9 @@ The data comprises 25,170 ICU admissions, with LOS recorded in discrete units fr
 
 Three estimation procedures were compared: the method of @lee_analysis_2018 without regularization, the two-step approach of @meir_gorfine_dtsp_2025 without and with LASSO regularization. LASSO was implemented using a grid search with 4-fold cross-validation to select the optimal hyperparameters by maximizing the global-AUC metric. Detailed results of the case study are presented in @meir_gorfine_dtsp_2025.
 
+![MIMIC dataset - LOS analysis](joss-figure.png)
+
+
 Additional examples demonstrating *PyDTS*'s functionality are also provided in @meir_gorfine_dtsp_2025. These include analyses with regularized regression across varying sample sizes and levels of covariates' correlation, as well as the application of Sure Independence Screening in ultra-high-dimensional settings @zhao2012principled. These examples make use of the package’s built-in data generation tools, underscoring its usefulness for methodological development and evaluation.
 
 # Acknowledgemnts
