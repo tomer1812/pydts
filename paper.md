@@ -95,8 +95,7 @@ gauc_cv_results = penalty_cv_search.cross_validate(
     full_df=mimic_df, l1_ratio=1, penalizers=penalizers, n_splits=4)
 ```
 
-where `mimic_df` is the full dataframe containing the covariates, an event-type column, an event-time column, and an event indicator column; `penalizers` denotes the set of penalization values evaluated for each risk; `n_splits` is the number of folds; and `l1_ratio` controls the balance between L1 and L2 regularization, with `l1_ratio = 1` corresponding to pure L1 (lasso) regularization.
-
+where `mimic_df` is the full dataframe containing the covariates, an event-type column, an event-time column, and an event indicator column; `penalizers` is the set of penalization values evaluated for each risk, denoted as $\eta_j$, with $j=1,2,3$; `n_splits` is the number of folds; and `l1_ratio` controls the balance between L1 and L2 regularization, with `l1_ratio = 1` corresponding to pure L1 (lasso) regularization.
 The results of this selection procedure are shown in \autoref{fig:los-mimic}. The estimated model values, as well as further details, are presented in @meir_gorfine_dtsp_2025.
 
 Additional examples demonstrating *PyDTS*'s functionality are also provided in @meir_gorfine_dtsp_2025. These include analyses with regularized regression across varying sample sizes and levels of covariates' correlation, as well as the application of Sure Independence Screening in ultra-high-dimensional settings @zhao2012principled. These examples make use of the package’s built-in data generation tools, underscoring its usefulness for methodological development and evaluation.
