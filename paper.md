@@ -27,7 +27,9 @@ bibliography: paper.bib
 ---
 
 # Summary
+
 Time-to-event (survival) analysis models  the time until a pre-specified event occurs. When time is measured in  discrete units  or rounded into intervals, standard continuous-time models can yield biased estimators. In addition, the event of interest may belong to one of several mutually exclusive types, referred to as competing risks, where the occurrence of one event prevents the occurrence or observation of the others.  \texttt{PyDTS} is an open-source Python package for analyzing discrete-time survival data with competing-risks. It provides regularized estimation methods, model evaluation metrics, variable screening tools, and a simulation module to support research and development.
+
 # Statement of need
 
 Time-to-event analysis is applied when the outcome of interest is the time until a pre-specified event occurs. In some settings, the time variable is inherently or effectively discrete, for example, when time is measured in weeks or months, or when event times are rounded or grouped into intervals. Competing risks arise when observations are at risk of experiencing multiple mutually exclusive event types, such that the occurrence of one event precludes the occurrence or observation of the others. Discrete-time survival data with competing risks are encountered across a wide range of scientific disciplines. For instance, in healthcare, the time to death from cancer is often recorded in months, with death from other causes considered a competing event. 
@@ -48,6 +50,7 @@ Details on the statistical models and methods implemented in *PyDTS* are summari
 # Package Details 
 
 ## Dependencies
+
 *PyDTS* can be easily installed via *PyPI* as follows:
 
 `pip install pydts`
@@ -64,11 +67,11 @@ This command automatically installs the following dependencies:
 
 ## Key Features
 
-- **Estimation procedures:** Two methods are implemented, `TwoStagesFitter` of @meir_gorfine_dtsp_2025, and `DataExpansionFitter` of @lee_analysis_2018. The `TwoStagesFitter` supports both regularization and the inclusion of time-dependent covariates, features that are not available in the `DataExpansionFitter` implementation.
-- **Sure Independence Screening:** The `SISTwoStagesFitter` class implements the Sure Independence Screening (SIS) of @zhao2012principled. SIS is a powerful dimensionality reduction technique designed for ultra-high-dimensional settings, where the number of covariates far exceeds the number of observations, a situation often encountered in genomic studies and other high-throughput domains. It works by filtering out a large number of uninformative covariates based on their marginal association with the outcome. After screening, penalized variable selection methods (e.g., LASSO) are typically applied to the reduced set of covariates to perform more refined modeling and selection.
-- **Evaluation Metrics:** The package includes functions for computing key performance metrics for discrete-time survival data with competing risks and right-censoring, including the cause-specific cumulative/dynamic area under the receiver operating characteristic curve (AUC) and the Brier score (BS). Formal definitions of all implemented evaluation metrics are provided in @meir_gorfine_dtsp_2025.
-- **Hyperparameters tuning:** The package provides automated procedures for hyperparameter selection, including grid search combined with cross-validation, enabling robust model calibration and improved generalization performance.
-- **Data Generation:** The `EventTimesSampler` module facilitates the generation of discrete-time survival data with competing risks and right censoring. Given user-specified model parameters, including the number of discrete event times, true regression coefficients, and covariate values for each observation, `EventTimesSampler` simulates both event times and event types. The module supports two types of right censoring: administrative censoring, applied when the simulated event time exceeds a user-defined maximum follow-up duration, and random censoring, which can be either covariate-dependent or independent. This flexible simulation framework is useful for benchmarking models, testing estimation procedures, and conducting methodological research.
+1. **Estimation procedures:** Two methods are implemented, `TwoStagesFitter` of @meir_gorfine_dtsp_2025, and `DataExpansionFitter` of @lee_analysis_2018. The `TwoStagesFitter` supports both regularization and the inclusion of time-dependent covariates, features that are not available in the `DataExpansionFitter` implementation.
+2. **Sure Independence Screening:** The `SISTwoStagesFitter` class implements the Sure Independence Screening (SIS) of @zhao2012principled. SIS is a powerful dimensionality reduction technique designed for ultra-high-dimensional settings, where the number of covariates far exceeds the number of observations, a situation often encountered in genomic studies and other high-throughput domains. It works by filtering out a large number of uninformative covariates based on their marginal association with the outcome. After screening, penalized variable selection methods (e.g., LASSO) are typically applied to the reduced set of covariates to perform more refined modeling and selection.
+3. **Evaluation Metrics:** The package includes functions for computing key performance metrics for discrete-time survival data with competing risks and right-censoring, including the cause-specific cumulative/dynamic area under the receiver operating characteristic curve (AUC) and the Brier score (BS). Formal definitions of all implemented evaluation metrics are provided in @meir_gorfine_dtsp_2025.
+4. **Hyperparameters tuning:** The package provides automated procedures for hyperparameter selection, including grid search combined with cross-validation, enabling robust model calibration and improved generalization performance.
+5. **Data Generation:** The `EventTimesSampler` module facilitates the generation of discrete-time survival data with competing risks and right censoring. Given user-specified model parameters, including the number of discrete event times, true regression coefficients, and covariate values for each observation, `EventTimesSampler` simulates both event times and event types. The module supports two types of right censoring: administrative censoring, applied when the simulated event time exceeds a user-defined maximum follow-up duration, and random censoring, which can be either covariate-dependent or independent. This flexible simulation framework is useful for benchmarking models, testing estimation procedures, and conducting methodological research.
 
 # Case Study
 
@@ -101,6 +104,7 @@ Additional examples demonstrating *PyDTS*'s functionality are also provided in @
 ![MIMIC dataset - LOS analysis. Regularized regression with 4-fold CV. The selected values of $\eta_j$ are shown in dashed-dotted lines on panels **A-F**. **A-C.** Number of non-zero coefficients for $j=1,2,3$. **D-F.** The estimated coefficients, as a function of $\eta_j$, $j=1,2,3$. **G-I.** Mean (and SD bars) of the 4 folds $\widehat{\mbox{AUC}}_j(t)$, $j=1,2,3$, for the selected values $\log \eta_1=-5$, $\log \eta_2=-9$ and $\log \eta_3=-11$. The number of observed events of each type is shown by bars.\label{fig:los-mimic}](joss-figure.png)
 
 # Acknowledgemnts
+
 T.M. is supported by the Israeli Council for Higher Education (Vatat) fellowship in data science via the Technion; M.G. work was supported by the ISF 767/21 grant and Malag competitive grant in data science (DS).
 
 # References 
