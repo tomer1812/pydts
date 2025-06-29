@@ -27,8 +27,7 @@ bibliography: paper.bib
 ---
 
 # Summary
-Time-to-event (survival) analysis models  the time until a pre-specified event occurs. When time is measured in  discrete units  or rounded into intervals, standard continuous-time models can yield biased estimators. In addition, the event of interest may belong to one of several mutually exclusive types, referred to as competing risks, where the occurrence of one event prevents the occurrence or observation of the others.  *PyDTS* is an open-source Python package for analyzing discrete-time survival data with competing-risks. It provides regularized estimation methods, model evaluation metrics, variable screening tools, and a simulation module to support research and development.
-
+Time-to-event (survival) analysis models  the time until a pre-specified event occurs. When time is measured in  discrete units  or rounded into intervals, standard continuous-time models can yield biased estimators. In addition, the event of interest may belong to one of several mutually exclusive types, referred to as competing risks, where the occurrence of one event prevents the occurrence or observation of the others.  \texttt{PyDTS} is an open-source Python package for analyzing discrete-time survival data with competing-risks. It provides regularized estimation methods, model evaluation metrics, variable screening tools, and a simulation module to support research and development.
 # Statement of need
 
 Time-to-event analysis is applied when the outcome of interest is the time until a pre-specified event occurs. In some settings, the time variable is inherently or effectively discrete, for example, when time is measured in weeks or months, or when event times are rounded or grouped into intervals. Competing risks arise when observations are at risk of experiencing multiple mutually exclusive event types, such that the occurrence of one event precludes the occurrence or observation of the others. Discrete-time survival data with competing risks are encountered across a wide range of scientific disciplines. For instance, in healthcare, the time to death from cancer is often recorded in months, with death from other causes considered a competing event. 
@@ -56,7 +55,7 @@ Details on the statistical models and methods implemented in *PyDTS* are summari
 This command automatically installs the following dependencies:
 - NumPy [@Harris2020] (<2.0.0)
 - pandas [@McKinney2010]
-- lifelines [@DavidsonPilon2023]
+- lifelines [@Davidson-Pilon:2019]
 - SciPy [@Virtanen2020]
 - scikit-learn [@Pedregosa2011]
 - statsmodels [@Seabold2010]
