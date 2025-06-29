@@ -82,7 +82,7 @@ The data comprises 25,170 ICU admissions, with LOS recorded in discrete units fr
 Three estimation procedures were compared: the method of @lee_analysis_2018 without regularization, the two-step approach of @meir_gorfine_dtsp_2025 without and with LASSO regularization. LASSO was implemented using a grid search with 4-fold cross-validation to select the optimal hyperparameters by maximizing the global-AUC metric. Detailed results of the case study are presented in @meir_gorfine_dtsp_2025.
 
 The lasso-regularized training procedure, which involves selecting the best combination of penalization parameters for each risk, can be conducted using the *PyDTS* model selection tools. Specifically, the analysis can be performed with the following simple code:
-```python
+```
 import numpy as np
 from pydts.cross_validation import PenaltyGridSearchCV
 
