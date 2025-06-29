@@ -93,13 +93,18 @@ gauc_cv_results = penalty_cv_search.cross_validate(
     full_df=mimic_df, l1_ratio=1, penalizers=penalizers, n_splits=4)
 ```
 
+
+![MIMIC dataset - LOS analysis](docs/joss-figure.png)
+
+**Figure 1.** MIMIC dataset — LOS analysis using lasso-regularized regression with 4-fold cross-validation. The selected values of $\eta_j$ are shown in dashed-dotted lines in panels **A–F**. **A–C.** Number of non-zero coefficients for $j=1,2,3$. **D–F.** The estimated coefficients as a function of $\eta_j$, $j=1,2,3$. **G–I.** Mean (with SD bars) of the 4 folds $\widehat{\mathrm{AUC}}_j(t)$, $j=1,2,3$, for the selected values $\log \eta_1=-5$, $\log \eta_2=-9$, and $\log \eta_3=-11$. The number of observed events of each type is shown by bars.
+
 where ```mimic_df``` is the full dataframe containing the covariates, an event-type column, an event-time column, and an event indicator column; ```penalizers``` denotes the set of penalization values evaluated for each risk; ```n_splits``` is the number of folds; and ```l1_ratio``` controls the balance between L1 and L2 regularization, with ```l1_ratio = 1``` corresponding to pure L1 (lasso) regularization.
 The results of this selection procedure are shown in Figure 1. The estimated model values, as well as further details, are presented in @meir_gorfine_dtsp_2025.
 
 
 Additional examples demonstrating *PyDTS*'s functionality are also provided in @meir_gorfine_dtsp_2025. These include analyses with regularized regression across varying sample sizes and levels of covariates' correlation, as well as the application of Sure Independence Screening in ultra-high-dimensional settings @zhao2012principled. These examples make use of the package’s built-in data generation tools, underscoring its usefulness for methodological development and evaluation.
 
-# Acknowledgemnts
+# Acknowledgments
 T.M. is supported by the Israeli Council for Higher Education (Vatat) fellowship in data science via the Technion; M.G. work was supported by the ISF 767/21 grant and Malag competitive grant in data science (DS).
 
 # References
