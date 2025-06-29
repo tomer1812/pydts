@@ -38,6 +38,7 @@ While excellent Python packages for continuous-time survival-analysis exist [@Da
 Moreover, in the continuous-time setting, competing-risks data can often be analyzed using methods developed for non-competing events, since the full likelihood function factorizes into separate likelihoods for each cause-specific hazard function [@kalbfleisch_statistical_2011]. In contrast, this factorization does not hold in the discrete-time setting [@lee_analysis_2018; @meir_gorfine_dtsp_2025], and dedicated estimation procedures are required to correctly account for the joint risk structure.
 
 *PyDTS* bridges this gap by providing tools for analyzing discrete-time survival data with competing risks, designed to support both expert and non-expert researchers. Specifically, it offers:
+
 - Discrete-time competing-risks regression models, based on the methods of @lee_analysis_2018 and @meir_gorfine_dtsp_2025.
 - Automated procedures for hyperparameter tuning.
 - Sure Independence Screening methods for feature selection [@zhao2012principled].
