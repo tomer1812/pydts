@@ -28,7 +28,7 @@ bibliography: paper.bib
 
 # Summary
 
-Time-to-event (survival) analysis models  the time until a pre-specified event occurs. When time is measured in  discrete units  or rounded into intervals, standard continuous-time models can yield biased estimators. In addition, the event of interest may belong to one of several mutually exclusive types, referred to as competing risks, where the occurrence of one event prevents the occurrence or observation of the others.  \texttt{PyDTS} is an open-source Python package for analyzing discrete-time survival data with competing-risks. It provides regularized estimation methods, model evaluation metrics, variable screening tools, and a simulation module to support research and development.
+Time-to-event (survival) analysis models the time until a pre-specified event occurs. When time is measured in discrete units or rounded into intervals, standard continuous-time models can yield biased estimators. In addition, the event of interest may belong to one of several mutually exclusive types, referred to as competing risks, where the occurrence of one event prevents the occurrence or observation of the others.  *PyDTS* is an open-source Python package for analyzing discrete-time survival data with competing-risks. It provides regularized estimation methods, model evaluation metrics, variable screening tools, and a simulation module to support research and development.
 
 # Statement of need
 
@@ -83,7 +83,7 @@ The data comprises 25,170 ICU admissions, with LOS recorded in discrete units fr
 
 Three estimation procedures were compared: the method of @lee_analysis_2018 without regularization, the two-step approach of @meir_gorfine_dtsp_2025 without and with LASSO regularization. LASSO was implemented using a grid search with 4-fold cross-validation to select the optimal hyperparameters by maximizing the global-AUC metric. Detailed results of the case study are presented in @meir_gorfine_dtsp_2025.
 
-The lasso-regularized training procedure, which involves selecting the best combination of penalization parameters for each risk, can be conducted using the *PyDTS* model selection tools. Specifically, the analysis can be performed with the following simple code:
+A cross-validation grid-search procedure for selecting the best combination of lasso penalization parameters for each risk can be conducted using the *PyDTS* model selection tools. Specifically, the analysis can be performed with the following simple code:
 
 ```python
 import numpy as np
@@ -96,9 +96,9 @@ gauc_cv_results = penalty_cv_search.cross_validate(
 ```
 
 where `mimic_df` is the full dataframe containing the covariates, an event-type column, an event-time column, and an event indicator column; `penalizers` is the set of penalization values evaluated for each risk, denoted as $\eta_j$, with $j=1,2,3$; `n_splits` is the number of folds; and `l1_ratio` controls the balance between L1 and L2 regularization, with `l1_ratio = 1` corresponding to pure L1 (lasso) regularization.
-The results of this selection procedure are shown in \autoref{fig:los-mimic}. The estimated model values, as well as further details, are presented in @meir_gorfine_dtsp_2025.
+The results of this cross-validation grid-search procedure are shown in \autoref{fig:los-mimic}. The estimated values of the model coefficients, as well as further details, are presented in @meir_gorfine_dtsp_2025.
 
-Additional examples demonstrating *PyDTS*'s functionality are also provided in @meir_gorfine_dtsp_2025. These include analyses with regularized regression across varying sample sizes and levels of covariates' correlation, as well as the application of Sure Independence Screening in ultra-high-dimensional settings @zhao2012principled. These examples make use of the package’s built-in data generation tools, underscoring its usefulness for methodological development and evaluation.
+Additional examples demonstrating *PyDTS*'s functionality are also provided in @meir_gorfine_dtsp_2025 and in the [package documentation](https://tomer1812.github.io/pydts/). These include analyses with regularized regression across varying sample sizes and levels of covariates' correlation, as well as the application of Sure Independence Screening in ultra-high-dimensional settings @zhao2012principled. These examples make use of the package’s built-in data generation tools, underscoring its usefulness for methodological development and evaluation.
 
 
 ![MIMIC dataset - LOS analysis. Regularized regression with 4-fold CV. The selected values of $\eta_j$ are shown in dashed-dotted lines on panels **A-F**. **A-C.** Number of non-zero coefficients for $j=1,2,3$. **D-F.** The estimated coefficients, as a function of $\eta_j$, $j=1,2,3$. **G-I.** Mean (and SD bars) of the 4 folds $\widehat{\mbox{AUC}}_j(t)$, $j=1,2,3$, for the selected values $\log \eta_1=-5$, $\log \eta_2=-9$ and $\log \eta_3=-11$. The number of observed events of each type is shown by bars.\label{fig:los-mimic}](joss-figure.png)
