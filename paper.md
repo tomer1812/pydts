@@ -83,6 +83,16 @@ Three estimation procedures were compared: the method of @lee_analysis_2018 with
 
 The lasso-regularized training procedure, which involves selecting the best combination of penalization parameters for each risk, can be conducted using the *PyDTS* model selection tools. Specifically, the analysis can be performed with the following simple code:
 
+```python
+import numpy as np
+from pydts.cross_validation import PenaltyGridSearchCV
+
+penalizers = np.exp(range(-12, -1))
+penalty_cv_search = PenaltyGridSearchCV()
+gauc_cv_results = penalty_cv_search.cross_validate(
+    full_df=mimic_df, l1_ratio=1, penalizers=penalizers, n_splits=4)
+```
+
 ![MIMIC dataset - LOS analysis](joss-figure.png)
 
 **Figure 1.** MIMIC dataset — LOS analysis using lasso-regularized regression with 4-fold cross-validation. The selected values of $\eta_j$ are shown in dashed-dotted lines in panels **A–F**. **A–C.** Number of non-zero coefficients for $j=1,2,3$. **D–F.** The estimated coefficients as a function of $\eta_j$, $j=1,2,3$. **G–I.** Mean (with SD bars) of the 4 folds $\widehat{\mathrm{AUC}}_j(t)$, $j=1,2,3$, for the selected values $\log \eta_1=-5$, $\log \eta_2=-9$, and $\log \eta_3=-11$. The number of observed events of each type is shown by bars.
