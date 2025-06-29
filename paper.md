@@ -46,7 +46,7 @@ Moreover, in the continuous-time setting, competing-risks data can often be anal
 - Simulation tools for generating synthetic datasets for research and testing.
 
 To the best of our knowledge, *PyDTS* is the first open-source Python package dedicated for discrete-time survival analysis with competing risks.
-Details on the statistical models and methods implemented in *PyDTS* are summarized in the package documentation and described in great detail in @meir_gorfine_dtsp_2025.
+Details on the statistical models and methods implemented in *PyDTS* are summarized in the [package documentation](https://tomer1812.github.io/pydts/) and described in great detail in @meir_gorfine_dtsp_2025.
 
 # Package Details 
 
