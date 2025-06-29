@@ -83,7 +83,7 @@ The data comprises 25,170 ICU admissions, with LOS recorded in discrete units fr
 
 Three estimation procedures were compared: the method of @lee_analysis_2018 without regularization, the two-step approach of @meir_gorfine_dtsp_2025 without and with LASSO regularization. LASSO was implemented using a grid search with 4-fold cross-validation to select the optimal hyperparameters by maximizing the global-AUC metric. Detailed results of the case study are presented in @meir_gorfine_dtsp_2025.
 
-A cross-validation grid-search procedure for selecting the best combination of lasso penalization parameters for each risk can be conducted using the *PyDTS* model selection tools. Specifically, the analysis can be performed with the following simple code:
+A cross-validation grid search procedure for selecting the best combination of LASSO penalization parameters for each risk can be conducted using the *PyDTS* model selection tools. Specifically, the analysis can be performed with the following simple code:
 
 ```python
 import numpy as np
@@ -95,7 +95,7 @@ gauc_cv_results = penalty_cv_search.cross_validate(
     full_df=mimic_df, l1_ratio=1, penalizers=penalizers, n_splits=4)
 ```
 
-where `mimic_df` is the full dataframe containing the covariates, an event-type column, an event-time column, and an event indicator column; `penalizers` is the set of penalization values evaluated for each risk, denoted as $\eta_j$, with $j=1,2,3$; `n_splits` is the number of folds; and `l1_ratio` controls the balance between L1 and L2 regularization, with `l1_ratio = 1` corresponding to pure L1 (lasso) regularization.
+where `mimic_df` is the full dataframe containing the covariates, an event-type column, an event-time column, and an event indicator column; `penalizers` is the set of penalization values evaluated for each risk, denoted as $\eta_j$, with $j=1,2,3$; `n_splits` is the number of folds; and `l1_ratio` controls the balance between L1 and L2 regularization, with `l1_ratio = 1` corresponding to pure L1 (LASSO) regularization.
 The results of this cross-validation grid-search procedure are shown in \autoref{fig:los-mimic}. The estimated values of the model coefficients, as well as further details, are presented in @meir_gorfine_dtsp_2025.
 
 Additional examples demonstrating *PyDTS*'s functionality are also provided in @meir_gorfine_dtsp_2025 and in the [package documentation](https://tomer1812.github.io/pydts/). These include analyses with regularized regression across varying sample sizes and levels of covariates' correlation, as well as the application of Sure Independence Screening in ultra-high-dimensional settings @zhao2012principled. These examples make use of the package’s built-in data generation tools, underscoring its usefulness for methodological development and evaluation.
