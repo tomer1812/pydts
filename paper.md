@@ -33,7 +33,7 @@ Time-to-event (survival) analysis models  the time until a pre-specified event o
 
 Time-to-event analysis is applied when the outcome of interest is the time until a pre-specified event occurs. In some settings, the time variable is inherently or effectively discrete, for example, when time is measured in weeks or months, or when event times are rounded or grouped into intervals. Competing risks arise when observations are at risk of experiencing multiple mutually exclusive event types, such that the occurrence of one event precludes the occurrence or observation of the others. Discrete-time survival data with competing risks are encountered across a wide range of scientific disciplines. For instance, in healthcare, the time to death from cancer is often recorded in months, with death from other causes considered a competing event. 
 
-While excellent Python packages for continuous-time survival-analysis exist [@DavidsonPilon2019][@Polsterl2020], a comprehensive, user-friendly Python toolkit specifically designed for discrete-time survival analysis is still missing. 
+While excellent Python packages for continuous-time survival-analysis exist [@DavidsonPilon2019; @Polsterl2020], a comprehensive, user-friendly Python toolkit specifically designed for discrete-time survival analysis is still missing. 
 Moreover, in the continuous-time setting, competing-risks data can often be analyzed using methods developed for non-competing events, since the full likelihood function factorizes into separate likelihoods for each cause-specific hazard function [@kalbfleisch_statistical_2011]. In contrast, this factorization does not hold in the discrete-time setting [@lee_analysis_2018; @meir_gorfine_dtsp_2025], and dedicated estimation procedures are required to correctly account for the joint risk structure.
 
 *PyDTS* bridges this gap by providing tools for analyzing discrete-time survival data with competing risks, designed to support both expert and non-expert researchers. Specifically, it offers:
@@ -94,7 +94,7 @@ gauc_cv_results = penalty_cv_search.cross_validate(
 ```
 
 
-![MIMIC dataset - LOS analysis](docs/joss-figure.png)
+![MIMIC dataset - LOS analysis](joss-figure.png)
 
 **Figure 1.** MIMIC dataset — LOS analysis using lasso-regularized regression with 4-fold cross-validation. The selected values of $\eta_j$ are shown in dashed-dotted lines in panels **A–F**. **A–C.** Number of non-zero coefficients for $j=1,2,3$. **D–F.** The estimated coefficients as a function of $\eta_j$, $j=1,2,3$. **G–I.** Mean (with SD bars) of the 4 folds $\widehat{\mathrm{AUC}}_j(t)$, $j=1,2,3$, for the selected values $\log \eta_1=-5$, $\log \eta_2=-9$, and $\log \eta_3=-11$. The number of observed events of each type is shown by bars.
 
