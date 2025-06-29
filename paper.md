@@ -1,4 +1,4 @@
----
+[---
 title: 'PyDTS: A Python Package for Discrete-Time Survival Analysis with Competing Risks and Optional Penalization' 
 tags:
   - Python
@@ -33,7 +33,7 @@ Time-to-event (survival) analysis models  the time until a pre-specified event o
 
 Time-to-event analysis is applied when the outcome of interest is the time until a pre-specified event occurs. In some settings, the time variable is inherently or effectively discrete, for example, when time is measured in weeks or months, or when event times are rounded or grouped into intervals. Competing risks arise when observations are at risk of experiencing multiple mutually exclusive event types, such that the occurrence of one event precludes the occurrence or observation of the others. Discrete-time survival data with competing risks are encountered across a wide range of scientific disciplines. For instance, in healthcare, the time to death from cancer is often recorded in months, with death from other causes considered a competing event. 
 
-While excellent Python packages for continuous-time survival-analysis exist [@Davidson-Pilon:2019; @Polsterl:2020], a comprehensive, user-friendly Python toolkit specifically designed for discrete-time survival analysis is still missing. 
+While excellent Python packages for continuous-time survival-analysis exist [@DavidsonPilon2019; @Polsterl:2020], a comprehensive, user-friendly Python toolkit specifically designed for discrete-time survival analysis is still missing. 
 Moreover, in the continuous-time setting, competing-risks data can often be analyzed using methods developed for non-competing events, since the full likelihood function factorizes into separate likelihoods for each cause-specific hazard function [@kalbfleisch_statistical_2011]. In contrast, this factorization does not hold in the discrete-time setting [@lee_analysis_2018; @meir_gorfine_dtsp_2025], and dedicated estimation procedures are required to correctly account for the joint risk structure.
 
 *PyDTS* bridges this gap by providing tools for analyzing discrete-time survival data with competing risks, designed to support both expert and non-expert researchers. Specifically, it offers:
@@ -56,7 +56,7 @@ Details on the statistical models and methods implemented in *PyDTS* are summari
 This command automatically installs the following dependencies:
 - NumPy [@Harris2020] (<2.0.0)
 - pandas [@McKinney2010]
-- lifelines [@DavidsonPilon2023]
+- lifelines [@DavidsonPilon2019]
 - SciPy [@Virtanen2020]
 - scikit-learn [@Pedregosa2011]
 - statsmodels [@Seabold2010]
@@ -70,6 +70,8 @@ This command automatically installs the following dependencies:
 - **Hyperparameters tuning:** The package provides automated procedures for hyperparameter selection, including grid search combined with cross-validation, enabling robust model calibration and improved generalization performance.
 - **Data Generation:** The `EventTimesSampler` module facilitates the generation of discrete-time survival data with competing risks and right censoring. Given user-specified model parameters, including the number of discrete event times, true regression coefficients, and covariate values for each observation, `EventTimesSampler` simulates both event times and event types. The module supports two types of right censoring: administrative censoring, applied when the simulated event time exceeds a user-defined maximum follow-up duration, and random censoring, which can be either covariate-dependent or independent. This flexible simulation framework is useful for benchmarking models, testing estimation procedures, and conducting methodological research.
 
+## 
+
 # Case Study
 
 The utility of *PyDTS* is demonstrated through an analysis of patients' length of stay (LOS) in intensive care unit (ICU), conducted by @meir_gorfine_dtsp_2025. This analysis uses the publicly accessible, large-scale Medical Information Mart for Intensive Care (MIMIC-IV, version 2.0) dataset [@johnson_mimic-iv_2022; @goldberger_physiobank_2000]. 
@@ -79,9 +81,26 @@ The data comprises 25,170 ICU admissions, with LOS recorded in discrete units fr
 
 Three estimation procedures were compared: the method of @lee_analysis_2018 without regularization, the two-step approach of @meir_gorfine_dtsp_2025 without and with LASSO regularization. LASSO was implemented using a grid search with 4-fold cross-validation to select the optimal hyperparameters by maximizing the global-AUC metric. Detailed results of the case study are presented in @meir_gorfine_dtsp_2025.
 
+The lasso-regularized training procedure, which involves selecting the best combination of penalization parameters for each risk, can be conducted using the *PyDTS* model selection tools. Specifically, the analysis can be performed with the following simple code:
+```python
+import numpy as np
+from pydts.cross_validation import PenaltyGridSearchCV
+
+penalizers = np.exp(range(-12, -1))
+penalty_cv_search = PenaltyGridSearchCV()
+gauc_cv_results = penalty_cv_search.cross_validate(
+    full_df=mimic_df, l1_ratio=1, penalizers=penalizers, n_splits=4)
+```
+
+where ```mimic_df``` is the full dataframe containing the covariates, an event-type column, an event-time column, and an event indicator column; ```penalizers``` denotes the set of penalization values evaluated for each risk; ```n_splits``` is the number of folds; and ```l1_ratio``` controls the balance between L1 and L2 regularization, with ```l1_ratio = 1``` corresponding to pure L1 (lasso) regularization.
+The results of this selection procedure are shown in Figure 1. The estimated model values, as well as further details, are presented in @meir_gorfine_dtsp_2025.
+
+![MIMIC dataset - LOS analysis. Lasso regularized regression with 4-fold CV. The selected values of $\eta_j$ are shown in dashed-dotted lines on panels **A-F**. **A-C.** Number of non-zero coefficients for $j=1,2,3$. **D-F.** The estimated coefficients, as a function of $\eta_j$, $j=1,2,3$. **G-I.** Mean (and SD bars) of the 4 folds $\widehat{\mbox{AUC}}_j(t)$, $j=1,2,3$, for the selected values $\log \eta_1=-5$, $\log \eta_2=-9$ and $\log \eta_3=-11$. The number of observed events of each type is shown by bars.](docs/joss-figure.png)
+
+
 Additional examples demonstrating *PyDTS*'s functionality are also provided in @meir_gorfine_dtsp_2025. These include analyses with regularized regression across varying sample sizes and levels of covariates' correlation, as well as the application of Sure Independence Screening in ultra-high-dimensional settings @zhao2012principled. These examples make use of the package’s built-in data generation tools, underscoring its usefulness for methodological development and evaluation.
 
 # Acknowledgemnts
 T.M. is supported by the Israeli Council for Higher Education (Vatat) fellowship in data science via the Technion; M.G. work was supported by the ISF 767/21 grant and Malag competitive grant in data science (DS).
 
-# References 
+# References
