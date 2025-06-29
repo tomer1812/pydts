@@ -53,6 +53,7 @@ Details on the statistical models and methods implemented in *PyDTS* are summari
 `pip install pydts`
 
 This command automatically installs the following dependencies:
+
 - NumPy [@Harris2020] (<2.0.0)
 - pandas [@McKinney2010]
 - lifelines [@Davidson-Pilon:2019]
