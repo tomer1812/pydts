@@ -78,7 +78,7 @@ The data comprises 25,170 ICU admissions, with LOS recorded in discrete units fr
 
 Three estimation procedures were compared: the method of @lee_analysis_2018 without regularization, the two-step approach of @meir_gorfine_dtsp_2025 without and with LASSO regularization. LASSO was implemented using a grid search with 4-fold cross-validation to select the optimal hyperparameters by maximizing the global-AUC metric. Detailed results of the case study are presented in @meir_gorfine_dtsp_2025.
 
-![MIMIC dataset - LOS analysis](joss-figure.png)
+![MIMIC dataset — LOS analysis using lasso-regularized regression with 4-fold cross-validation. The selected values of $\eta_j$ are shown in dashed-dotted lines in panels **A–F**. **A–C.** Number of non-zero coefficients for $j=1,2,3$. **D–F.** The estimated coefficients as a function of $\eta_j$, $j=1,2,3$. **G–I.** Mean &#40;with SD bars&#41; of the 4 folds $\widehat{\mathrm{AUC}}_j&#40;t&#41;$, $j=1,2,3$, for the selected values $\log \eta_1=-5$, $\log \eta_2=-9$, and $\log \eta_3=-11$. The number of observed events of each type is shown by bars.](joss-figure.png)
 
 
 Additional examples demonstrating *PyDTS*'s functionality are also provided in @meir_gorfine_dtsp_2025. These include analyses with regularized regression across varying sample sizes and levels of covariates' correlation, as well as the application of Sure Independence Screening in ultra-high-dimensional settings @zhao2012principled. These examples make use of the package’s built-in data generation tools, underscoring its usefulness for methodological development and evaluation.
