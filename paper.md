@@ -48,25 +48,14 @@ Moreover, in the continuous-time setting, competing-risks data can often be anal
 To the best of our knowledge, *PyDTS* is the first open-source Python package dedicated for discrete-time survival analysis with competing risks.
 Details on the statistical models and methods implemented in *PyDTS* are summarized in the [package documentation](https://tomer1812.github.io/pydts/) and described in great detail in @meir_gorfine_dtsp_2025.
 
-# Package Details 
 
-## Dependencies
+# Key Features
 
 *PyDTS* can be easily installed via *PyPI* as follows:
 
 `pip install pydts`
 
-This command automatically installs the following dependencies:
-
-- NumPy [@Harris2020] (<2.0.0)
-- pandas [@McKinney2010]
-- lifelines [@Davidson-Pilon:2019]
-- SciPy [@Virtanen2020]
-- scikit-learn [@Pedregosa2011]
-- statsmodels [@Seabold2010]
-
-
-## Key Features
+It includes the following key features:
 
 1. **Estimation procedures:** Two methods are implemented, `TwoStagesFitter` of @meir_gorfine_dtsp_2025, and `DataExpansionFitter` of @lee_analysis_2018. The `TwoStagesFitter` supports both regularization and the inclusion of time-dependent covariates, features that are not available in the `DataExpansionFitter` implementation.
 2. **Sure Independence Screening:** The `SISTwoStagesFitter` class implements the Sure Independence Screening (SIS) of @zhao2012principled. SIS is a powerful dimensionality reduction technique designed for ultra-high-dimensional settings, where the number of covariates far exceeds the number of observations, a situation often encountered in genomic studies and other high-throughput domains. It works by filtering out a large number of uninformative covariates based on their marginal association with the outcome. After screening, penalized variable selection methods (e.g., LASSO) are typically applied to the reduced set of covariates to perform more refined modeling and selection.
@@ -79,11 +68,13 @@ This command automatically installs the following dependencies:
 The utility of *PyDTS* is demonstrated through an analysis of patients' length of stay (LOS) in intensive care unit (ICU), conducted by @meir_gorfine_dtsp_2025. This analysis uses the publicly accessible, large-scale Medical Information Mart for Intensive Care (MIMIC-IV, version 2.0) dataset [@johnson_mimic-iv_2022; @goldberger_physiobank_2000]. 
 
 @meir_gorfine_dtsp_2025 developed a discrete-time survival model to predict ICU LOS based on patients’ clinical characteristics at admission.
-The data comprises 25,170 ICU admissions, with LOS recorded in discrete units from 1 to 28 days, resulting in many patients sharing the same event time on each day. Three competing events are considered: discharge to home (69.0%), transfer to another medical facility (21.4%), and in-hospital death (6.1%). Patients who left the ICU against medical advice (1.0%) are treated as right-censored, and administrative censoring is applied to those hospitalized for more than 28 days (2.5%). The analysis includes 36 covariates per patient. For a full description of the data, see @meir_gorfine_dtsp_2025.
+The dataset comprises 25,170 ICU patients. For each patient, only the last admission is considered, and features related to prior admission history are included. The LOS is recorded in discrete units from 1 to 28 days, resulting in many patients sharing the same event time on each day. Three competing events are considered: discharge to home (69.0%), transfer to another medical facility (21.4%), and in-hospital death (6.1%). Patients who left the ICU against medical advice (1.0%) are treated as right-censored, and administrative censoring is applied to those hospitalized for more than 28 days (2.5%). The analysis includes 36 covariates per patient. For a full description of the data, see @meir_gorfine_dtsp_2025.
 
-Three estimation procedures were compared: the method of @lee_analysis_2018 without regularization, two-step approach of @meir_gorfine_dtsp_2025 without and with LASSO regularization. LASSO was implemented using a grid search with 4-fold cross-validation to select the optimal hyperparameters by maximizing the global-AUC metric. Detailed results of the case study are presented in @meir_gorfine_dtsp_2025.
-
-The code below illustrates a cross-validated grid search that selects the optimal LASSO penalty parameters for each competing event.
+Three estimation procedures were compared: the method of @lee_analysis_2018 without regularization, two-step approach of @meir_gorfine_dtsp_2025 without and with LASSO regularization.
+When applying the two-step procedure with LASSO regularization, we need to specify the hyperparameters that control the amount of regularization applied to each competing event. 
+*PyDTS* provides functionality for tuning these hyperparameters via K-fold cross-validation. By default, the optimal values are those that maximize the out-of-sample global-AUC metric, as defined in @meir_gorfine_dtsp_2025, Appendix A. Additional tuning options are also available.
+Here, a grid search with 4-fold cross-validation was performed to select the optimal hyperparameters that maximize the global-AUC.
+The code below illustrates such tuning procedure
 
 ```python
 import numpy as np
@@ -96,12 +87,12 @@ gauc_cv_results = penalty_cv_search.cross_validate(
 ```
 
 where `mimic_df` is the full dataframe containing the covariates, an event-type column, an event-time column, and an event indicator column; `penalizers` is the set of penalization values evaluated for each risk, denoted as $\eta_j$, with $j=1,2,3$; `n_splits` is the number of folds; and `l1_ratio` controls the balance between L1 and L2 regularization, with `l1_ratio = 1` corresponding to pure L1 (LASSO) regularization.
-The results are shown in \autoref{fig:los-mimic}.
+\autoref{fig:los-mimic} presents the results of the selection procedure. Panels A–C illustrate the number of non-zero estimated coefficients, denoted as $\beta_j$, as a function of the regularization hyperparameter $\eta_j$ for each competing event. Panels D–F illustrate the coefficient values as a function of $\eta_j$ for each competing event. Panels G–I illustrate the $\widehat{\mbox{AUC}}_j(t)$ metric for the selected set of $\eta_j$, $j = 1, 2, 3$. A comprehensive description of the case study settings and results can be found in @meir_gorfine_dtsp_2025.
 
 Additional examples demonstrating *PyDTS*'s functionality are also provided in @meir_gorfine_dtsp_2025 and in the [package documentation](https://tomer1812.github.io/pydts/). These include analyses with regularized regression across varying sample sizes and levels of covariates' correlation, as well as the application of Sure Independence Screening in ultra-high-dimensional settings [@zhao2012principled]. These examples make use of the package’s built-in data generation tools, underscoring its usefulness for methodological development and evaluation.
 
 
-![MIMIC dataset - LOS analysis. Regularized regression with 4-fold CV. The selected values of $\eta_j$ are shown in dashed-dotted lines on panels **A-F**. **A-C.** Number of non-zero coefficients for $j=1,2,3$. **D-F.** The estimated coefficients, as a function of $\eta_j$, $j=1,2,3$. **G-I.** Mean (and SD bars) of the 4 folds $\widehat{\mbox{AUC}}_j(t)$, $j=1,2,3$, for the selected values $\log \eta_1=-5$, $\log \eta_2=-9$ and $\log \eta_3=-11$. The number of observed events of each type is shown by bars.\label{fig:los-mimic}](joss-figure.png)
+![MIMIC dataset - LOS analysis. Regularized regression with 4-fold CV. The selected values of $\eta_j$ are shown in dashed-dotted lines on panels **A-F**. **A-C.** Number of non-zero coefficients for $j=1,2,3$. **D-F.** The estimated coefficients, as a function of $\eta_j$, $j=1,2,3$. **G-I.** Mean (and SD bars) of the 4 folds $\widehat{\mbox{AUC}}_j(t)$, $j=1,2,3$, for the selected values $\log \eta_1=-5$, $\log \eta_2=-9$ and $\log \eta_3=-11$. The number of observed events of each type is shown by bars.\label{fig:los-mimic}](joss-figure.pdf)
 
 # Acknowledgemnts
 
