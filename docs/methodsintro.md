@@ -1,11 +1,11 @@
 # Methods
 
-In this section, we outline the statistical background for the tools incorporated in PyDTS. We commence with some definitions, present the collapsed log-likelihood approach and the estimation procedure of Lee et al. (2018) [[4]](#4), introduce our estimation method [[1]](#1)-[[2]](#2), and conclude with evaluation metrics. For additional details, check out the references.
+In this section, we outline the statistical background for the tools incorporated in *PyDTS*. We commence with some definitions, present the collapsed log-likelihood approach and the estimation procedure of Lee et al. (2018) [[4]](#4), introduce our estimation method [[1]](#1)-[[2]](#2), and conclude with evaluation metrics. For additional details, check out the references.
 
 
 ## References
 <a id="1">[1]</a> 
-Meir, Tomer\*, Gutman, Rom\*, and Gorfine, Malka, 
+Meir, Tomer, Gutman, Rom, and Gorfine, Malka, 
 "PyDTS: A Python Package for Discrete-Time Survival Analysis with Competing Risks"
 (2022)
 

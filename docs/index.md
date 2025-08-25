@@ -43,11 +43,11 @@ The function `generate_quick_start_df` simulates a dataset with the following de
   - $\beta_1$ = −log([0.8, 3, 3, 2.5, 2])  
   - $\beta_2$ = −log([1, 3, 4, 3, 2])  
 
-For each patient, a censoring time `C` is drawn from Uniform{1, ..., 14}.
-The observed time is defined as `X = min(T, C)`, where `T` is the event time, sampled based on the covariates of each patient and the hazard coefficients.
-If censoring occurs before the event (`C < T`), the event type is set to `J = 0`.
+For each patient, a censoring time $C$ is drawn from Uniform{1, ..., 14}.
+The observed time is defined as $X = min(T, C)$, where $T$ is the event time, sampled based on the covariates of each patient and the hazard coefficients.
+If censoring occurs before the event ($C < T$), the event type is set to $J = 0$.
 
-Once the dataset is generated, you can fit a `TwoStagesFitter` to the data (without columns `C` and `T` which are not observed in practice).
+Once the dataset is generated, you can fit a `TwoStagesFitter` to the data (without columns $C$ and $T$ which are not observed in practice).
 
 You can generate synthetic data and fit your first `TwoStagesFitter` model with the following code: 
 

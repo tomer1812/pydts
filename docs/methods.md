@@ -163,7 +163,7 @@ For the SIS-L procedure, lasso regularization is then applied in the first step 
 
 ## References
 <a id="1">[1]</a> 
-Meir, Tomer\*, Gutman, Rom\*, and Gorfine, Malka 
+Meir, Tomer, Gutman, Rom, and Gorfine, Malka 
 "PyDTS: A Python Package for Discrete Time Survival-analysis with Competing Risks"
 (2022)
 
