@@ -42,8 +42,8 @@ The function `generate_quick_start_df` simulates a dataset with the following de
 - **Competing events**: `j_events=2` event types  
 - **Time scale**: `d_times=14` discrete time intervals  
 - **Hazard coefficients** (default values):  
-  - $\alpha_1(t)$ = −1 − 0.3 * log(t)  
-  - $\alpha_2(t)$ = −1.75 − 0.15 * log(t)
+  - $\alpha_{1t}$ = −1 − 0.3 * log(t)  
+  - $\alpha_{2t}$ = −1.75 − 0.15 * log(t)
   - $\beta_1$ = −log([0.8, 3, 3, 2.5, 2])  
   - $\beta_2$ = −log([1, 3, 4, 3, 2])  
 
