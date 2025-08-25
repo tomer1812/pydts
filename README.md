@@ -5,35 +5,75 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15296343.svg)](https://doi.org/10.5281/zenodo.15296343)
 
 # Discrete Time Survival Analysis  
-A Python package for discrete-time survival data analysis with competing risks.
 
-![PyDTS](docs/icon.png)  
+*PyDTS* is a Python package designed for discrete-time survival analysis with competing risks, offering tools for model fitting, evaluation, and simulation.
 
-[Tomer Meir](https://tomer1812.github.io/), [Rom Gutman](https://github.com/RomGutman), [Malka Gorfine](https://www.tau.ac.il/~gorfinem/) 2022
+For details, usage examples, and API information - check out the package 
+[documentation](https://tomer1812.github.io/pydts/) 
 
-[Documentation](https://tomer1812.github.io/pydts/)  
+
+*PyDTS* offers:
+
+- Discrete-time competing-risks regression models.
+- Automated procedures for hyperparameter tuning.
+- Sure Independence Screening methods for feature selection.
+- Model evaluation metrics for predictive accuracy and calibration.
+- Simulation tools for generating synthetic datasets for research and testing.
+
 
 ## Installation
+
+*PyDTS* can be installed using PyPI as follows:
+
 ```console
 pip install pydts
 ```
 
 ## Quick Start
 
+The following example demonstrates how to generate synthetic data and fit a TwoStagesFitter model.
+
+Detailed definitions and explanations are available in the [methods section](https://tomer1812.github.io/pydts/methods/) of the documentation. 
+
+The function `generate_quick_start_df` simulates a dataset with the following defaults:  
+
+- **Sample size**: `n_patients=10000`  
+- **Covariates**: `n_cov=5` independent covariates, each drawn from `Uniform(0,1)` distribution 
+- **Competing events**: `j_events=2` event types  
+- **Time scale**: `d_times=14` discrete time intervals  
+- **Hazard coefficients** (default values):  
+  - $\alpha_1(t)$ = −1 − 0.3 * log(t)  
+  - $\alpha_2(t)$ = −1.75 − 0.15 * log(t)
+  - $\beta_1$ = −log([0.8, 3, 3, 2.5, 2])  
+  - $\beta_2$ = −log([1, 3, 4, 3, 2])  
+
+For each patient, a censoring time `C` is drawn from `Uniform{1, …, 14}`.
+The observed time is defined as `X = min(T, C)`, where `T` is the event time.
+If censoring occurs before the event (`C < T`), the event type is set to `J = 0`.
+
+Once the dataset is generated, you can fit a `TwoStagesFitter` to the data (without columns `C` and `T` which are not observed in practice).
+
+You can generate synthetic data and fit your first `TwoStagesFitter` model with the following code: 
+
+```python
+
+
+
 ```python
 from pydts.fitters import TwoStagesFitter
 from pydts.examples_utils.generate_simulations_data import generate_quick_start_df
 
+# Generate a synthetic dataset with 10,000 patients,
+# 5 covariates, 14 discrete time intervals, and 2 competing events
 patients_df = generate_quick_start_df(n_patients=10000, n_cov=5, d_times=14, j_events=2, pid_col='pid', seed=0)
 
+# Initialize and fit the discrete-time competing-risk model
 fitter = TwoStagesFitter()
 fitter.fit(df=patients_df.drop(['C', 'T'], axis=1))
+
+# Display model summary
 fitter.print_summary()
 ```
-
-## Examples
-1. [Usage Example](https://tomer1812.github.io/pydts/UsageExample-Intro/)
-2. [Hospital Length of Stay Simulation Example](https://tomer1812.github.io/pydts/SimulatedDataset/)
 
 ## Citations
 If you found PyDTS software useful to your research, please cite the papers:
