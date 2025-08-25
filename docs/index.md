@@ -8,10 +8,6 @@
 
 *PyDTS* is a Python package designed for discrete-time survival analysis with competing risks, offering tools for model fitting, evaluation, and simulation.
 
-For details, usage examples, and API information - check out the package 
-[documentation](https://tomer1812.github.io/pydts/) 
-
-
 *PyDTS* offers:
 
 - Discrete-time competing-risks regression models.
@@ -31,14 +27,14 @@ pip install pydts
 
 ## Quick Start
 
-The following example demonstrates how to generate synthetic data and fit a TwoStagesFitter model.
+The following example demonstrates how to generate synthetic data and fit a `TwoStagesFitter` model.
 
-Detailed definitions and explanations are available in the [methods section](https://tomer1812.github.io/pydts/methods/) of the documentation. 
+Detailed definitions and explanations are available in the [methods section](https://tomer1812.github.io/pydts/methods/). 
 
 The function `generate_quick_start_df` simulates a dataset with the following defaults:  
 
 - **Sample size**: `n_patients=10000`  
-- **Covariates**: `n_cov=5` independent covariates, each drawn from `Uniform(0,1)` distribution 
+- **Covariates**: `n_cov=5` independent covariates, each drawn from Uniform(0,1) distribution 
 - **Competing events**: `j_events=2` event types  
 - **Time scale**: `d_times=14` discrete time intervals  
 - **Hazard coefficients** (default values):  
@@ -47,17 +43,13 @@ The function `generate_quick_start_df` simulates a dataset with the following de
   - $\beta_1$ = −log([0.8, 3, 3, 2.5, 2])  
   - $\beta_2$ = −log([1, 3, 4, 3, 2])  
 
-For each patient, a censoring time `C` is drawn from `Uniform{1, …, 14}`.
-The observed time is defined as `X = min(T, C)`, where `T` is the event time.
+For each patient, a censoring time `C` is drawn from Uniform{1, ..., 14}.
+The observed time is defined as `X = min(T, C)`, where `T` is the event time, sampled based on the covariates of each patient and the hazard coefficients.
 If censoring occurs before the event (`C < T`), the event type is set to `J = 0`.
 
 Once the dataset is generated, you can fit a `TwoStagesFitter` to the data (without columns `C` and `T` which are not observed in practice).
 
 You can generate synthetic data and fit your first `TwoStagesFitter` model with the following code: 
-
-```python
-
-
 
 ```python
 from pydts.fitters import TwoStagesFitter
@@ -76,7 +68,7 @@ fitter.print_summary()
 ```
 
 ## Citations
-If you found PyDTS software useful to your research, please cite the papers:
+If you found *PyDTS* software useful to your research, please cite the papers:
 
 ```bibtex
 @article{Meir_PyDTS_2022,
