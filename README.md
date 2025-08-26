@@ -11,7 +11,6 @@
 For details, usage examples, and API information - check out the package 
 [documentation](https://tomer1812.github.io/pydts/) 
 
-
 *PyDTS* offers:
 
 - Discrete-time competing-risks regression models.
@@ -20,6 +19,7 @@ For details, usage examples, and API information - check out the package
 - Model evaluation metrics for predictive accuracy and calibration.
 - Simulation tools for generating synthetic datasets for research and testing.
 
+Additional simulations and illustrative examples are available in [Meir and Gorfine (2025), Discrete-Time Competing-Risks Regression with or without Penalization, Biometrics (2025)](https://academic.oup.com/biometrics/article/81/2/ujaf040/8120014), and in the accompanying [Github Repository](https://github.com/tomer1812/DiscreteTimeSurvivalPenalization/tree/main)
 
 ## Installation
 
