@@ -72,7 +72,7 @@ The dataset comprises 25,170 ICU patients. For each patient, only the last admis
 
 Three estimation procedures were compared: the method of @lee_analysis_2018 without regularization, two-step approach of @meir_gorfine_dtsp_2025 without and with LASSO regularization.
 When applying the two-step procedure with LASSO regularization, we need to specify the hyperparameters that control the amount of regularization applied to each competing event. 
-*PyDTS* provides functionality for tuning these hyperparameters via K-fold cross-validation. By default, the optimal values are those that maximize the out-of-sample global-AUC metric, as defined in @meir_gorfine_dtsp_2025, Appendix A. Additional tuning options are also available.
+*PyDTS* provides functionality for tuning these hyperparameters via K-fold cross-validation. By default, the optimal values are those that maximize the out-of-sample global-AUC metric, as defined in @meir_gorfine_dtsp_2025, Appendix I. Additional tuning options are also available.
 Here, a grid search with 4-fold cross-validation was performed to select the optimal hyperparameters that maximize the global-AUC.
 The code below illustrates such tuning procedure
 
