@@ -3,7 +3,7 @@ from pydts.examples_utils.simulations_data_config import *
 from pydts.config import *
 import pandas as pd
 from scipy.special import expit
-from pandarallel import pandarallel
+# from pandarallel import pandarallel
 
 
 def sample_los(new_patient, age_mean, age_std, bmi_mean, bmi_std, coefs=COEFS, baseline_hazard_scale=8,
