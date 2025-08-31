@@ -33,14 +33,14 @@ pip install pydts
 The package requires the following dependencies (with version constraints chosen for compatibility across Python and NumPy/SciPy releases):  
 
 - *NumPy*  
-  - Python 3.9: `>=1.26,<2.1`  
-  - Python 3.10: `>=1.26,<2.3`  
-  - Python 3.11–3.13: `>=1.26` (including NumPy 2.x)  
+  -- Python 3.9: `>=1.26,<2.1`  
+  -- Python 3.10: `>=1.26,<2.3`  
+  -- Python 3.11–3.13: `>=1.26` (including NumPy 2.x)  
 
 - *SciPy*  
-  - Python 3.9: `>=1.13,<1.14`  
-  - Python 3.10: `>=1.14,<1.16`  
-  - Python 3.11–3.13: `>=1.15`  
+  -- Python 3.9: `>=1.13,<1.14`  
+  -- Python 3.10: `>=1.14,<1.16`  
+  -- Python 3.11–3.13: `>=1.15`  
 
 - *pandas* `>=2.2.2`  
 - *scikit-learn* `>=1.6`  
