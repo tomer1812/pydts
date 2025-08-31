@@ -142,7 +142,7 @@ def global_brier_score(pred_df: pd.DataFrame,
     e_j_ser = pred_df[pred_df[event_type_col] != 0].groupby('J').size().sort_index()
     total_e = e_j_ser.sum()
     global_bs = 0
-    for event, e_j in e_j_ser.iteritems():
+    for event, e_j in e_j_ser.items():
         global_bs += (e_j / total_e) * event_specific_integrated_brier_score(
             pred_df=pred_df, event=event, event_type_col=event_type_col,
             duration_col=duration_col)
@@ -343,7 +343,7 @@ def global_auc(pred_df: pd.DataFrame,
     e_j_ser = pred_df[pred_df[event_type_col] != 0].groupby('J').size().sort_index()
     total_e = e_j_ser.sum()
     global_auc = 0
-    for event, e_j in e_j_ser.iteritems():
+    for event, e_j in e_j_ser.items():
         global_auc += (e_j / total_e) * event_specific_integrated_auc(
             pred_df=pred_df, event=event, event_type_col=event_type_col,
             duration_col=duration_col)

@@ -746,6 +746,7 @@ class TwoStagesFitterExact(TwoStagesFitter):
         else:
             _covs = self.covariates
 
+        expanded_df = expanded_df.apply(pd.to_numeric)
         beta_j_model = ConditionalLogit(endog=expanded_df[f'j_{event}'],
                                         exog=expanded_df[_covs],
                                         groups=expanded_df[self.duration_col],
