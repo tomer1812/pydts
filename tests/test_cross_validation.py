@@ -46,7 +46,7 @@ class TestCrossValidation(unittest.TestCase):
         patients_df = patients_df.reset_index()
         patients_df = ets.sample_independent_lof_censoring(patients_df, prob_lof_at_t=0.01 * np.ones(d_times))
         self.patients_df = ets.update_event_or_lof(patients_df)
-        self.patients_df = pd.to_numeric(self.patients_df)
+        self.patients_df = self.patients_df.apply(pd.to_numeric, errors="raise")
 
         self.tscv = TwoStagesCV()
 
