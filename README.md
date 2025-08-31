@@ -29,6 +29,34 @@ Additional simulations and illustrative examples are available in [Meir and Gorf
 pip install pydts
 ```
 
+## Dependencies
+
+*PyDTS* supports Python versions 3.9–3.13.  
+
+The package requires the following dependencies (with version constraints chosen for compatibility across Python and NumPy/SciPy releases):  
+
+- *NumPy*  
+  - Python 3.9: `>=1.26,<2.1`  
+  - Python 3.10: `>=1.26,<2.3`  
+  - Python 3.11–3.13: `>=1.26` (including NumPy 2.x)  
+
+- *SciPy*  
+  - Python 3.9: `>=1.13,<1.14`  
+  - Python 3.10: `>=1.14,<1.16`  
+  - Python 3.11–3.13: `>=1.15`  
+
+- *pandas* `>=2.2.2`  
+- *scikit-learn* `>=1.6`  
+- *statsmodels* `>=0.14.2`  
+- *lifelines* `>=0.27`  
+- *tqdm* `>=4.66`  
+- *psutil* `>=5.9`  
+- *seaborn* `>=0.13`  
+- *formulaic* `>=1.0`  
+
+All dependencies are installed automatically when you install *PyDTS*. 
+
+
 ## Quick Start
 
 The following example demonstrates how to generate synthetic data and fit a `TwoStagesFitter` model.
