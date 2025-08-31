@@ -35,6 +35,7 @@ lifelines     = ">=0.27"
 tqdm          = ">=4.66"
 psutil        = ">=5.9"
 seaborn       = ">=0.13"
+formulaic = ">=1.0"
 
 
 [tool.poetry.group.dev.dependencies]
