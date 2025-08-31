@@ -25,6 +25,7 @@ class TestTwoStagesFitterExact(unittest.TestCase):
         }
         self.df = generate_quick_start_df(n_patients=300, n_cov=5, d_times=4, j_events=2, pid_col='pid', seed=0,
                                           real_coef_dict=self.real_coef_dict, censoring_prob=0.1)
+        self.df = pd.to_numeric(self.df)
 
         self.m = TwoStagesFitterExact()
         self.fitted_model = TwoStagesFitterExact()

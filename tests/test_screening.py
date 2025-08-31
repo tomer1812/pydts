@@ -49,6 +49,7 @@ class TestScreening(unittest.TestCase):
         patients_df = ets.update_event_or_lof(patients_df)
         patients_df.index.name = 'pid'
         self.patients_df = patients_df.reset_index()
+        self.patients_df = pd.to_numeric(self.patients_df)
         self.covariates = covariates
         self.fitter = SISTwoStagesFitter()
 
