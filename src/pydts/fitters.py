@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 import psutil
 from lifelines.fitters.coxph_fitter import CoxPHFitter
-from pandarallel import pandarallel
+# from pandarallel import pandarallel
 from typing import Optional, List, Union
 from matplotlib import colors as mcolors
 from joblib import Parallel, delayed
