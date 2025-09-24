@@ -62,6 +62,7 @@ nav:
       - Definitions and Estimation: methods.md
       - Evaluation Metrics: methodsevaluation.md
     - Examples:
+      - Introduction: examples-intro.md
       - Event Times Sampler: EventTimesSampler.ipynb
       - Estimation Example:
         - Introduction: UsageExample-Intro.ipynb

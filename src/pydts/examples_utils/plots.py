@@ -745,6 +745,8 @@ def plot_sampled_covariates_figure(observations_df, fname, show=True):
     ax.bar(observations_df['Z1'].value_counts().index, observations_df['Z1'].value_counts().values, width=0.4)
     ax.set_xlabel('Z1', fontsize=fontsize)
     ax.set_ylabel('Number of observations', fontsize=fontsize)
+    ax.set_xticks([0, 0.5, 1])
+    ax.set_xticklabels(['0', '', '1'])
     ax = axes[1]
     ax.tick_params(axis='both', which='major', labelsize=15)
     ax.tick_params(axis='both', which='minor', labelsize=15)
