@@ -287,6 +287,20 @@ class ExpansionBasedFitter(BaseFitter):
                 df = self.predict_event_cumulative_incident_function(df=df, event=event)
         return df
 
+    def predict_full(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        This function adds columns of the predicted hazard function, overall survival, probabilities of event occurance
+        and cumulative incident function (CIF) to the given dataframe.
+
+        Args:
+            df (pandas.DataFrame): dataframe with covariates columns included
+
+        Returns:
+            df (pandas.DataFrame): dataframe with additional prediction columns
+
+        """
+        return self.predict_cumulative_incident_function(df)
+
     def predict_marginal_prob_event_j(self, df: pd.DataFrame, event: Union[str, int]) -> pd.DataFrame:
         """
         This function calculates the marginal probability of an event given the covariates.

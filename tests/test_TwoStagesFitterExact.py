@@ -188,6 +188,9 @@ class TestTwoStagesFitterExact(unittest.TestCase):
     def test_predict_cumulative_incident_function_case_successful_predict(self):
         self.fitted_model.predict_cumulative_incident_function(df=self.df.drop(['C', 'T'], axis=1))
 
+    def test_predict_full_case_successful_predict(self):
+        self.fitted_model.predict_full(df=self.df.drop(['C', 'T'], axis=1))
+
     def test_predict_marginal_prob_function_case_successful(self):
         self.fitted_model.predict_marginal_prob_event_j(df=self.df.drop(columns=['C', 'T']),
                                                         event=1)
