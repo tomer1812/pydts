@@ -127,3 +127,26 @@ and please consider starring the project [on GitHub](https://github.com/tomer181
 4. If you want to become a developer (thank you, we appreciate it!) - please contact Tomer or Rom for developers' on-boarding. 
 
 Tomer Meir: tomer1812@gmail.com, Rom Gutman: rom.gutman1@gmail.com
+
+
+## Running Tests Locally
+
+To run the test suite on your local machine, follow these steps:
+
+1. Clone the repository
+
+```bash
+git clone https://github.com/tomer1812/pydts.git
+cd pydts
+```
+
+2. Install the package in editable mode
+```bash
+pip install -e .
+```
+
+3. Run the test suite with Poetry
+```bash
+pip install poetry
+poetry run pytest
+```
