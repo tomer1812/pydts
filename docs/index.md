@@ -121,8 +121,9 @@ If you found *PyDTS* software useful to your research, please cite the papers:
 and please consider starring the project [on GitHub](https://github.com/tomer1812/pydts)
 
 ## How to Contribute
-1. Open Github issues to suggest new features or to report bugs\errors
-2. Contact Tomer or Rom if you want to add a usage example to the documentation 
-3. If you want to become a developer (thank you, we appreciate it!) - please contact Tomer or Rom for developers' on-boarding 
+1. Open Github issues to suggest new features or to report bugs\errors.
+2. Provide feedback on the documentation.
+3. Contact Tomer or Rom if you want to add a usage example to the documentation. 
+4. If you want to become a developer (thank you, we appreciate it!) - please contact Tomer or Rom for developers' on-boarding. 
 
 Tomer Meir: tomer1812@gmail.com, Rom Gutman: rom.gutman1@gmail.com
