@@ -22,7 +22,7 @@ from .examples_utils.generate_simulations_data import generate_quick_start_df
 from .utils import assert_fit
 
 COLORS = list(mcolors.TABLEAU_COLORS.keys())
-WORKERS = psutil.cpu_count(logical=False)
+# WORKERS = psutil.cpu_count(logical=False)
 
 
 # Example:
@@ -227,6 +227,8 @@ class TwoStagesFitter(ExpansionBasedFitter):
     This class implements the approach of Meir et al. (2022):
     """
 
+    WORKERS = psutil.cpu_count(logical=False)
+
     def __init__(self):
         super().__init__()
         self.alpha_df = pd.DataFrame()
@@ -413,13 +415,19 @@ class TwoStagesFitter(ExpansionBasedFitter):
         Returns:
             None
         """
-        from IPython.display import display
-        display(self.get_beta_SE())
+        try:
+            from IPython.display import display
+            display(self.get_beta_SE())
 
-        for event, model in self.event_models.items():
-            print(f'\n\nModel summary for event: {event}')
-            display(model[1].set_index([self.event_type_col, self.duration_col]))
+            for event, model in self.event_models.items():
+                print(f'\n\nModel summary for event: {event}')
+                display(model[1].set_index([self.event_type_col, self.duration_col]))
+        except:
+            print(self.get_beta_SE())
 
+            for event, model in self.event_models.items():
+                print(f'\n\nModel summary for event: {event}')
+                print(model[1].set_index([self.event_type_col, self.duration_col]))
 
     def plot_event_alpha(self, event: Union[str, int], ax: plt.Axes = None, scatter_kwargs: dict = {},
                          show=True, title=None, xlabel='t', ylabel=r'$\alpha_{jt}$', fontsize=18,

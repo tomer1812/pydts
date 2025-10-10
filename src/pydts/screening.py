@@ -7,10 +7,12 @@ from .utils import get_expanded_df
 from joblib import Parallel, delayed
 
 
-WORKERS = psutil.cpu_count(logical=False)
+# WORKERS = psutil.cpu_count(logical=False)
 
 
 class MarginalTwoStagesFitter(TwoStagesFitter):
+
+    WORKERS = psutil.cpu_count(logical=False)
 
     def fit(self,
             expanded_df: pd.DataFrame,
@@ -59,6 +61,8 @@ class MarginalTwoStagesFitter(TwoStagesFitter):
 
 
 class MarginalTwoStagesFitterExact(TwoStagesFitterExact):
+
+    WORKERS = psutil.cpu_count(logical=False)
 
     def fit(self,
             expanded_df: pd.DataFrame,
@@ -111,6 +115,8 @@ class BaseSISTwoStages(object):
     """
     This class implements the principled sure independence screening (PSIS) process of Zhao et al. (2012) for discrete-time data using the TwoStagesFitter and data-driven threshold.
     """
+
+    WORKERS = psutil.cpu_count(logical=False)
 
     def __init__(self):
         self.threshold = None

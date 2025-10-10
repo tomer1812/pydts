@@ -17,13 +17,15 @@ from .evaluation import events_brier_score_at_t, events_integrated_brier_score, 
 from .model_selection import PenaltyGridSearch, PenaltyGridSearchExact
 from time import time
 
-WORKERS = psutil.cpu_count(logical=False)
+# WORKERS = psutil.cpu_count(logical=False)
 
 
 class BaseTwoStagesCV(object):
     """
     This class implements K-fold cross-validation using TwoStagesFitters and TwoStagesFittersExact
     """
+
+    WORKERS = psutil.cpu_count(logical=False)
 
     def __init__(self):
         self.models = {}
@@ -139,6 +141,8 @@ class BasePenaltyGridSearchCV(object):
     """
     This class implements K-fold cross-validation of the PenaltyGridSearch
     """
+
+    WORKERS = psutil.cpu_count(logical=False)
 
     def __init__(self):
         self.folds_grids = {}
