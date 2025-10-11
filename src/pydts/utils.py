@@ -47,23 +47,10 @@ def get_expanded_df(
     result_df.drop(index=result_df.loc[~result_df[duration_col].isin(unique_times)].index, inplace=True)
     result_df.reset_index(drop=True, inplace=True)
     last_idx = result_df.drop_duplicates(subset=[pid_col], keep='last').index
-    # events = sorted(df[event_type_col].unique())
-    # result_df.loc[last_idx, [f'j_{e}' for e in events]] = pd.get_dummies(
-    #     result_df.loc[last_idx, event_type_col]).values
-    # result_df[[f'j_{e}' for e in events]] = result_df[[f'j_{e}' for e in events]].fillna(0)
     events = sorted(df[event_type_col].unique())
-    j_cols = [f'j_{e}' for e in events]
-
-    dummies = pd.get_dummies(
-        result_df.loc[last_idx, event_type_col].astype(
-            pd.CategoricalDtype(categories=events, ordered=True)
-        ),
-        dtype=int
-    )
-    dummies.columns = [f'j_{c}' for c in dummies.columns]
-    dummies = dummies.reindex(columns=j_cols, fill_value=0)
-
-    result_df.loc[last_idx, j_cols] = dummies
+    result_df.loc[last_idx, [f'j_{e}' for e in events]] = pd.get_dummies(
+        result_df.loc[last_idx, event_type_col]).values
+    result_df[[f'j_{e}' for e in events]] = result_df[[f'j_{e}' for e in events]].fillna(0)
     result_df[f'j_0'] = 1 - result_df[[f'j_{e}' for e in events if e > 0]].sum(axis=1)
     return result_df
 
