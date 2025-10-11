@@ -6,11 +6,13 @@ from matplotlib import pyplot as plt
 import matplotlib.gridspec as gridspec
 import seaborn as sns
 from lifelines import KaplanMeierFitter
+from ..evaluation import *
 from ..config import *
 import os
 import string
 import warnings
 warnings.filterwarnings('ignore')
+from .mimic_consts import *
 
 
 def add_panel_text(ax, text, xplace=-0.15, fsz=17):
@@ -773,3 +775,284 @@ def plot_sampled_covariates_figure(observations_df, fname, show=True):
     fig.savefig(fname, dpi=300)
     if show:
         plt.show()
+
+
+def create_mimic_analysis_results(fitters_table, n_splits, penalizers, penalty_cv_search, chosen_eta,
+                                  lee_fitter, new_fitter, reg_fitter):
+    slicer = pd.IndexSlice
+    filename = 'mimic_summary_.png'
+    case = f'mimic_final_'
+
+    lee_alpha_ser = lee_fitter.get_alpha_df().loc[:, slicer[:, [COEF_COL, STDERR_COL]]].unstack().sort_index()
+    lee_beta_ser = lee_fitter.get_beta_SE().loc[:, slicer[:, [COEF_COL, STDERR_COL]]].unstack().sort_index()
+
+    two_step_alpha_k_results = new_fitter.alpha_df[['J', 'X', 'alpha_jt']]
+    two_step_beta_k_results = new_fitter.get_beta_SE().unstack().to_frame()
+
+    reg_two_step_alpha_k_results = reg_fitter.alpha_df[['J', 'X', 'alpha_jt']]
+    reg_two_step_beta_k_results = reg_fitter.get_beta_SE().unstack().to_frame()
+
+    lee_alpha_k_results = lee_alpha_ser.to_frame()
+    lee_beta_k_results = lee_beta_ser.to_frame()
+
+    # Cache results
+    two_step_alpha_k_results.to_csv(os.path.join(OUTPUT_DIR, f'{case}_two_step_alpha.csv'))
+    two_step_beta_k_results.to_csv(os.path.join(OUTPUT_DIR, f'{case}_two_step_beta.csv'))
+    reg_two_step_alpha_k_results.to_csv(os.path.join(OUTPUT_DIR, f'{case}_reg_two_step_alpha.csv'))
+    reg_two_step_beta_k_results.to_csv(os.path.join(OUTPUT_DIR, f'{case}_reg_two_step_beta.csv'))
+    lee_alpha_k_results.to_csv(os.path.join(OUTPUT_DIR, f'{case}_lee_alpha.csv'))
+    lee_beta_k_results.to_csv(os.path.join(OUTPUT_DIR, f'{case}_lee_beta.csv'))
+
+    covariates = [c for c in fitters_table.columns if c not in ['pid', 'J', 'X']]
+
+    two_step_alpha_k_results = pd.read_csv(os.path.join(OUTPUT_DIR, f'{case}_two_step_alpha.csv'),
+                                           index_col=['J', 'X'])
+    two_step_beta_k_results = pd.read_csv(os.path.join(OUTPUT_DIR, f'{case}_two_step_beta.csv'),
+                                          index_col=[0, 1])
+    reg_two_step_alpha_k_results = pd.read_csv(os.path.join(OUTPUT_DIR, f'{case}_reg_two_step_alpha.csv'),
+                                               index_col=['J', 'X'])
+    reg_two_step_beta_k_results = pd.read_csv(os.path.join(OUTPUT_DIR, f'{case}_reg_two_step_beta.csv'),
+                                              index_col=[0, 1])
+    lee_alpha_k_results = pd.read_csv(os.path.join(OUTPUT_DIR, f'{case}_lee_alpha.csv'),
+                                      index_col=[0, 1, 2])
+    lee_beta_k_results = pd.read_csv(os.path.join(OUTPUT_DIR, f'{case}_lee_beta.csv'),
+                                     index_col=[0, 1, 2])
+
+    twostep_beta1_summary = two_step_beta_k_results.mean(axis=1).unstack([0]).round(3).iloc[:, [1, 0]]
+    twostep_beta1_summary.index = [f'{iii.replace(" ", "")}_1' for iii in twostep_beta1_summary.index]
+    twostep_beta2_summary = two_step_beta_k_results.mean(axis=1).unstack([0]).round(3).iloc[:, [3, 2]]
+    twostep_beta2_summary.index = [f'{iii.replace(" ", "")}_2' for iii in twostep_beta2_summary.index]
+    twostep_beta3_summary = two_step_beta_k_results.mean(axis=1).unstack([0]).round(3).iloc[:, [5, 4]]
+    twostep_beta3_summary.index = [f'{iii.replace(" ", "")}_3' for iii in twostep_beta3_summary.index]
+
+    reg_twostep_beta1_summary = reg_two_step_beta_k_results.mean(axis=1).unstack([0]).round(3).iloc[:, [1, 0]]
+    reg_twostep_beta1_summary.index = [f'{iii.replace(" ", "")}_1' for iii in reg_twostep_beta1_summary.index]
+    reg_twostep_beta2_summary = reg_two_step_beta_k_results.mean(axis=1).unstack([0]).round(3).iloc[:, [3, 2]]
+    reg_twostep_beta2_summary.index = [f'{iii.replace(" ", "")}_2' for iii in reg_twostep_beta2_summary.index]
+    reg_twostep_beta3_summary = reg_two_step_beta_k_results.mean(axis=1).unstack([0]).round(3).iloc[:, [5, 4]]
+    reg_twostep_beta3_summary.index = [f'{iii.replace(" ", "")}_3' for iii in reg_twostep_beta3_summary.index]
+
+    lee_beta1_summary = lee_beta_k_results.mean(axis=1).loc[slicer[1, :, :]].unstack([0]).round(3)
+    lee_beta1_summary.index = [f'{iii.replace(" ", "")}_1' for iii in lee_beta1_summary.index]
+    lee_beta2_summary = lee_beta_k_results.mean(axis=1).loc[slicer[2, :, :]].unstack([0]).round(3)
+    lee_beta2_summary.index = [f'{iii.replace(" ", "")}_2' for iii in lee_beta2_summary.index]
+    lee_beta3_summary = lee_beta_k_results.mean(axis=1).loc[slicer[3, :, :]].unstack([0]).round(3)
+    lee_beta3_summary.index = [f'{iii.replace(" ", "")}_3' for iii in lee_beta3_summary.index]
+
+    lee_beta1_summary.columns = pd.MultiIndex.from_tuples([('Lee et al.', 'Estimate'), ('Lee et al.', 'SE')])
+    lee_beta2_summary.columns = pd.MultiIndex.from_tuples([('Lee et al.', 'Estimate'), ('Lee et al.', 'SE')])
+    lee_beta3_summary.columns = pd.MultiIndex.from_tuples([('Lee et al.', 'Estimate'), ('Lee et al.', 'SE')])
+
+    beta_summary_comparison = pd.concat([lee_beta1_summary, lee_beta2_summary, lee_beta3_summary], axis=0)
+
+    twostep_beta1_summary.columns = pd.MultiIndex.from_tuples([('Two-Step', 'Estimate'), ('Two-Step', 'SE')])
+    twostep_beta2_summary.columns = pd.MultiIndex.from_tuples([('Two-Step', 'Estimate'), ('Two-Step', 'SE')])
+    twostep_beta3_summary.columns = pd.MultiIndex.from_tuples([('Two-Step', 'Estimate'), ('Two-Step', 'SE')])
+
+    reg_twostep_beta1_summary.columns = pd.MultiIndex.from_tuples(
+        [('Two-Step & LASSO', 'Estimate'), ('Two-Step & LASSO', 'SE')])
+    reg_twostep_beta2_summary.columns = pd.MultiIndex.from_tuples(
+        [('Two-Step & LASSO', 'Estimate'), ('Two-Step & LASSO', 'SE')])
+    reg_twostep_beta3_summary.columns = pd.MultiIndex.from_tuples(
+        [('Two-Step & LASSO', 'Estimate'), ('Two-Step & LASSO', 'SE')])
+
+    tmp = pd.concat([twostep_beta1_summary.round(3), twostep_beta2_summary.round(3), twostep_beta3_summary.round(3)],
+                    axis=0)
+    tmp2 = pd.concat(
+        [reg_twostep_beta1_summary.round(3), reg_twostep_beta2_summary.round(3), reg_twostep_beta3_summary.round(3)],
+        axis=0)
+
+    beta_summary_comparison = pd.concat([beta_summary_comparison, tmp, tmp2], axis=1)
+    beta_summary_comparison.index.name = r'$\beta_{jk}$'
+    beta_summary_comparison.index = [c.replace("_", " ") for c in beta_summary_comparison.index]
+
+    beta_summary_comparison[('Lee et al.', 'Estimate (SE)')] = ['{:.3f} ({:.3f})'.format(x, y) for x, y in
+                                                                beta_summary_comparison[[('Lee et al.', 'Estimate'),
+                                                                                         ('Lee et al.', 'SE')]].values]
+    beta_summary_comparison[('Two-Step', 'Estimate (SE)')] = ['{:.3f} ({:.3f})'.format(x, y) for x, y in
+                                                              beta_summary_comparison[
+                                                                  [('Two-Step', 'Estimate'), ('Two-Step', 'SE')]].values]
+    beta_summary_comparison[('Two-Step & LASSO', 'Estimate (SE)')] = ['{:.3f} ({:.3f})'.format(x, y) for x, y in
+                                                                      beta_summary_comparison[
+                                                                          [('Two-Step & LASSO', 'Estimate'),
+                                                                           ('Two-Step & LASSO', 'SE')]].values]
+
+    beta_summary_comparison = beta_summary_comparison[
+        [('Lee et al.', 'Estimate (SE)'), ('Two-Step', 'Estimate (SE)'), ('Two-Step & LASSO', 'Estimate (SE)')]]
+
+    risk1_rename_index_dict = {k + f' 1': v for k, v in rename_beta_index.items()}
+    risk1 = beta_summary_comparison.iloc[:int(len(beta_summary_comparison) // 3)].rename(risk1_rename_index_dict,
+                                                                                         axis=0).sort_index()
+    risk1 = risk1.merge(pd.Series(beta_units, name=('', '')), left_index=True, right_index=True, how='outer').sort_index(
+        axis=1)
+
+    risk2_rename_index_dict = {k + f' 2': v for k, v in rename_beta_index.items()}
+    risk2 = beta_summary_comparison.iloc[
+            int(len(beta_summary_comparison) // 3):2 * (int(len(beta_summary_comparison) // 3))].rename(
+        risk2_rename_index_dict, axis=0).sort_index()
+    risk2 = risk2.merge(pd.Series(beta_units, name=('', '')), left_index=True, right_index=True, how='outer').sort_index(
+        axis=1)
+
+    risk3_rename_index_dict = {k + f' 3': v for k, v in rename_beta_index.items()}
+    risk3 = beta_summary_comparison.iloc[2 * int(len(beta_summary_comparison) // 3):].rename(risk3_rename_index_dict,
+                                                                                             axis=0).sort_index()
+    risk3 = risk3.merge(pd.Series(beta_units, name=('', '')), left_index=True, right_index=True, how='outer').sort_index(
+        axis=1)
+
+    ADMINISTRATIVE_CENSORING = 28
+
+    first_model_name = 'Lee et al.'
+    second_model_name = 'two-step'
+    times = range(1, ADMINISTRATIVE_CENSORING + 1)
+
+    lee_colors = ['tab:blue', 'tab:green', 'tab:red']
+    two_step_colors = ['navy', 'darkgreen', 'tab:brown']
+    true_colors = ['tab:blue', 'tab:green', 'tab:red']
+
+    fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+
+    counts = fitters_table.groupby(['J', 'X'])['pid'].count().unstack('J').fillna(0)
+
+    two_step_alpha_k_results = pd.read_csv(os.path.join(OUTPUT_DIR, f'{case}_two_step_alpha.csv'),
+                                           index_col=['J', 'X'])
+
+    lee_alpha_k_results = pd.read_csv(os.path.join(OUTPUT_DIR, f'{case}_lee_alpha.csv'),
+                                      index_col=[0, 1, 2])
+
+    ax.tick_params(axis='both', which='major', labelsize=15)
+    ax.tick_params(axis='both', which='minor', labelsize=15)
+
+    for j in [1, 2, 3]:
+        tmp_alpha = lee_alpha_k_results.loc[slicer[j, COEF_COL, :]].mean(axis=1)
+        tmp_alpha.index = [int(idx.split(')[')[1].split(']')[0]) for idx in tmp_alpha.index]
+        tmp_alpha = pd.Series(tmp_alpha.values.squeeze().astype(float), index=tmp_alpha.index)
+
+        ax.scatter(tmp_alpha.index, tmp_alpha.values,
+                   label=f'J={j} ({first_model_name})', color=lee_colors[j - 1], marker='o', alpha=0.4, s=40)
+
+        tmp_alpha = two_step_alpha_k_results.loc[slicer[j, 'alpha_jt']]
+        ax.scatter(tmp_alpha.index, tmp_alpha.values,
+                   label=f'J={j} ({second_model_name})', color=two_step_colors[j - 1], marker='*', alpha=0.7, s=20)
+
+        ax.set_xlabel(r'Time', fontsize=18)
+        ax.set_ylabel(r'$\alpha_{jt}$', fontsize=18)
+        ax.legend(loc='upper right', fontsize=12)
+
+    ax.set_ylim([-13, 3])
+
+    ax2 = ax.twinx()
+    ax2.bar(counts.index, counts[1].values.squeeze(), label='J=1', color='navy', alpha=0.4, width=0.4)
+    ax2.bar(counts.index, counts[2].values.squeeze(), label='J=2', color='darkgreen', alpha=0.4, align='edge',
+            width=0.4)
+    ax2.bar(counts.index, counts[3].values.squeeze(), label='J=3', color='tab:red', alpha=0.6, align='edge',
+            width=-0.4)
+    ax2.legend(loc='upper center', fontsize=12)
+    ax2.set_ylabel('Number of observed events', fontsize=16, color='red')
+    ax2.tick_params(axis='y', colors='red')
+    ax2.set_ylim([0, 8000])
+    ax2.tick_params(axis='both', which='major', labelsize=15)
+    ax2.tick_params(axis='both', which='minor', labelsize=15)
+
+    fig.tight_layout()
+
+
+
+    ticksize = 15
+    axes_title_fontsize = 17
+    legend_size = 13
+
+    chosen_auc_df = pd.DataFrame()
+    for i_fold in range(n_splits):
+        mixed_two_step = penalty_cv_search.folds_grids[i_fold].get_mixed_two_stages_fitter(np.exp(chosen_eta))
+        test_df = fitters_table[fitters_table['pid'].isin(penalty_cv_search.test_pids[i_fold])]
+        pred_df = mixed_two_step.predict_prob_events(test_df)
+        auc_t = events_auc_at_t(pred_df)
+        chosen_auc_df = pd.concat([chosen_auc_df, pd.concat([auc_t], keys=[i_fold])])
+
+    risk_names = ['Home', 'Further Treatment', 'Death']
+    risk_colors = ['tab:blue', 'tab:green', 'tab:red']
+    abc_letters = ['a', 'b', 'c']
+    def_letters = ['d', 'e', 'f']
+    ghi_letters = ['g', 'h', 'i']
+
+    fig, axes = plt.subplots(3, 3, figsize=(20, 17))
+
+    for risk in [1, 2, 3]:
+        nonzero_count = pd.DataFrame(index=list(range(n_splits)), columns=penalizers)
+        for idp, penalizer in enumerate(penalizers):
+
+            tmp_j1_params_df = pd.DataFrame()
+            for i_fold in range(n_splits):
+                params_ser = penalty_cv_search.folds_grids[i_fold].meta_models[np.exp(penalizer)].beta_models[risk].params_
+                nonzero_count.loc[i_fold, penalizer] = (params_ser.round(3).abs() > 0).sum()
+                tmp_j1_params_df = pd.concat([tmp_j1_params_df, params_ser], axis=1)
+
+            ser_1 = tmp_j1_params_df.mean(axis=1)
+            ser_1.name = penalizer
+
+            if idp == 0:
+                j1_params_df = ser_1.to_frame()
+            else:
+                j1_params_df = pd.concat([j1_params_df, ser_1], axis=1)
+
+        ax = axes[0, risk - 1]
+        add_panel_text(ax, abc_letters[risk - 1])
+        ax.tick_params(axis='both', which='major', labelsize=ticksize)
+        ax.tick_params(axis='both', which='minor', labelsize=ticksize)
+        ax.set_xlabel(fr'Log ($\eta_{risk}$)', fontsize=axes_title_fontsize)
+        ax.set_ylabel(f'Number of Non-Zero Coefficients', fontsize=axes_title_fontsize)
+        ax.set_title(rf'$\beta_{risk}$ - {risk_names[risk - 1]}', fontsize=axes_title_fontsize)
+        ax.axvline(chosen_eta[risk - 1], color=risk_colors[risk - 1], alpha=1, ls='--', lw=1,
+                   label=rf'Chosen $Log (\eta_{risk})$')
+        ax.set_ylim([0, 40])
+
+        for idp, penalizer in enumerate(penalizers):
+
+            count = nonzero_count[penalizer].mean()
+            if idp == 0:
+                ax.scatter(penalizer, count, color=risk_colors[risk - 1], alpha=0.8, marker='P', label=f'4-Fold mean')
+            else:
+                ax.scatter(penalizer, count, color=risk_colors[risk - 1], alpha=0.8, marker='P')
+            if penalizer == chosen_eta[risk - 1]:
+                print(f"Risk {risk}: {count} non-zero coefficients at chosen eta {chosen_eta[risk - 1]}")
+
+        ax.legend(fontsize=legend_size)
+
+        ax = axes[1, risk - 1]
+        add_panel_text(ax, def_letters[risk - 1])
+        ax.tick_params(axis='both', which='major', labelsize=ticksize)
+        ax.tick_params(axis='both', which='minor', labelsize=ticksize)
+        for i in range(len(j1_params_df)):
+            ax.plot(penalizers, j1_params_df.iloc[i].values, lw=1)
+
+            if i == 0:
+                ax.set_ylabel(f'{n_splits}-Fold Mean Coefficient Value', fontsize=axes_title_fontsize)
+                ax.set_xlabel(fr'Log ($\eta_{risk}$)', fontsize=axes_title_fontsize)
+                ax.set_title(rf'$\beta_{risk}$ - {risk_names[risk - 1]}', fontsize=axes_title_fontsize)
+                ax.axvline(chosen_eta[risk - 1], color=risk_colors[risk - 1], alpha=1, ls='--', lw=1)
+
+        ax = axes[2, risk - 1]
+        add_panel_text(ax, ghi_letters[risk - 1])
+        ax.tick_params(axis='both', which='major', labelsize=ticksize)
+        ax.tick_params(axis='both', which='minor', labelsize=ticksize)
+        mean_auc = chosen_auc_df.loc[slicer[:, risk], :].mean(axis=0)
+        std_auc = chosen_auc_df.loc[slicer[:, risk], :].std(axis=0)
+        ax.errorbar(mean_auc.index, mean_auc.values, yerr=std_auc.values, fmt="o", color=risk_colors[risk - 1], alpha=0.8)
+        ax.set_yticks(np.arange(0, 1.1, 0.1))
+        ax.set_yticklabels([c.round(1) for c in np.arange(0, 1.1, 0.1)])
+        ax.set_xlabel(r'Time', fontsize=axes_title_fontsize)
+        ax.set_ylabel(f'AUC (t)', fontsize=axes_title_fontsize)
+        ax.set_title(fr'{risk_names[risk - 1]}, Log ($\eta_{risk}$) = {chosen_eta[risk - 1]}', fontsize=axes_title_fontsize)
+        ax.set_ylim([0, 1])
+        ax.axhline(0.5, ls='--', color='k', alpha=0.3)
+        ax2 = ax.twinx()
+        ax2.bar(counts.index, counts[risk].values.squeeze(), color=risk_colors[risk - 1], alpha=0.8, width=0.4)
+        ax2.set_ylabel('Number of observed events', fontsize=axes_title_fontsize, color=risk_colors[risk - 1])
+        ax2.tick_params(axis='y', colors=risk_colors[risk - 1])
+        ax2.set_ylim([0, 5100])
+        ax2.tick_params(axis='both', which='major', labelsize=ticksize)
+        ax2.tick_params(axis='both', which='minor', labelsize=ticksize)
+
+    fig.tight_layout()
+
+    return risk1, risk2, risk3
