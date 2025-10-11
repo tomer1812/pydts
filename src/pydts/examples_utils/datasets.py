@@ -270,7 +270,7 @@ def get_mimic_df(mimic_data_dir, return_table1=False, chunksize=10 ** 6, minimum
                    'admissions_count_group', 'discharge_location']
     categorical = [table1_rename_columns[c] for c in categorical]
     table1.dropna(inplace=True)
-    groupby = [table1_rename_columns[DISCHARGE_LOCATION_COL]]
+    groupby = table1_rename_columns[DISCHARGE_LOCATION_COL]
 
     if return_table1:
         ensure_package("tableone")
@@ -290,7 +290,7 @@ def get_mimic_df(mimic_data_dir, return_table1=False, chunksize=10 ** 6, minimum
                    'PlateletCount', 'RDW', 'RedBloodCells', 'WhiteBloodCells']
     columns = [table1_rename_columns[c] for c in columns]
     categorical = [table1_rename_columns[c] for c in categorical]
-    groupby = [table1_rename_columns[DISCHARGE_LOCATION_COL]]
+    groupby = table1_rename_columns[DISCHARGE_LOCATION_COL]
 
     if return_table1:
         mytable = TableOne(table1.dropna().replace(table1_rename_normal_abnormal), columns=columns, categorical=categorical, groupby=groupby,
