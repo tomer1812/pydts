@@ -275,7 +275,7 @@ def get_mimic_df(mimic_data_dir, return_table1=False, chunksize=10 ** 6, minimum
     if return_table1:
         ensure_package("tableone")
         from tableone import TableOne
-        mytable = TableOne(table1, columns, categorical, groupby, missing=False)
+        mytable = TableOne(table1, columns=columns, categorical=categorical, groupby=groupby, missing=False)
         # Patients' characteristics
         # print(mytable.tableone.round(3).to_latex())
         characteristics_table1 = mytable.tableone.round(3).copy()
@@ -293,7 +293,7 @@ def get_mimic_df(mimic_data_dir, return_table1=False, chunksize=10 ** 6, minimum
     groupby = [table1_rename_columns[DISCHARGE_LOCATION_COL]]
 
     if return_table1:
-        mytable = TableOne(table1.dropna().replace(table1_rename_normal_abnormal), columns, categorical, groupby,
+        mytable = TableOne(table1.dropna().replace(table1_rename_normal_abnormal), columns=columns, categorical=categorical, groupby=groupby,
                            missing=False)
 
         # Patients' lab tests
