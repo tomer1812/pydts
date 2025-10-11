@@ -303,10 +303,10 @@ def get_mimic_df(mimic_data_dir, return_table1=False, chunksize=10 ** 6, minimum
     # %%
     fitters_table = pd.concat([
         fitters_table.copy(),
-        pd.get_dummies(dummies_df[INSURANCE_COL], prefix='Insurance', drop_first=True),
-        pd.get_dummies(dummies_df[MARITAL_STATUS_COL], prefix='Marital', drop_first=True),
-        pd.get_dummies(dummies_df[RACE_COL], prefix='Ethnicity', drop_first=True),
-        pd.get_dummies(dummies_df[ADMISSION_COUNT_GROUP_COL], prefix='AdmsCount', drop_first=True),
+        pd.get_dummies(dummies_df[INSURANCE_COL], prefix='Insurance', drop_first=True, dtype=int),
+        pd.get_dummies(dummies_df[MARITAL_STATUS_COL], prefix='Marital', drop_first=True, dtype=int),
+        pd.get_dummies(dummies_df[RACE_COL], prefix='Ethnicity', drop_first=True, dtype=int),
+        pd.get_dummies(dummies_df[ADMISSION_COUNT_GROUP_COL], prefix='AdmsCount', drop_first=True, dtype=int),
         dummies_df[[NIGHT_ADMISSION_FLAG,
                     GENDER_COL,
                     DIRECT_IND_COL,
