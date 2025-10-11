@@ -49,7 +49,7 @@ def get_expanded_df(
     last_idx = result_df.drop_duplicates(subset=[pid_col], keep='last').index
     events = sorted(df[event_type_col].unique())
     result_df.loc[last_idx, [f'j_{e}' for e in events]] = pd.get_dummies(
-        result_df.loc[last_idx, event_type_col]).values
+        result_df.loc[last_idx, event_type_col], dtype=int).values
     result_df[[f'j_{e}' for e in events]] = result_df[[f'j_{e}' for e in events]].fillna(0)
     result_df[f'j_0'] = 1 - result_df[[f'j_{e}' for e in events if e > 0]].sum(axis=1)
     return result_df
