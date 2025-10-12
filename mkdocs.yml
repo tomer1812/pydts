@@ -76,6 +76,7 @@ nav:
       - Small Sample Size Example: UsageExample-FittingTwoStagesFitterExact-FULL.ipynb
       - Screening Example: UsageExample-SIS-SIS-L.ipynb
       - Hospitalization LOS Simulation: SimulatedDataset.ipynb
+      - MIMIC Example Summary: JOSS_mimic_example.ipynb
     - API:
       - The Two Stages Procedure of Meir and Gorfine (2023) - Efron: 'api/two_stages_fitter.md'
       - The Two Stages Procedure of Meir and Gorfine (2023) - Exact: 'api/two_stages_fitter_exact.md'
