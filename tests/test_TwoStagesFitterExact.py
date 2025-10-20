@@ -33,11 +33,6 @@ class TestTwoStagesFitterExact(unittest.TestCase):
 
     def test_fit_case_event_col_not_in_df(self):
         # Event column (here 'J') must be passed in df to .fit()
-        print(self.fitted_model.get_beta_SE())
-
-
-    def test_fit_case_event_col_not_in_df(self):
-        # Event column (here 'J') must be passed in df to .fit()
         with self.assertRaises(AssertionError):
             self.m.fit(df=self.df.drop(['C', 'J', 'T'], axis=1))
 
@@ -69,9 +64,25 @@ class TestTwoStagesFitterExact(unittest.TestCase):
             self.m.fit(df=tmp_df.drop(['C', 'T'], axis=1))
 
     def test_fit_case_correct_fit(self):
-        # Fit should be successful
+        # Fit should be successful and produce valid models
         m = TwoStagesFitterExact()
         m.fit(df=self.df.drop(['C', 'T'], axis=1))
+        
+        # Validate that fitting produced expected attributes
+        self.assertEqual(m.events, [1, 2])
+        self.assertEqual(m.times, [1, 2, 3, 4, 5])
+        self.assertEqual(m.covariates, ['Z1', 'Z2', 'Z3', 'Z4', 'Z5'])
+        self.assertEqual(len(m.alpha_df), len(m.events)*len(m.times[:-1]))
+        self.assertTrue((m.alpha_df['success'] == True).all())
+        self.assertTrue((m.alpha_df['alpha_jt'].min() > -1.3))
+        self.assertTrue((m.alpha_df['alpha_jt'].max() < 0.3))
+        self.assertIsNotNone(m.beta_models)
+        coef1 = m.get_beta_SE()[(1, '   coef   ')].astype(float)
+        coef2 = m.get_beta_SE()[(2, '   coef   ')].astype(float)
+        self.assertTrue((coef1.min() > -1.1))
+        self.assertTrue((coef1.max() < 0.2))
+        self.assertTrue((coef2.min() > -1.1))
+        self.assertTrue((coef2.max() < 0.5))
 
     def test_print_summary(self):
         self.fitted_model.print_summary()
@@ -99,21 +110,32 @@ class TestTwoStagesFitterExact(unittest.TestCase):
         self.fitted_model.plot_all_events_alpha(show=False, ax=ax)
 
     def test_get_beta_SE(self):
-        self.fitted_model.get_beta_SE()
+        result = self.fitted_model.get_beta_SE()
+        
+        # Validate output structure and content
+        self.assertIsInstance(result, pd.DataFrame)
+        self.assertFalse(result.empty)
+        self.assertEqual(len(result), 5)  # Should have 5 covariates
+        
+        # Check that we have columns for both events (structure may vary)
+        if hasattr(result.columns, 'levels'):
+            # MultiIndex columns case
+            self.assertEqual(len(result.columns.levels[0]), 2)  # Should have 2 events
+        else:
+            # Regular columns case - should have at least some columns
+            self.assertGreater(len(result.columns), 0)
+        
+        # Check that all values are numeric and finite
+        numeric_data = result.select_dtypes(include=[np.number])
+        self.assertTrue(numeric_data.notna().all().all())
+        self.assertTrue(np.isfinite(numeric_data).all().all())
 
     def test_get_alpha_df(self):
-        self.fitted_model.get_alpha_df()
-
-    # def test_plot_all_events_beta(self):
-    #     self.fitted_model.plot_all_events_beta(show=False)
-    #
-    # def test_plot_all_events_beta_case_show(self):
-    #     with patch('matplotlib.pyplot.show') as p:
-    #         self.fitted_model.plot_all_events_beta(show=True)
-    #
-    # def test_plot_all_events_beta_case_ax_exists(self):
-    #     fig, ax = plt.subplots()
-    #     self.fitted_model.plot_all_events_beta(show=False, ax=ax)
+        result = self.fitted_model.get_alpha_df()
+        
+        # Validate output structure
+        self.assertIsInstance(result, pd.DataFrame)
+        self.assertFalse(result.empty)
 
     def test_predict_hazard_jt_case_covariate_not_in_df(self):
         # Covariates columns used in fit (here ['Z1','Z2','Z3','Z4','Z5']) must be passed in df to .predict()
@@ -155,38 +177,55 @@ class TestTwoStagesFitterExact(unittest.TestCase):
                 df=self.df.drop(['C', 'T'], axis=1), event=self.fitted_model.events[0], t=1000)
 
     def test_predict_hazard_jt_case_successful_predict(self):
-        self.fitted_model.predict_hazard_jt(
+        result = self.fitted_model.predict_hazard_jt(
             df=self.df.drop(['C', 'T'], axis=1),
             event=self.fitted_model.events[0], t=self.fitted_model.times[0])
+        
+        self.assertIsInstance(result, pd.DataFrame)
+        self.assertFalse(result.empty)
+        self.assertEqual(len(result), len(self.df))
+        self.assertTrue(result['hazard_j1_t1'].between(0, 1, inclusive='both').all())
 
     def test_predict_hazard_t_case_successful_predict(self):
         self.fitted_model.predict_hazard_t(df=self.df.drop(['C', 'T'], axis=1), t=self.fitted_model.times[:3])
 
     def test_predict_hazard_all_case_successful_predict(self):
-        self.fitted_model.predict_hazard_all(df=self.df.drop(['C', 'T'], axis=1))
+        result = self.fitted_model.predict_hazard_all(df=self.df.drop(['C', 'T'], axis=1))
+        for event in [1, 2]:
+            for time in [1, 2, 3, 4]:
+                self.assertTrue(result[f"hazard_j{event}_t{time}"].between(0, 1, inclusive='both').all())
 
     def test_predict_overall_survival_case_successful_predict(self):
-        self.fitted_model.predict_overall_survival(
+        result = self.fitted_model.predict_overall_survival(
             df=self.df.drop(['C', 'T'], axis=1), t=self.fitted_model.times[3], return_hazards=True)
+        for time in [1, 2, 3, 4]:
+            self.assertTrue(result[f"overall_survival_t{time}"].between(0, 1, inclusive='both').all())
 
     def test_predict_prob_event_j_at_t_case_successful_predict(self):
         self.fitted_model.predict_prob_event_j_at_t(df=self.df.drop(['C', 'T'], axis=1),
                                                     event=self.fitted_model.events[0],
                                                     t=self.fitted_model.times[3])
 
+
     def test_predict_prob_event_j_all_case_successful_predict(self):
         self.fitted_model.predict_prob_event_j_all(df=self.df.drop(['C', 'T'], axis=1),
                                                    event=self.fitted_model.events[0])
 
     def test_predict_prob_events_case_successful_predict(self):
-        self.fitted_model.predict_prob_events(df=self.df.drop(['C', 'T'], axis=1))
+        result = self.fitted_model.predict_prob_events(df=self.df.drop(['C', 'T'], axis=1))
+        for event in [1, 2]:
+            for time in [1, 2, 3, 4]:
+                self.assertTrue(result[f"prob_j{event}_at_t{time}"].between(0, 1, inclusive='both').all())
 
     def test_predict_event_cumulative_incident_function_case_successful_predict(self):
         self.fitted_model.predict_event_cumulative_incident_function(df=self.df.drop(['C', 'T'], axis=1),
                                                                      event=self.fitted_model.events[0])
 
     def test_predict_cumulative_incident_function_case_successful_predict(self):
-        self.fitted_model.predict_cumulative_incident_function(df=self.df.drop(['C', 'T'], axis=1))
+        result = self.fitted_model.predict_cumulative_incident_function(df=self.df.drop(['C', 'T'], axis=1))
+        for event in [1, 2]:
+            for time in [1, 2, 3, 4]:
+                self.assertTrue(result[f"cif_j{event}_at_t{time}"].between(0, 1, inclusive='both').all())
 
     def test_predict_full_case_successful_predict(self):
         self.fitted_model.predict_full(df=self.df.drop(['C', 'T'], axis=1))
