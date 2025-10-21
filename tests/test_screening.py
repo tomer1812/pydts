@@ -54,24 +54,120 @@ class TestScreening(unittest.TestCase):
         self.fitter = SISTwoStagesFitter()
 
     def test_psis_permute_df(self):
-        self.fitter.permute_df(df=self.patients_df)
+        result = self.fitter.permute_df(df=self.patients_df)
+        
+        # Validate output structure
+        self.assertIsInstance(result, pd.DataFrame)
+        self.assertEqual(len(result), len(self.patients_df))
+        self.assertEqual(set(result.columns), set(self.patients_df.columns))
+        
+        # Check that permutation actually changed the data (with high probability)
+        # At least some rows should be different after permutation
+        different_rows = (result != self.patients_df).any(axis=1).sum()
+        self.assertGreater(different_rows, len(self.patients_df) * 0.5)  # At least 50% should be different
 
     def test_psis_fit_marginal_model(self):
         expanded_df = get_expanded_df(self.patients_df.drop(['C', 'T'], axis=1))
-        self.fitter.fit_marginal_model(expanded_df, covariate='Z1')
+        result = self.fitter.fit_marginal_model(expanded_df, covariate='Z1')
+        
+        # Validate that marginal model returns beta estimates DataFrame
+        self.assertIsInstance(result, pd.DataFrame)
+        self.assertFalse(result.empty)
+        
+        # Should have one row for the single covariate 'Z1'
+        self.assertEqual(len(result), 1)
+        self.assertIn('Z1', result.index)
+        
+        # Check that we have columns for both events (structure may vary)
+        if hasattr(result.columns, 'levels'):
+            # MultiIndex columns case
+            self.assertEqual(len(result.columns.levels[0]), 2)  # Should have 2 events
+        else:
+            # Regular columns case - should have at least some columns
+            self.assertGreater(len(result.columns), 0)
+        
+        # Check that all values are numeric and finite
+        numeric_data = result.select_dtypes(include=[np.number])
+        if not numeric_data.empty:
+            self.assertTrue(numeric_data.notna().all().all())
+            self.assertTrue(np.isfinite(numeric_data).all().all())
 
     def test_psis_get_marginal_estimates(self):
         expanded_df = get_expanded_df(self.patients_df.drop(['C', 'T'], axis=1))
-        self.fitter.get_marginal_estimates(expanded_df)
+        result = self.fitter.get_marginal_estimates(expanded_df)
+        
+        # Validate output structure
+        self.assertIsInstance(result, pd.DataFrame)
+        self.assertFalse(result.empty)
+        
+        # Should have estimates for all covariates
+        self.assertEqual(len(result), len(self.covariates))
+        
+        # Check that estimates are numeric
+        numeric_cols = result.select_dtypes(include=[np.number]).columns
+        self.assertGreater(len(numeric_cols), 0)  # Should have at least some numeric columns
+        
+        for col in numeric_cols:
+            self.assertTrue(result[col].notna().all())
+            self.assertTrue(np.isfinite(result[col]).all())
 
     def test_psis_get_data_driven_treshold(self):
-        self.fitter.get_data_driven_threshold(df=self.patients_df.drop(['C', 'T'], axis=1))
+        result = self.fitter.get_data_driven_threshold(df=self.patients_df.drop(['C', 'T'], axis=1))
+        
+        # Validate threshold properties
+        self.assertIsInstance(result, (float, np.float64))
+        self.assertGreater(result, 0)  # Threshold should be positive
+        self.assertTrue(np.isfinite(result))
+        
+        # Check that the fitter now has null model data
+        self.assertIsInstance(self.fitter.null_model_df, pd.DataFrame)
+        self.assertFalse(self.fitter.null_model_df.empty)
+        
+        # Check that permuted data was created
+        self.assertIsInstance(self.fitter.permuted_df, pd.DataFrame)
+        self.assertEqual(len(self.fitter.permuted_df), len(self.patients_df))
 
     def test_psis_fit_data_driven_threshold(self):
-        self.fitter.fit(df=self.patients_df.drop(['C', 'T'], axis=1), quantile=0.95)
+        result = self.fitter.fit(df=self.patients_df.drop(['C', 'T'], axis=1), quantile=0.95)
+        
+        # Validate that fitting was successful and returns a fitted model
+        self.assertIsNotNone(result)
+        # The result should be a TwoStagesFitter instance
+        from src.pydts.fitters import TwoStagesFitter
+        self.assertIsInstance(result, TwoStagesFitter)
+        
+        # Check that the model has been fitted with expected attributes
+        self.assertEqual(result.events, [1, 2])  # Should have 2 events
+        self.assertEqual(result.times[:-1], list(range(1, 8, 1)))
+        
+        # Check that screening was performed
+        self.assertIsInstance(self.fitter.chosen_covariates, (list, np.ndarray))
+        
+        # Check that threshold was set
+        self.assertIsInstance(self.fitter.threshold, (float, np.float64))
+        self.assertGreater(self.fitter.threshold, 0)
+        
+        # Check that some covariates were chosen
+        self.assertGreater(len(self.fitter.chosen_covariates), 0)  # Should select at least some
 
     def test_psis_fit_user_defined_threshold(self):
-        self.fitter.fit(df=self.patients_df.drop(['C', 'T'], axis=1), threshold=0.15)
+        result = self.fitter.fit(df=self.patients_df.drop(['C', 'T'], axis=1), threshold=0.15)
+        
+        # Validate that fitting with user-defined threshold was successful
+        self.assertIsNotNone(result)
+        from src.pydts.fitters import TwoStagesFitter
+        self.assertIsInstance(result, TwoStagesFitter)
+        
+        # Check that the user-defined threshold was used
+        self.assertEqual(self.fitter.threshold, 0.15)
+        
+        # Check that screening was performed with the threshold
+        self.assertIsInstance(self.fitter.chosen_covariates, (list, np.ndarray))
+        
+        # Check that the final model was fitted
+        self.assertIsNotNone(result.covariates)
+        self.assertEqual(result.events, [1, 2])  # Should have 2 events
+        self.assertEqual(result.times[:-1], list(range(1, 8, 1)))
 
     def test_psis_covs_dict(self):
         with self.assertRaises(ValueError):
