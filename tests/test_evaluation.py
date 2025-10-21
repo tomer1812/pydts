@@ -55,7 +55,12 @@ class TestEvaluation(unittest.TestCase):
         fitter.fit(df=self.patients_df.drop(['C', 'T'], axis=1), nb_workers=1)
         pred_df = fitter.predict_prob_event_j_all(self.patients_df, event=1)
         esauc = event_specific_auc_at_t(pred_df, event=1, t=9)
-        print(esauc)
+        
+        # Validate AUC properties
+        self.assertIsInstance(esauc, (float, np.float64))
+        self.assertGreaterEqual(esauc, 0)
+        self.assertLessEqual(esauc, 1)
+        self.assertTrue(np.isfinite(esauc))
 
     def test_event_specific_auc_perfect_model(self):
         cov_df = self.patients_df[self.covariates]
@@ -68,7 +73,12 @@ class TestEvaluation(unittest.TestCase):
                                              for t in range(1, self.ets.d_times+1)])
         pred_df = pd.concat([self.patients_df, probs_j_at_t], axis=1)
         esauc = event_specific_auc_at_t(pred_df, event=event, t=9)
-        print(esauc)
+        
+        # Perfect model should have AUC better than random (0.5)
+        self.assertIsInstance(esauc, (float, np.float64))
+        self.assertGreater(esauc, 0.5)  # Should be better than random
+        self.assertLessEqual(esauc, 1.0)
+        self.assertTrue(np.isfinite(esauc))
 
     def test_event_specific_brier_score_perfect_model(self):
         cov_df = self.patients_df[self.covariates]
@@ -80,8 +90,13 @@ class TestEvaluation(unittest.TestCase):
                                     columns=[f'prob_j{event}_at_t{t}'
                                              for t in range(1, self.ets.d_times+1)])
         pred_df = pd.concat([self.patients_df, probs_j_at_t], axis=1)
-        esauc = event_specific_brier_score_at_t(pred_df, event=event, t=9)
-        print(esauc)
+        esbs = event_specific_brier_score_at_t(pred_df, event=event, t=9)
+        
+        # Perfect model should have reasonable Brier score
+        self.assertIsInstance(esbs, (float, np.float64))
+        self.assertGreaterEqual(esbs, 0)
+        self.assertLess(esbs, 0.25)  # Should be reasonable for perfect model
+        self.assertTrue(np.isfinite(esbs))
 
     def test_event_specific_auc_all_perfect_model(self):
         cov_df = self.patients_df[self.covariates]
@@ -94,7 +109,19 @@ class TestEvaluation(unittest.TestCase):
                                              for t in range(1, self.ets.d_times+1)])
         pred_df = pd.concat([self.patients_df, probs_j_at_t], axis=1)
         esauc = event_specific_auc_at_t_all(pred_df, event=event)
-        print(esauc)
+        
+        # Validate AUC all times results for perfect model
+        self.assertIsInstance(esauc, (pd.DataFrame, pd.Series, dict))
+        if isinstance(esauc, pd.Series):
+            # Should have valid AUC values
+            self.assertTrue((esauc >= 0.0).all())  # Valid AUC range
+            self.assertTrue((esauc <= 1.0).all())
+            self.assertTrue(esauc.notna().all())
+        elif isinstance(esauc, pd.DataFrame):
+            numeric_cols = esauc.select_dtypes(include=[np.number]).columns
+            for col in numeric_cols:
+                self.assertTrue((esauc[col] >= 0.0).all())  # Valid AUC range
+                self.assertTrue((esauc[col] <= 1.0).all())
 
     def test_event_specific_brier_score_all_perfect_model(self):
         cov_df = self.patients_df[self.covariates]
@@ -107,7 +134,19 @@ class TestEvaluation(unittest.TestCase):
                                              for t in range(1, self.ets.d_times+1)])
         pred_df = pd.concat([self.patients_df, probs_j_at_t], axis=1)
         esbs = event_specific_brier_score_at_t_all(pred_df, event=event)
-        print(esbs)
+        
+        # Validate Brier Score all times results for perfect model
+        self.assertIsInstance(esbs, (pd.DataFrame, pd.Series, dict))
+        if isinstance(esbs, pd.Series):
+            # Should have reasonable Brier Score values for perfect model
+            self.assertTrue((esbs >= 0).all())
+            self.assertTrue((esbs <= 0.25).all())  # Should be reasonable for perfect model
+            self.assertTrue(esbs.notna().all())
+        elif isinstance(esbs, pd.DataFrame):
+            numeric_cols = esbs.select_dtypes(include=[np.number]).columns
+            for col in numeric_cols:
+                self.assertTrue((esbs[col] >= 0).all())
+                self.assertTrue((esbs[col] <= 0.25).all())
 
     def test_event_specific_integrated_auc_perfect_model(self):
         cov_df = self.patients_df[self.covariates]
@@ -120,7 +159,12 @@ class TestEvaluation(unittest.TestCase):
                                              for t in range(1, self.ets.d_times+1)])
         pred_df = pd.concat([self.patients_df, probs_j_at_t], axis=1)
         esauc = event_specific_integrated_auc(pred_df, event=event)
-        print(esauc)
+        
+        # Validate integrated AUC for perfect model
+        self.assertIsInstance(esauc, (float, np.float64))
+        self.assertGreater(esauc, 0.5)  # Should be better than random
+        self.assertLessEqual(esauc, 1.0)
+        self.assertTrue(np.isfinite(esauc))
 
     def test_event_specific_integrated_brier_score_perfect_model(self):
         cov_df = self.patients_df[self.covariates]
@@ -133,7 +177,12 @@ class TestEvaluation(unittest.TestCase):
                                              for t in range(1, self.ets.d_times+1)])
         pred_df = pd.concat([self.patients_df, probs_j_at_t], axis=1)
         esbs = event_specific_integrated_brier_score(pred_df, event=event)
-        print(esbs)
+        
+        # Validate integrated Brier Score for perfect model
+        self.assertIsInstance(esbs, (float, np.float64))
+        self.assertGreaterEqual(esbs, 0)
+        self.assertLess(esbs, 0.25)  # Should be reasonable for perfect model
+        self.assertTrue(np.isfinite(esbs))
 
     def test_event_specific_integrated_auc_with_weights_perfect_model(self):
         cov_df = self.patients_df[self.covariates]
@@ -148,7 +197,12 @@ class TestEvaluation(unittest.TestCase):
         weights = pd.Series((1/self.ets.d_times)*np.ones(self.ets.d_times),
                             index=range(1, self.ets.d_times+1))
         esauc = event_specific_integrated_auc(pred_df, event=event, weights=weights)
-        print(esauc)
+        
+        # Validate weighted integrated AUC for perfect model
+        self.assertIsInstance(esauc, (float, np.float64))
+        self.assertGreater(esauc, 0.5)  # Should be better than random
+        self.assertLessEqual(esauc, 1.0)
+        self.assertTrue(np.isfinite(esauc))
 
     def test_event_specific_integrated_brier_score_with_weights_perfect_model(self):
         cov_df = self.patients_df[self.covariates]
@@ -163,7 +217,12 @@ class TestEvaluation(unittest.TestCase):
         weights = pd.Series((1/self.ets.d_times)*np.ones(self.ets.d_times),
                             index=range(1, self.ets.d_times+1))
         esbs = event_specific_integrated_brier_score(pred_df, event=event, weights=weights)
-        print(esbs)
+        
+        # Validate weighted integrated Brier Score for perfect model
+        self.assertIsInstance(esbs, (float, np.float64))
+        self.assertGreaterEqual(esbs, 0)
+        self.assertLess(esbs, 0.25)  # Should be reasonable for perfect model
+        self.assertTrue(np.isfinite(esbs))
 
     def test_global_auc_perfect_model(self):
         cov_df = self.patients_df[self.covariates]
@@ -180,7 +239,12 @@ class TestEvaluation(unittest.TestCase):
                                              for t in range(1, self.ets.d_times+1)])
         pred_df = pd.concat([self.patients_df, probs_j_at_t_1, probs_j_at_t_2], axis=1)
         esauc = global_auc(pred_df)
-        print(esauc)
+        
+        # Validate global AUC for perfect model
+        self.assertIsInstance(esauc, (float, np.float64))
+        self.assertGreater(esauc, 0.5)  # Should be better than random
+        self.assertLessEqual(esauc, 1.0)
+        self.assertTrue(np.isfinite(esauc))
 
     def test_global_brier_score_perfect_model(self):
         cov_df = self.patients_df[self.covariates]
@@ -197,7 +261,12 @@ class TestEvaluation(unittest.TestCase):
                                              for t in range(1, self.ets.d_times+1)])
         pred_df = pd.concat([self.patients_df, probs_j_at_t_1, probs_j_at_t_2], axis=1)
         esbs = global_brier_score(pred_df)
-        print(esbs)
+        
+        # Validate global Brier Score for perfect model
+        self.assertIsInstance(esbs, (float, np.float64))
+        self.assertGreaterEqual(esbs, 0)
+        self.assertLess(esbs, 0.25)  # Should be reasonable for perfect model
+        self.assertTrue(np.isfinite(esbs))
 
     def test_events_integrated_brier_score_perfect_model(self):
         cov_df = self.patients_df[self.covariates]
@@ -214,7 +283,17 @@ class TestEvaluation(unittest.TestCase):
                                              for t in range(1, self.ets.d_times+1)])
         pred_df = pd.concat([self.patients_df, probs_j_at_t_1, probs_j_at_t_2], axis=1)
         esbs = events_integrated_brier_score(pred_df)
-        print(esbs)
+        
+        # Validate events integrated Brier Score for perfect model
+        self.assertIsInstance(esbs, (float, np.float64, pd.Series, dict))
+        if isinstance(esbs, (float, np.float64)):
+            self.assertGreaterEqual(esbs, 0)
+            self.assertLess(esbs, 0.25)  # Should be reasonable for perfect model
+            self.assertTrue(np.isfinite(esbs))
+        elif isinstance(esbs, pd.Series):
+            self.assertTrue((esbs >= 0).all())
+            self.assertTrue((esbs <= 0.25).all())
+            self.assertTrue(esbs.notna().all())
 
     def test_events_integrated_auc_perfect_model(self):
         cov_df = self.patients_df[self.covariates]
@@ -230,8 +309,18 @@ class TestEvaluation(unittest.TestCase):
                                     columns=[f'prob_j{event}_at_t{t}'
                                              for t in range(1, self.ets.d_times+1)])
         pred_df = pd.concat([self.patients_df, probs_j_at_t_1, probs_j_at_t_2], axis=1)
-        esbs = events_integrated_auc(pred_df)
-        print(esbs)
+        esauc = events_integrated_auc(pred_df)
+        
+        # Validate events integrated AUC for perfect model
+        self.assertIsInstance(esauc, (float, np.float64, pd.Series, dict))
+        if isinstance(esauc, (float, np.float64)):
+            self.assertGreater(esauc, 0.5)  # Should be better than random
+            self.assertLessEqual(esauc, 1.0)
+            self.assertTrue(np.isfinite(esauc))
+        elif isinstance(esauc, pd.Series):
+            self.assertTrue((esauc >= 0.5).all())  # Better than random
+            self.assertTrue((esauc <= 1.0).all())
+            self.assertTrue(esauc.notna().all())
 
     def test_events_auc_at_t_perfect_model(self):
         cov_df = self.patients_df[self.covariates]
@@ -248,7 +337,19 @@ class TestEvaluation(unittest.TestCase):
                                              for t in range(1, self.ets.d_times+1)])
         pred_df = pd.concat([self.patients_df, probs_j_at_t_1, probs_j_at_t_2], axis=1)
         esauc = events_auc_at_t(pred_df)
-        print(esauc)
+        
+        # Validate events AUC at t for perfect model
+        self.assertIsInstance(esauc, (pd.DataFrame, pd.Series, dict))
+        if isinstance(esauc, pd.Series):
+            self.assertTrue((esauc >= 0.0).all())  # Valid AUC range
+            self.assertTrue((esauc <= 1.0).all())
+            self.assertTrue(esauc.notna().all())
+        elif isinstance(esauc, pd.DataFrame):
+            numeric_cols = esauc.select_dtypes(include=[np.number]).columns
+            for col in numeric_cols:
+                self.assertTrue((esauc[col] >= 0.0).all())  # Valid AUC range
+                self.assertTrue((esauc[col] <= 1.0).all())
+
 
     def test_events_brier_score_at_t_perfect_model(self):
         cov_df = self.patients_df[self.covariates]
@@ -265,7 +366,18 @@ class TestEvaluation(unittest.TestCase):
                                              for t in range(1, self.ets.d_times+1)])
         pred_df = pd.concat([self.patients_df, probs_j_at_t_1, probs_j_at_t_2], axis=1)
         esbs = events_brier_score_at_t(pred_df)
-        print(esbs)
+        
+        # Validate events Brier Score at t for perfect model
+        self.assertIsInstance(esbs, (pd.DataFrame, pd.Series, dict))
+        if isinstance(esbs, pd.Series):
+            self.assertTrue((esbs >= 0).all())
+            self.assertTrue((esbs <= 0.25).all())  # Should be reasonable for perfect model
+            self.assertTrue(esbs.notna().all())
+        elif isinstance(esbs, pd.DataFrame):
+            numeric_cols = esbs.select_dtypes(include=[np.number]).columns
+            for col in numeric_cols:
+                self.assertTrue((esbs[col] >= 0).all())
+                self.assertTrue((esbs[col] <= 0.25).all())
 
     def test_event_specific_weights_perfect_model(self):
         cov_df = self.patients_df[self.covariates]
@@ -278,7 +390,16 @@ class TestEvaluation(unittest.TestCase):
                                              for t in range(1, self.ets.d_times+1)])
         pred_df = pd.concat([self.patients_df, probs_j_at_t], axis=1)
         weights = event_specific_weights(pred_df, event=event)
-        print(weights)
+        
+        # Validate event specific weights
+        self.assertIsInstance(weights, (pd.Series, pd.DataFrame, dict, np.ndarray))
+        if isinstance(weights, pd.Series):
+            self.assertTrue((weights >= 0).all())
+            self.assertTrue(weights.notna().all())
+            self.assertTrue(np.isfinite(weights).all())
+        elif isinstance(weights, np.ndarray):
+            self.assertTrue((weights >= 0).all())
+            self.assertTrue(np.isfinite(weights).all())
 
     def test_event_specific_auc_simple_case_j1_t5(self):
         # d=6 times, n=7, J=2
@@ -324,5 +445,14 @@ class TestEvaluation(unittest.TestCase):
             [2, 6, 0.04, 0.04, 0.07, 0.07, 0.12, 0.12],
         ], columns=['J', 'X'] + [f'prob_j1_at_t{t}' for t in range(1, d+1)])
 
-        event_specific_weights(pred_df, event=1)
-        print('x')
+        weights = event_specific_weights(pred_df, event=1)
+        
+        # Validate cause specific AUC weights
+        self.assertIsInstance(weights, (pd.Series, pd.DataFrame, dict, np.ndarray))
+        if isinstance(weights, pd.Series):
+            self.assertTrue((weights >= 0).all())
+            self.assertTrue(weights.notna().all())
+            self.assertTrue(np.isfinite(weights).all())
+        elif isinstance(weights, np.ndarray):
+            self.assertTrue((weights >= 0).all())
+            self.assertTrue(np.isfinite(weights).all())
