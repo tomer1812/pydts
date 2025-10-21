@@ -30,7 +30,22 @@ class TestEventTimesSampler(unittest.TestCase):
                 2: -np.log([1, 3, 4, 3, 2]),
             }
         }
-        ets.sample_event_times(patients_df, hazard_coefs=real_coef_dict, seed=seed)
+        result = ets.sample_event_times(patients_df, hazard_coefs=real_coef_dict, seed=seed)
+        
+        # Validate output structure
+        self.assertIsInstance(result, pd.DataFrame)
+        self.assertEqual(len(result), n_patients)
+        
+        # Check required columns exist
+        self.assertIn('T', result.columns)  # Event time
+        self.assertIn('J', result.columns)  # Event type
+        
+        # Validate event types are within expected range
+        self.assertTrue(result['J'].isin([0, 1, 2]).all())
+        
+        # Validate event times are positive and within reasonable range
+        self.assertTrue((result['T'] > 0).all())
+        self.assertTrue((result['T'] <= (ets.d_times+1)).all())
 
     def test_sample_3_events_4_covariates(self):
         n_cov = 4
@@ -40,7 +55,7 @@ class TestEventTimesSampler(unittest.TestCase):
         patients_df = pd.DataFrame(data=np.random.uniform(low=0.0, high=1.0, size=[n_patients, n_cov]),
                                    columns=covariates)
 
-        ets = EventTimesSampler(d_times=15, j_event_types=2)
+        ets = EventTimesSampler(d_times=15, j_event_types=3)  # Fixed: should be 3 events, not 2
         real_coef_dict = {
             "alpha": {
                 1: lambda t: -1 - 0.3 * np.log(t),
@@ -53,7 +68,22 @@ class TestEventTimesSampler(unittest.TestCase):
                 3: -np.log([0.5, 2, 3, 4]),
             }
         }
-        ets.sample_event_times(patients_df, hazard_coefs=real_coef_dict, seed=seed)
+        result = ets.sample_event_times(patients_df, hazard_coefs=real_coef_dict, seed=seed)
+        
+        # Validate output structure
+        self.assertIsInstance(result, pd.DataFrame)
+        self.assertEqual(len(result), n_patients)
+        
+        # Check required columns exist
+        self.assertIn('T', result.columns)  # Event time
+        self.assertIn('J', result.columns)  # Event type
+        
+        # Validate event types are within expected range (1, 2, 3)
+        self.assertTrue(result['J'].isin([0, 1, 2, 3]).all())
+        
+        # Validate event times are positive and within reasonable range
+        self.assertTrue((result['T'] > 0).all())
+        self.assertTrue((result['T'] <= (ets.d_times+1)).all())
 
     def test_sample_hazard_censoring(self):
         seed = 0
@@ -73,7 +103,20 @@ class TestEventTimesSampler(unittest.TestCase):
                 0: -np.log([0.8, 3, 3, 2.5, 2]),
             }
         }
-        ets.sample_hazard_lof_censoring(patients_df, censoring_coef_dict, seed)
+        result = ets.sample_hazard_lof_censoring(patients_df, censoring_coef_dict, seed)
+        
+        # Validate hazard censoring was applied
+        self.assertIsInstance(result, pd.DataFrame)
+        self.assertEqual(len(result), n_patients)
+        self.assertIn('C', result.columns)  # Censoring time
+        
+        # Check censoring times are valid
+        self.assertTrue((result['C'] > 0).all())
+        self.assertTrue((result['C'] <= (ets.d_times+1)).all())
+        
+        # Check that original covariates are preserved
+        for cov in covariates:
+            self.assertIn(cov, result.columns)
 
     def test_sample_independent_censoring(self):
         n_cov = 4
@@ -84,7 +127,16 @@ class TestEventTimesSampler(unittest.TestCase):
 
         d_times = 15
         ets = EventTimesSampler(d_times=15, j_event_types=2)
-        ets.sample_independent_lof_censoring(patients_df, prob_lof_at_t=0.03 * np.ones(d_times))
+        result = ets.sample_independent_lof_censoring(patients_df, prob_lof_at_t=0.03 * np.ones(d_times))
+        
+        # Validate censoring was applied
+        self.assertIsInstance(result, pd.DataFrame)
+        self.assertEqual(len(result), n_patients)
+        self.assertIn('C', result.columns)  # Censoring time
+        
+        # Check censoring times are valid
+        self.assertTrue((result['C'] > 0).all())
+        self.assertTrue((result['C'] <= (d_times+1)).all())
 
     def test_update_event_or_lof(self):
         n_cov = 5
@@ -118,7 +170,24 @@ class TestEventTimesSampler(unittest.TestCase):
         }
 
         patients_df = ets.sample_hazard_lof_censoring(patients_df, censoring_coef_dict, seed=seed)
-        patients_df = ets.update_event_or_lof(patients_df)
+        result = ets.update_event_or_lof(patients_df)
+        
+        # Validate output structure
+        self.assertIsInstance(result, pd.DataFrame)
+        self.assertEqual(len(result), n_patients)
+        
+        # Check that X column exists (observed time)
+        self.assertIn('X', result.columns)
+        
+        # Validate observed times are positive and within reasonable range
+        self.assertTrue((result['X'] > 0).all())
+        self.assertTrue((result['X'] <= (ets.d_times+1)).all())
+        
+        # Check that event indicators are valid
+        if 'J' in result.columns:
+            # J should be 0 for censored observations or valid event types
+            valid_events = list(range(ets.j_event_types + 1))  # 0 for censoring, 1-j for events
+            self.assertTrue(result['J'].isin(valid_events).all())
 
     def test_update_event_or_lof_T_assertion(self):
         with self.assertRaises(AssertionError):
@@ -352,4 +421,10 @@ class TestEventTimesSampler(unittest.TestCase):
                 columns=covariates))
 
             patients_df = ets.sample_event_times(patients_df, hazard_coefs=real_coef_dict, seed=seed)
+            
+            # This should raise ValueError due to negative survival probabilities
+            patients_df = ets.sample_hazard_lof_censoring(patients_df, 
+                                                         censoring_hazard_coefs=censoring_hazard_coef_dict, 
+                                                         seed=seed + 1)
+            ets.update_event_or_lof(patients_df)
 
