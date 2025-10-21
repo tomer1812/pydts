@@ -51,22 +51,142 @@ class TestCrossValidation(unittest.TestCase):
         self.tscv = TwoStagesCV()
 
     def test_cross_validation_bs(self):
-        self.tscv.cross_validate(self.patients_df, metrics='BS', n_splits=2)
+        result = self.tscv.cross_validate(self.patients_df, metrics='BS', n_splits=2)
+        
+        # Validate output structure - cross_validate returns a DataFrame
+        self.assertIsInstance(result, pd.DataFrame)
+        self.assertFalse(result.empty)
+        
+        # Check that BS metric is in the results
+        if hasattr(result.index, 'levels'):
+            # MultiIndex case
+            self.assertIn('BS', result.index.get_level_values(0))
+        else:
+            # Regular index case - check if BS is in index or columns
+            self.assertTrue('BS' in str(result.index) or 'BS' in str(result.columns))
+        
+        # Validate that all values are finite and in reasonable range for Brier scores
+        numeric_data = result.select_dtypes(include=[np.number])
+        if not numeric_data.empty:
+            self.assertTrue((numeric_data >= 0).all().all())
+            self.assertTrue((numeric_data <= 1).all().all())
+            self.assertTrue(np.isfinite(numeric_data).all().all())
 
     def test_cross_validation_auc(self):
-        self.tscv.cross_validate(self.patients_df, metrics='AUC', n_splits=2)
+        result = self.tscv.cross_validate(self.patients_df, metrics='AUC', n_splits=2)
+        
+        # Validate output structure - cross_validate returns a DataFrame
+        self.assertIsInstance(result, pd.DataFrame)
+        self.assertFalse(result.empty)
+        
+        # Check that AUC metric is in the results
+        if hasattr(result.index, 'levels'):
+            # MultiIndex case
+            self.assertIn('AUC', result.index.get_level_values(0))
+        else:
+            # Regular index case - check if AUC is in index or columns
+            self.assertTrue('AUC' in str(result.index) or 'AUC' in str(result.columns))
+        
+        # Validate that all values are finite and in reasonable range for AUC scores
+        numeric_data = result.select_dtypes(include=[np.number])
+        if not numeric_data.empty:
+            self.assertTrue((numeric_data >= 0).all().all())
+            self.assertTrue((numeric_data <= 1).all().all())
+            self.assertTrue(np.isfinite(numeric_data).all().all())
 
     def test_cross_validation_iauc(self):
-        self.tscv.cross_validate(self.patients_df, metrics='IAUC', n_splits=2)
+        result = self.tscv.cross_validate(self.patients_df, metrics='IAUC', n_splits=2)
+        
+        # Validate output structure - cross_validate returns a DataFrame
+        self.assertIsInstance(result, pd.DataFrame)
+        # Note: IAUC might return empty DataFrame if not enough data
+        
+        # If result is not empty, validate structure and values
+        if not result.empty:
+            # Check that IAUC metric is in the results
+            if hasattr(result.index, 'levels'):
+                # MultiIndex case
+                self.assertIn('IAUC', result.index.get_level_values(0))
+            else:
+                # Regular index case - check if IAUC is in index or columns
+                self.assertTrue('IAUC' in str(result.index) or 'IAUC' in str(result.columns))
+            
+            # Validate that all values are finite and in reasonable range for IAUC scores
+            numeric_data = result.select_dtypes(include=[np.number])
+            if not numeric_data.empty:
+                self.assertTrue((numeric_data >= 0).all().all())
+                self.assertTrue((numeric_data <= 1).all().all())
+                self.assertTrue(np.isfinite(numeric_data).all().all())
 
     def test_cross_validation_gauc(self):
-        self.tscv.cross_validate(self.patients_df, metrics='GAUC', n_splits=2)
+        result = self.tscv.cross_validate(self.patients_df, metrics='GAUC', n_splits=2)
+        
+        # Validate output structure - cross_validate returns a DataFrame
+        self.assertIsInstance(result, pd.DataFrame)
+        # Note: GAUC might return empty DataFrame if not enough data
+        
+        # If result is not empty, validate structure and values
+        if not result.empty:
+            # Check that GAUC metric is in the results
+            if hasattr(result.index, 'levels'):
+                # MultiIndex case
+                self.assertIn('GAUC', result.index.get_level_values(0))
+            else:
+                # Regular index case - check if GAUC is in index or columns
+                self.assertTrue('GAUC' in str(result.index) or 'GAUC' in str(result.columns))
+            
+            # Validate that all values are finite and in reasonable range for GAUC scores
+            numeric_data = result.select_dtypes(include=[np.number])
+            if not numeric_data.empty:
+                self.assertTrue((numeric_data >= 0).all().all())
+                self.assertTrue((numeric_data <= 1).all().all())
+                self.assertTrue(np.isfinite(numeric_data).all().all())
 
     def test_cross_validation_ibs(self):
-        self.tscv.cross_validate(self.patients_df, metrics='IBS', n_splits=2)
+        result = self.tscv.cross_validate(self.patients_df, metrics='IBS', n_splits=2)
+        
+        # Validate output structure - cross_validate returns a DataFrame
+        self.assertIsInstance(result, pd.DataFrame)
+        # Note: IBS might return empty DataFrame if not enough data
+        
+        # If result is not empty, validate structure and values
+        if not result.empty:
+            # Check that IBS metric is in the results
+            if hasattr(result.index, 'levels'):
+                # MultiIndex case
+                self.assertIn('IBS', result.index.get_level_values(0))
+            else:
+                # Regular index case - check if IBS is in index or columns
+                self.assertTrue('IBS' in str(result.index) or 'IBS' in str(result.columns))
+            
+            # Validate that all values are finite and non-negative for IBS scores
+            numeric_data = result.select_dtypes(include=[np.number])
+            if not numeric_data.empty:
+                self.assertTrue((numeric_data >= 0).all().all())
+                self.assertTrue(np.isfinite(numeric_data).all().all())
 
     def test_cross_validation_gbs(self):
-        self.tscv.cross_validate(self.patients_df, metrics='GBS', n_splits=3)
+        result = self.tscv.cross_validate(self.patients_df, metrics='GBS', n_splits=3)
+        
+        # Validate output structure - cross_validate returns a DataFrame
+        self.assertIsInstance(result, pd.DataFrame)
+        # Note: GBS might return empty DataFrame if not enough data
+        
+        # If result is not empty, validate structure and values
+        if not result.empty:
+            # Check that GBS metric is in the results
+            if hasattr(result.index, 'levels'):
+                # MultiIndex case
+                self.assertIn('GBS', result.index.get_level_values(0))
+            else:
+                # Regular index case - check if GBS is in index or columns
+                self.assertTrue('GBS' in str(result.index) or 'GBS' in str(result.columns))
+            
+            # Validate that all values are finite and non-negative for GBS scores
+            numeric_data = result.select_dtypes(include=[np.number])
+            if not numeric_data.empty:
+                self.assertTrue((numeric_data >= 0).all().all())
+                self.assertTrue(np.isfinite(numeric_data).all().all())
 
 
 class TestCrossValidationExact(TestCrossValidation):
@@ -157,11 +277,14 @@ class TestPenaltyGridSearchCV(unittest.TestCase):
         self.pgscv = PenaltyGridSearchCV()
 
     def test_penalty_grid_search_cross_validate(self):
-        self.pgscv.cross_validate(full_df=self.patients_df,
-                             l1_ratio=1,
-                             n_splits=2,
-                             penalizers=[0.0001, 0.02],
-                             seed=0)
+        result = self.pgscv.cross_validate(full_df=self.patients_df,
+                                          l1_ratio=1,
+                                          n_splits=2,
+                                          penalizers=[0.0001, 0.02],
+                                          seed=0)
+        
+        # Validate that penalty grid search returns results
+        self.assertIsNotNone(result)
 
 
 class TestPenaltyGridSearchCVExact(TestPenaltyGridSearchCV):
