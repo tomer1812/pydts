@@ -1,0 +1,3283 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="The documentation for the PyDTS software library.">
+      
+      
+        <meta name="author" content="Tomer Meir, Rom Gutman">
+      
+      
+      
+        <link rel="prev" href="../UsageExample-FittingTwoStagesFitterExact-FULL/">
+      
+      
+        <link rel="next" href="../SimulatedDataset/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
+    
+    
+      
+        <title>Screening Example - PyDTS</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.7e37652d.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../css/ansi-colours.css">
+    
+      <link rel="stylesheet" href="../css/jupyter-cells.css">
+    
+      <link rel="stylesheet" href="../css/pandas-dataframe.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  
+  
+
+<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","G-Z0XYP3868P"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","G-Z0XYP3868P",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=G-Z0XYP3868P",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#sure-independent-screening" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="PyDTS" class="md-header__button md-logo" aria-label="PyDTS" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PyDTS
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Screening Example
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/tomer1812/pydts/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    tomer1812/pydts
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="PyDTS" class="md-nav__button md-logo" aria-label="PyDTS" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    PyDTS
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/tomer1812/pydts/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    tomer1812/pydts
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Methods
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Methods
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../methodsintro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../methods/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Definitions and Estimation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../methodsevaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Evaluation Metrics
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Examples
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Examples
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples-intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../EventTimesSampler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Event Times Sampler
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Estimation Example
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            Estimation Example
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../UsageExample-Intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../UsageExample-DataPreparation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Preparation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../UsageExample-FittingTwoStagesFitter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Estimation with TwoStagesFitter
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../UsageExample-FittingDataExpansionFitter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Estimation with DataExpansionFitter
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../UsageExample-RegroupingData/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Regrouping Example
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ModelsComparison/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Comparing the Estimation Methods
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../PerformanceMeasures/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Evaluation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Regularization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Regularization
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../UsageExample-FittingTwoStagesFitterExact-FULL/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Small Sample Size Example
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Screening Example
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Screening Example
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#data-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Generation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sis" class="md-nav__link">
+    <span class="md-ellipsis">
+      SIS
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-lasso-sis-l" class="md-nav__link">
+    <span class="md-ellipsis">
+      Adding LASSO (SIS-L)
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SimulatedDataset/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Hospitalization LOS Simulation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../JOSS_mimic_example/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    MIMIC Example Summary
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    API
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            API
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/two_stages_fitter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    The Two Stages Procedure of Meir and Gorfine (2023) - Efron
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/two_stages_fitter_exact/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    The Two Stages Procedure of Meir and Gorfine (2023) - Exact
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/data_expansion_fitter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Expansion Procedure of Lee et al. (2018)
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/event_times_sampler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Event Times Sampler
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Evaluation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/cross_validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Cross Validation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/model_selection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Model Selection
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/screening/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Sure Independent Screening
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/utils/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Utils
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+<script>
+(function() {
+  function addWidgetsRenderer() {
+    var requireJsScript = document.createElement('script');
+    requireJsScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js';
+
+    var mimeElement = document.querySelector('script[type="application/vnd.jupyter.widget-view+json"]');
+    var jupyterWidgetsScript = document.createElement('script');
+    var widgetRendererSrc = 'https://unpkg.com/@jupyter-widgets/html-manager@*/dist/embed-amd.js';
+    var widgetState;
+
+    // Fallback for older version:
+    try {
+      widgetState = mimeElement && JSON.parse(mimeElement.innerHTML);
+
+      if (widgetState && (widgetState.version_major < 2 || !widgetState.version_major)) {
+        widgetRendererSrc = 'jupyter-js-widgets@*/dist/embed.js';
+      }
+    } catch(e) {}
+
+    jupyterWidgetsScript.src = widgetRendererSrc;
+
+    document.body.appendChild(requireJsScript);
+    document.body.appendChild(jupyterWidgetsScript);
+  }
+
+  document.addEventListener('DOMContentLoaded', addWidgetsRenderer);
+}());
+</script>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="sure-independent-screening">Sure Independent Screening<a class="headerlink" href="#sure-independent-screening" title="Permanent link">¤</a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Sure independent screening (SIS) has been shown to effectively filter out many uninformative variables in ultra-high-dimensional settings, where the number of covariates greatly exceeds the number of observations (as is common in genetic datasets, for example). Penalized variable selection methods are typically applied to the remaining covariates after screening.</p>
+<p>In the following example, we demonstrate how such an analysis can be performed on discrete-time survival data with competing events using the <code>SISTwoStagesFitter</code> of <em>PyDTS</em>. An "Exact" version for small sample sizes is also available via <code>SISTwoStagesFitterExact</code>. </p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="data-generation">Data Generation<a class="headerlink" href="#data-generation" title="Permanent link">¤</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>To demonstrate the screening process, we first sample a dataset with <span class="arithmatex">\(p = 1000\)</span> covariates and <span class="arithmatex">\(n = 500\)</span> observations. Clearly, <span class="arithmatex">\(p \gg n\)</span>, placing us in an ultra-high-dimensional setting.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pydts.data_generation</span><span class="w"> </span><span class="kn">import</span> <span class="n">EventTimesSampler</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pydts.screening</span><span class="w"> </span><span class="kn">import</span> <span class="n">SISTwoStagesFitter</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pydts.cross_validation</span><span class="w"> </span><span class="kn">import</span> <span class="n">PenaltyGridSearchCV</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pydts.fitters</span><span class="w"> </span><span class="kn">import</span> <span class="n">TwoStagesFitter</span>
+</code></pre></div>
+
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">n_cov</span> <span class="o">=</span> <span class="mi">1000</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">beta1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_cov</span><span class="p">)</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">beta1</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.5</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.6</span><span class="p">])</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">beta2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_cov</span><span class="p">)</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">beta2</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.5</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.7</span><span class="p">])</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="n">real_coef_dict</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>        <span class="mi">1</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="o">-</span><span class="mf">3.1</span> <span class="o">+</span> <span class="mf">0.15</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">t</span><span class="p">),</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>        <span class="mi">2</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="o">-</span><span class="mf">3.2</span> <span class="o">+</span> <span class="mf">0.15</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="p">},</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="s2">&quot;beta&quot;</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>        <span class="mi">1</span><span class="p">:</span> <span class="n">beta1</span><span class="p">,</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>        <span class="mi">2</span><span class="p">:</span> <span class="n">beta2</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>    <span class="p">}</span>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="p">}</span>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="n">n_patients</span> <span class="o">=</span> <span class="mi">500</span>
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="n">d_times</span> <span class="o">=</span> <span class="mi">6</span>
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="n">j_events</span> <span class="o">=</span> <span class="mi">2</span>
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="n">ets</span> <span class="o">=</span> <span class="n">EventTimesSampler</span><span class="p">(</span><span class="n">d_times</span><span class="o">=</span><span class="n">d_times</span><span class="p">,</span> <span class="n">j_event_types</span><span class="o">=</span><span class="n">j_events</span><span class="p">)</span>
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="n">seed</span> <span class="o">=</span> <span class="mi">97</span>
+<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="n">means_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_cov</span><span class="p">)</span>
+<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="n">covariance_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">n_cov</span><span class="p">)</span>
+<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>
+<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a><span class="n">clip_value</span> <span class="o">=</span> <span class="mf">2.5</span>
+<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>
+<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a><span class="n">covariates</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;Z</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_cov</span><span class="p">)]</span>
+<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>
+<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a><span class="n">patients_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">(</span><span class="n">means_vector</span><span class="p">,</span> <span class="n">covariance_matrix</span><span class="p">,</span>
+<a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>                                                                                <span class="n">size</span><span class="o">=</span><span class="n">n_patients</span><span class="p">),</span>
+<a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>                                             <span class="n">columns</span><span class="o">=</span><span class="n">covariates</span><span class="p">))</span>
+<a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a><span class="n">patients_df</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">lower</span><span class="o">=-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">clip_value</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="n">clip_value</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a><span class="n">patients_df</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">sample_event_times</span><span class="p">(</span><span class="n">patients_df</span><span class="p">,</span> <span class="n">hazard_coefs</span><span class="o">=</span><span class="n">real_coef_dict</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+<a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a><span class="n">patients_df</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">sample_independent_lof_censoring</span><span class="p">(</span><span class="n">patients_df</span><span class="p">,</span> <span class="n">prob_lof_at_t</span><span class="o">=</span><span class="mf">0.01</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">d_times</span><span class="p">),</span>
+<a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>                                                   <span class="n">seed</span><span class="o">=</span><span class="n">seed</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+<a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a><span class="n">patients_df</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">update_event_or_lof</span><span class="p">(</span><span class="n">patients_df</span><span class="p">)</span>
+<a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a><span class="n">patients_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;pid&#39;</span>
+<a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a><span class="n">patients_df</span> <span class="o">=</span> <span class="n">patients_df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+</code></pre></div>
+
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The resulting dataset contains the following observed event-types and event-times:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pydts.examples_utils.plots</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_events_occurrence</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">plot_events_occurrence</span><span class="p">(</span><span class="n">patients_df</span><span class="p">)</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_png output_subarea">
+<img alt="No description has been provided for this image" src="data:image/png;base64,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"/>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="sis">SIS<a class="headerlink" href="#sis" title="Permanent link">¤</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><code>SISTwoStagesFitter</code> implements the screening process. As described in the Methods section, we fit marginal estimates for the <span class="arithmatex">\(\beta_j\)</span> coefficients using both the original data and permuted data that follow the null model. The maximum absolute value of the marginal coefficients from the null model (fitted using the permuted data) is selected as a data-driven threshold. We then retain only those variables whose marginal coefficients from the original data exceed this threshold.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">fitter</span> <span class="o">=</span> <span class="n">SISTwoStagesFitter</span><span class="p">()</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">fitter</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">patients_df</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">seed</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>
+<code>[Parallel(n_jobs=8)]: Using backend LokyBackend with 8 concurrent workers.
+[Parallel(n_jobs=8)]: Done  25 tasks      | elapsed:    3.4s
+[Parallel(n_jobs=8)]: Done 146 tasks      | elapsed:    7.2s
+[Parallel(n_jobs=8)]: Done 349 tasks      | elapsed:   13.7s
+[Parallel(n_jobs=8)]: Done 632 tasks      | elapsed:   22.7s
+[Parallel(n_jobs=8)]: Done 1000 out of 1000 | elapsed:   34.2s finished
+[Parallel(n_jobs=8)]: Using backend LokyBackend with 8 concurrent workers.
+[Parallel(n_jobs=8)]: Done  25 tasks      | elapsed:    1.0s
+[Parallel(n_jobs=8)]: Done 146 tasks      | elapsed:    4.8s
+[Parallel(n_jobs=8)]: Done 349 tasks      | elapsed:   11.3s
+[Parallel(n_jobs=8)]: Done 632 tasks      | elapsed:   20.3s
+[Parallel(n_jobs=8)]: Done 1000 out of 1000 | elapsed:   32.7s finished
+</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The results of the marginal estimates under the null model using permuted data, the marginal estimates using the original data, and the data-driven threshold are provided below.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">fitter</span><span class="o">.</span><span class="n">null_model_df</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>j1_params</th>
+<th>j1_SE</th>
+<th>j2_params</th>
+<th>j2_SE</th>
+</tr>
+<tr>
+<th>covariate</th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>Z1</th>
+<td>-0.051194</td>
+<td>0.079323</td>
+<td>-0.109907</td>
+<td>0.079738</td>
+</tr>
+<tr>
+<th>Z2</th>
+<td>0.018975</td>
+<td>0.082467</td>
+<td>-0.032187</td>
+<td>0.082622</td>
+</tr>
+<tr>
+<th>Z3</th>
+<td>-0.048221</td>
+<td>0.074646</td>
+<td>-0.129129</td>
+<td>0.076010</td>
+</tr>
+<tr>
+<th>Z4</th>
+<td>-0.034971</td>
+<td>0.076312</td>
+<td>-0.056456</td>
+<td>0.076418</td>
+</tr>
+<tr>
+<th>Z5</th>
+<td>0.034691</td>
+<td>0.073673</td>
+<td>-0.043497</td>
+<td>0.074451</td>
+</tr>
+<tr>
+<th>...</th>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<th>Z996</th>
+<td>-0.068723</td>
+<td>0.084455</td>
+<td>-0.029909</td>
+<td>0.084860</td>
+</tr>
+<tr>
+<th>Z997</th>
+<td>0.199384</td>
+<td>0.079347</td>
+<td>-0.141407</td>
+<td>0.078816</td>
+</tr>
+<tr>
+<th>Z998</th>
+<td>0.048464</td>
+<td>0.075687</td>
+<td>0.029086</td>
+<td>0.075630</td>
+</tr>
+<tr>
+<th>Z999</th>
+<td>0.038851</td>
+<td>0.077472</td>
+<td>0.018370</td>
+<td>0.077997</td>
+</tr>
+<tr>
+<th>Z1000</th>
+<td>-0.162900</td>
+<td>0.075047</td>
+<td>0.027251</td>
+<td>0.076968</td>
+</tr>
+</tbody>
+</table>
+<p>1000 rows × 4 columns</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">fitter</span><span class="o">.</span><span class="n">threshold</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_text output_subarea output_execute_result">
+<pre>
+<code>0.24893913811535112</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">fitter</span><span class="o">.</span><span class="n">marginal_estimates_df</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>j1_params</th>
+<th>j1_SE</th>
+<th>j2_params</th>
+<th>j2_SE</th>
+</tr>
+<tr>
+<th>covariate</th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>Z1</th>
+<td>-0.440522</td>
+<td>0.080529</td>
+<td>0.290845</td>
+<td>0.078372</td>
+</tr>
+<tr>
+<th>Z2</th>
+<td>0.450510</td>
+<td>0.083694</td>
+<td>-0.661550</td>
+<td>0.084618</td>
+</tr>
+<tr>
+<th>Z3</th>
+<td>-0.439468</td>
+<td>0.082773</td>
+<td>0.524361</td>
+<td>0.077278</td>
+</tr>
+<tr>
+<th>Z4</th>
+<td>0.672241</td>
+<td>0.081552</td>
+<td>-0.496182</td>
+<td>0.078566</td>
+</tr>
+<tr>
+<th>Z5</th>
+<td>-0.458879</td>
+<td>0.080453</td>
+<td>-0.714228</td>
+<td>0.083198</td>
+</tr>
+<tr>
+<th>...</th>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<th>Z996</th>
+<td>-0.001290</td>
+<td>0.080151</td>
+<td>-0.098645</td>
+<td>0.080883</td>
+</tr>
+<tr>
+<th>Z997</th>
+<td>0.144605</td>
+<td>0.078395</td>
+<td>0.142037</td>
+<td>0.079094</td>
+</tr>
+<tr>
+<th>Z998</th>
+<td>-0.069460</td>
+<td>0.073183</td>
+<td>-0.012518</td>
+<td>0.072763</td>
+</tr>
+<tr>
+<th>Z999</th>
+<td>0.049599</td>
+<td>0.079498</td>
+<td>-0.094697</td>
+<td>0.079714</td>
+</tr>
+<tr>
+<th>Z1000</th>
+<td>-0.050592</td>
+<td>0.077711</td>
+<td>-0.085265</td>
+<td>0.078140</td>
+</tr>
+</tbody>
+</table>
+<p>1000 rows × 4 columns</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The informative coefficients that exceed the threshold are selected separately for each event type:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">fitter</span><span class="o">.</span><span class="n">chosen_covariates_j</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_text output_subarea output_execute_result">
+<pre>
+<code>{1: ['Z1', 'Z2', 'Z3', 'Z4', 'Z5', 'Z95'],
+ 2: ['Z1', 'Z2', 'Z3', 'Z4', 'Z5', 'Z198', 'Z355']}</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Evidently, we successfully identified all informative variables (<span class="arithmatex">\(Z_1\)</span>–<span class="arithmatex">\(Z_5\)</span>) and filtered out almost all non-informative ones, except for one false positive in event-type 1 (<span class="arithmatex">\(Z_{95}\)</span>) and two false positives (<span class="arithmatex">\(Z_{198}\)</span>, <span class="arithmatex">\(Z_{355}\)</span>) in event-type 2. Now, we can use the selected variables to train a <code>TwoStagesFitter</code> as follows.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">selected_covariates</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">fitter</span><span class="o">.</span><span class="n">chosen_covariates_j</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">fitter</span><span class="o">.</span><span class="n">chosen_covariates_j</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="n">two_step</span> <span class="o">=</span> <span class="n">TwoStagesFitter</span><span class="p">()</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="n">two_step</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">patients_df</span><span class="p">[[</span><span class="s1">&#39;pid&#39;</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;J&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">selected_covariates</span><span class="p">],</span> <span class="n">covariates</span><span class="o">=</span><span class="n">fitter</span><span class="o">.</span><span class="n">chosen_covariates_j</span><span class="p">)</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="n">two_step</span><span class="o">.</span><span class="n">get_beta_SE</span><span class="p">()</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>j1_params</th>
+<th>j1_SE</th>
+<th>j2_params</th>
+<th>j2_SE</th>
+</tr>
+<tr>
+<th>covariate</th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>Z1</th>
+<td>-0.677825</td>
+<td>0.078953</td>
+<td>0.460589</td>
+<td>0.086621</td>
+</tr>
+<tr>
+<th>Z2</th>
+<td>0.615446</td>
+<td>0.086701</td>
+<td>-0.953396</td>
+<td>0.096915</td>
+</tr>
+<tr>
+<th>Z3</th>
+<td>-0.651071</td>
+<td>0.093876</td>
+<td>0.668352</td>
+<td>0.078943</td>
+</tr>
+<tr>
+<th>Z4</th>
+<td>0.802648</td>
+<td>0.081182</td>
+<td>-0.639696</td>
+<td>0.084932</td>
+</tr>
+<tr>
+<th>Z5</th>
+<td>-0.724804</td>
+<td>0.090150</td>
+<td>-0.815123</td>
+<td>0.084053</td>
+</tr>
+<tr>
+<th>Z95</th>
+<td>0.102926</td>
+<td>0.083056</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr>
+<th>Z198</th>
+<td>NaN</td>
+<td>NaN</td>
+<td>0.139889</td>
+<td>0.081325</td>
+</tr>
+<tr>
+<th>Z355</th>
+<td>NaN</td>
+<td>NaN</td>
+<td>-0.205345</td>
+<td>0.083858</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="adding-lasso-sis-l">Adding LASSO (SIS-L)<a class="headerlink" href="#adding-lasso-sis-l" title="Permanent link">¤</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>As an additional variable selection step, LASSO regression can be applied to the set of covariates retained by the screening process.</p>
+<p>To select the optimal penalization parameter, we perform a penalty grid search using cross-validation and the evaluation metrics described in the Methods section. By default, model selection is guided by the global-AUC metric.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">step</span> <span class="o">=</span> <span class="mf">0.5</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="n">penalizers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mf">8.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.4</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">)</span> 
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="n">n_splits</span> <span class="o">=</span> <span class="mi">3</span>
+</code></pre></div>
+
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">penalty_cv_search</span> <span class="o">=</span> <span class="n">PenaltyGridSearchCV</span><span class="p">()</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="n">gauc_cv_results</span> <span class="o">=</span> <span class="n">penalty_cv_search</span><span class="o">.</span><span class="n">cross_validate</span><span class="p">(</span><span class="n">full_df</span><span class="o">=</span><span class="n">patients_df</span><span class="p">[[</span><span class="s1">&#39;pid&#39;</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;J&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">selected_covariates</span><span class="p">],</span> 
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>                                                   <span class="n">l1_ratio</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> 
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>                                                   <span class="n">penalizers</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">penalizers</span><span class="p">),</span>  
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>                                                   <span class="n">n_splits</span><span class="o">=</span><span class="n">n_splits</span><span class="p">,</span> 
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>                                                   <span class="n">seed</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+<code>Starting fold 1/3
+Started estimating the coefficients for penalizer 0.00033546262790251185 (1/14)
+Finished estimating the coefficients for penalizer 0.00033546262790251185 (1/14), 0 seconds
+Started estimating the coefficients for penalizer 0.0005530843701478336 (2/14)
+Finished estimating the coefficients for penalizer 0.0005530843701478336 (2/14), 0 seconds
+Started estimating the coefficients for penalizer 0.0009118819655545162 (3/14)
+Finished estimating the coefficients for penalizer 0.0009118819655545162 (3/14), 0 seconds
+Started estimating the coefficients for penalizer 0.0015034391929775724 (4/14)
+Finished estimating the coefficients for penalizer 0.0015034391929775724 (4/14), 0 seconds
+Started estimating the coefficients for penalizer 0.0024787521766663585 (5/14)
+Finished estimating the coefficients for penalizer 0.0024787521766663585 (5/14), 0 seconds
+Started estimating the coefficients for penalizer 0.004086771438464067 (6/14)
+Finished estimating the coefficients for penalizer 0.004086771438464067 (6/14), 0 seconds
+Started estimating the coefficients for penalizer 0.006737946999085467 (7/14)
+Finished estimating the coefficients for penalizer 0.006737946999085467 (7/14), 1 seconds
+Started estimating the coefficients for penalizer 0.011108996538242306 (8/14)
+Finished estimating the coefficients for penalizer 0.011108996538242306 (8/14), 1 seconds
+Started estimating the coefficients for penalizer 0.01831563888873418 (9/14)
+Finished estimating the coefficients for penalizer 0.01831563888873418 (9/14), 1 seconds
+Started estimating the coefficients for penalizer 0.0301973834223185 (10/14)
+Finished estimating the coefficients for penalizer 0.0301973834223185 (10/14), 1 seconds
+Started estimating the coefficients for penalizer 0.049787068367863944 (11/14)
+Finished estimating the coefficients for penalizer 0.049787068367863944 (11/14), 1 seconds
+Started estimating the coefficients for penalizer 0.0820849986238988 (12/14)
+Finished estimating the coefficients for penalizer 0.0820849986238988 (12/14), 1 seconds
+Started estimating the coefficients for penalizer 0.1353352832366127 (13/14)
+Finished estimating the coefficients for penalizer 0.1353352832366127 (13/14), 1 seconds
+Started estimating the coefficients for penalizer 0.22313016014842982 (14/14)
+Finished estimating the coefficients for penalizer 0.22313016014842982 (14/14), 1 seconds
+Finished fold 1/3, 58 seconds
+Starting fold 2/3
+Started estimating the coefficients for penalizer 0.00033546262790251185 (1/14)
+Finished estimating the coefficients for penalizer 0.00033546262790251185 (1/14), 0 seconds
+Started estimating the coefficients for penalizer 0.0005530843701478336 (2/14)
+Finished estimating the coefficients for penalizer 0.0005530843701478336 (2/14), 0 seconds
+Started estimating the coefficients for penalizer 0.0009118819655545162 (3/14)
+Finished estimating the coefficients for penalizer 0.0009118819655545162 (3/14), 1 seconds
+Started estimating the coefficients for penalizer 0.0015034391929775724 (4/14)
+Finished estimating the coefficients for penalizer 0.0015034391929775724 (4/14), 1 seconds
+Started estimating the coefficients for penalizer 0.0024787521766663585 (5/14)
+Finished estimating the coefficients for penalizer 0.0024787521766663585 (5/14), 1 seconds
+Started estimating the coefficients for penalizer 0.004086771438464067 (6/14)
+Finished estimating the coefficients for penalizer 0.004086771438464067 (6/14), 1 seconds
+Started estimating the coefficients for penalizer 0.006737946999085467 (7/14)
+Finished estimating the coefficients for penalizer 0.006737946999085467 (7/14), 1 seconds
+Started estimating the coefficients for penalizer 0.011108996538242306 (8/14)
+Finished estimating the coefficients for penalizer 0.011108996538242306 (8/14), 1 seconds
+Started estimating the coefficients for penalizer 0.01831563888873418 (9/14)
+Finished estimating the coefficients for penalizer 0.01831563888873418 (9/14), 1 seconds
+Started estimating the coefficients for penalizer 0.0301973834223185 (10/14)
+Finished estimating the coefficients for penalizer 0.0301973834223185 (10/14), 1 seconds
+Started estimating the coefficients for penalizer 0.049787068367863944 (11/14)
+Finished estimating the coefficients for penalizer 0.049787068367863944 (11/14), 1 seconds
+Started estimating the coefficients for penalizer 0.0820849986238988 (12/14)
+Finished estimating the coefficients for penalizer 0.0820849986238988 (12/14), 1 seconds
+Started estimating the coefficients for penalizer 0.1353352832366127 (13/14)
+Finished estimating the coefficients for penalizer 0.1353352832366127 (13/14), 1 seconds
+Started estimating the coefficients for penalizer 0.22313016014842982 (14/14)
+Finished estimating the coefficients for penalizer 0.22313016014842982 (14/14), 1 seconds
+Finished fold 2/3, 59 seconds
+Starting fold 3/3
+Started estimating the coefficients for penalizer 0.00033546262790251185 (1/14)
+Finished estimating the coefficients for penalizer 0.00033546262790251185 (1/14), 0 seconds
+Started estimating the coefficients for penalizer 0.0005530843701478336 (2/14)
+Finished estimating the coefficients for penalizer 0.0005530843701478336 (2/14), 0 seconds
+Started estimating the coefficients for penalizer 0.0009118819655545162 (3/14)
+Finished estimating the coefficients for penalizer 0.0009118819655545162 (3/14), 1 seconds
+Started estimating the coefficients for penalizer 0.0015034391929775724 (4/14)
+Finished estimating the coefficients for penalizer 0.0015034391929775724 (4/14), 1 seconds
+Started estimating the coefficients for penalizer 0.0024787521766663585 (5/14)
+Finished estimating the coefficients for penalizer 0.0024787521766663585 (5/14), 1 seconds
+Started estimating the coefficients for penalizer 0.004086771438464067 (6/14)
+Finished estimating the coefficients for penalizer 0.004086771438464067 (6/14), 1 seconds
+Started estimating the coefficients for penalizer 0.006737946999085467 (7/14)
+Finished estimating the coefficients for penalizer 0.006737946999085467 (7/14), 1 seconds
+Started estimating the coefficients for penalizer 0.011108996538242306 (8/14)
+Finished estimating the coefficients for penalizer 0.011108996538242306 (8/14), 1 seconds
+Started estimating the coefficients for penalizer 0.01831563888873418 (9/14)
+Finished estimating the coefficients for penalizer 0.01831563888873418 (9/14), 1 seconds
+Started estimating the coefficients for penalizer 0.0301973834223185 (10/14)
+Finished estimating the coefficients for penalizer 0.0301973834223185 (10/14), 1 seconds
+Started estimating the coefficients for penalizer 0.049787068367863944 (11/14)
+Finished estimating the coefficients for penalizer 0.049787068367863944 (11/14), 1 seconds
+Started estimating the coefficients for penalizer 0.0820849986238988 (12/14)
+Finished estimating the coefficients for penalizer 0.0820849986238988 (12/14), 1 seconds
+Started estimating the coefficients for penalizer 0.1353352832366127 (13/14)
+Finished estimating the coefficients for penalizer 0.1353352832366127 (13/14), 1 seconds
+Started estimating the coefficients for penalizer 0.22313016014842982 (14/14)
+Finished estimating the coefficients for penalizer 0.22313016014842982 (14/14), 1 seconds
+Finished fold 3/3, 59 seconds
+</code>
+</pre>
+</div>
+</div>
+<div class="output_area">
+<div class="output_text output_subarea output_execute_result">
+<pre>
+<code>array([-5. , -6.5])</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The mean and standard error (SE) of the global-AUC, calculated via cross-validation for all possible combinations of penalization parameters, are as follows:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">gauc_cv_results</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th></th>
+<th>Mean</th>
+<th>SE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th rowspan="14" valign="top">0.000335</th>
+<th>0.000335</th>
+<td>0.839310</td>
+<td>0.016736</td>
+</tr>
+<tr>
+<th>0.000553</th>
+<td>0.839301</td>
+<td>0.017051</td>
+</tr>
+<tr>
+<th>0.000912</th>
+<td>0.839296</td>
+<td>0.017185</td>
+</tr>
+<tr>
+<th>0.001503</th>
+<td>0.839121</td>
+<td>0.017664</td>
+</tr>
+<tr>
+<th>0.002479</th>
+<td>0.839049</td>
+<td>0.017628</td>
+</tr>
+<tr>
+<th>0.004087</th>
+<td>0.838560</td>
+<td>0.017396</td>
+</tr>
+<tr>
+<th>0.006738</th>
+<td>0.838120</td>
+<td>0.017466</td>
+</tr>
+<tr>
+<th>0.011109</th>
+<td>0.837332</td>
+<td>0.016710</td>
+</tr>
+<tr>
+<th>0.018316</th>
+<td>0.833451</td>
+<td>0.013611</td>
+</tr>
+<tr>
+<th>0.030197</th>
+<td>0.821111</td>
+<td>0.007837</td>
+</tr>
+<tr>
+<th>0.049787</th>
+<td>0.783010</td>
+<td>0.011579</td>
+</tr>
+<tr>
+<th>0.082085</th>
+<td>0.772589</td>
+<td>0.016024</td>
+</tr>
+<tr>
+<th>0.135335</th>
+<td>0.772869</td>
+<td>0.016011</td>
+</tr>
+<tr>
+<th>0.223130</th>
+<td>0.772824</td>
+<td>0.016058</td>
+</tr>
+<tr>
+<th rowspan="14" valign="top">0.000553</th>
+<th>0.000335</th>
+<td>0.839319</td>
+<td>0.016691</td>
+</tr>
+<tr>
+<th>0.000553</th>
+<td>0.839215</td>
+<td>0.016970</td>
+</tr>
+<tr>
+<th>0.000912</th>
+<td>0.839322</td>
+<td>0.017114</td>
+</tr>
+<tr>
+<th>0.001503</th>
+<td>0.839048</td>
+<td>0.017512</td>
+</tr>
+<tr>
+<th>0.002479</th>
+<td>0.839088</td>
+<td>0.017568</td>
+</tr>
+<tr>
+<th>0.004087</th>
+<td>0.838381</td>
+<td>0.017399</td>
+</tr>
+<tr>
+<th>0.006738</th>
+<td>0.838048</td>
+<td>0.017620</td>
+</tr>
+<tr>
+<th>0.011109</th>
+<td>0.837413</td>
+<td>0.016404</td>
+</tr>
+<tr>
+<th>0.018316</th>
+<td>0.833464</td>
+<td>0.013506</td>
+</tr>
+<tr>
+<th>0.030197</th>
+<td>0.821080</td>
+<td>0.007901</td>
+</tr>
+<tr>
+<th>0.049787</th>
+<td>0.782982</td>
+<td>0.012069</td>
+</tr>
+<tr>
+<th>0.082085</th>
+<td>0.772556</td>
+<td>0.016003</td>
+</tr>
+<tr>
+<th>0.135335</th>
+<td>0.772837</td>
+<td>0.015990</td>
+</tr>
+<tr>
+<th>0.223130</th>
+<td>0.772791</td>
+<td>0.016036</td>
+</tr>
+<tr>
+<th rowspan="14" valign="top">0.000912</th>
+<th>0.000335</th>
+<td>0.839445</td>
+<td>0.016549</td>
+</tr>
+<tr>
+<th>0.000553</th>
+<td>0.839508</td>
+<td>0.016806</td>
+</tr>
+<tr>
+<th>0.000912</th>
+<td>0.839674</td>
+<td>0.017078</td>
+</tr>
+<tr>
+<th>0.001503</th>
+<td>0.839211</td>
+<td>0.017539</td>
+</tr>
+<tr>
+<th>0.002479</th>
+<td>0.839136</td>
+<td>0.017455</td>
+</tr>
+<tr>
+<th>0.004087</th>
+<td>0.838765</td>
+<td>0.017007</td>
+</tr>
+<tr>
+<th>0.006738</th>
+<td>0.838096</td>
+<td>0.017474</td>
+</tr>
+<tr>
+<th>0.011109</th>
+<td>0.837514</td>
+<td>0.016094</td>
+</tr>
+<tr>
+<th>0.018316</th>
+<td>0.833507</td>
+<td>0.013212</td>
+</tr>
+<tr>
+<th>0.030197</th>
+<td>0.821264</td>
+<td>0.007708</td>
+</tr>
+<tr>
+<th>0.049787</th>
+<td>0.783023</td>
+<td>0.012378</td>
+</tr>
+<tr>
+<th>0.082085</th>
+<td>0.772664</td>
+<td>0.016456</td>
+</tr>
+<tr>
+<th>0.135335</th>
+<td>0.772945</td>
+<td>0.016442</td>
+</tr>
+<tr>
+<th>0.223130</th>
+<td>0.772899</td>
+<td>0.016487</td>
+</tr>
+<tr>
+<th rowspan="14" valign="top">0.001503</th>
+<th>0.000335</th>
+<td>0.839244</td>
+<td>0.016515</td>
+</tr>
+<tr>
+<th>0.000553</th>
+<td>0.839205</td>
+<td>0.016741</td>
+</tr>
+<tr>
+<th>0.000912</th>
+<td>0.839271</td>
+<td>0.017036</td>
+</tr>
+<tr>
+<th>0.001503</th>
+<td>0.838917</td>
+<td>0.017737</td>
+</tr>
+<tr>
+<th>0.002479</th>
+<td>0.838679</td>
+<td>0.017799</td>
+</tr>
+<tr>
+<th>0.004087</th>
+<td>0.838435</td>
+<td>0.017271</td>
+</tr>
+<tr>
+<th>0.006738</th>
+<td>0.838051</td>
+<td>0.017731</td>
+</tr>
+<tr>
+<th>0.011109</th>
+<td>0.837635</td>
+<td>0.016325</td>
+</tr>
+<tr>
+<th>0.018316</th>
+<td>0.833447</td>
+<td>0.013246</td>
+</tr>
+<tr>
+<th>0.030197</th>
+<td>0.821356</td>
+<td>0.007606</td>
+</tr>
+<tr>
+<th>0.049787</th>
+<td>0.783343</td>
+<td>0.012864</td>
+</tr>
+<tr>
+<th>0.082085</th>
+<td>0.772856</td>
+<td>0.016586</td>
+</tr>
+<tr>
+<th>0.135335</th>
+<td>0.773137</td>
+<td>0.016572</td>
+</tr>
+<tr>
+<th>0.223130</th>
+<td>0.773091</td>
+<td>0.016614</td>
+</tr>
+<tr>
+<th rowspan="14" valign="top">0.002479</th>
+<th>0.000335</th>
+<td>0.839097</td>
+<td>0.016811</td>
+</tr>
+<tr>
+<th>0.000553</th>
+<td>0.839035</td>
+<td>0.016926</td>
+</tr>
+<tr>
+<th>0.000912</th>
+<td>0.839103</td>
+<td>0.017126</td>
+</tr>
+<tr>
+<th>0.001503</th>
+<td>0.838893</td>
+<td>0.017719</td>
+</tr>
+<tr>
+<th>0.002479</th>
+<td>0.838964</td>
+<td>0.017633</td>
+</tr>
+<tr>
+<th>0.004087</th>
+<td>0.838691</td>
+<td>0.017244</td>
+</tr>
+<tr>
+<th>0.006738</th>
+<td>0.838744</td>
+<td>0.017172</td>
+</tr>
+<tr>
+<th>0.011109</th>
+<td>0.838227</td>
+<td>0.015683</td>
+</tr>
+<tr>
+<th>0.018316</th>
+<td>0.833432</td>
+<td>0.012906</td>
+</tr>
+<tr>
+<th>0.030197</th>
+<td>0.821181</td>
+<td>0.006973</td>
+</tr>
+<tr>
+<th>0.049787</th>
+<td>0.783506</td>
+<td>0.012074</td>
+</tr>
+<tr>
+<th>0.082085</th>
+<td>0.773286</td>
+<td>0.015911</td>
+</tr>
+<tr>
+<th>0.135335</th>
+<td>0.773566</td>
+<td>0.015897</td>
+</tr>
+<tr>
+<th>0.223130</th>
+<td>0.773520</td>
+<td>0.015939</td>
+</tr>
+<tr>
+<th rowspan="14" valign="top">0.004087</th>
+<th>0.000335</th>
+<td>0.838782</td>
+<td>0.016410</td>
+</tr>
+<tr>
+<th>0.000553</th>
+<td>0.838854</td>
+<td>0.016409</td>
+</tr>
+<tr>
+<th>0.000912</th>
+<td>0.839057</td>
+<td>0.016399</td>
+</tr>
+<tr>
+<th>0.001503</th>
+<td>0.838994</td>
+<td>0.016779</td>
+</tr>
+<tr>
+<th>0.002479</th>
+<td>0.838890</td>
+<td>0.016642</td>
+</tr>
+<tr>
+<th>0.004087</th>
+<td>0.838758</td>
+<td>0.016638</td>
+</tr>
+<tr>
+<th>0.006738</th>
+<td>0.838664</td>
+<td>0.017101</td>
+</tr>
+<tr>
+<th>0.011109</th>
+<td>0.838381</td>
+<td>0.015460</td>
+</tr>
+<tr>
+<th>0.018316</th>
+<td>0.834031</td>
+<td>0.011877</td>
+</tr>
+<tr>
+<th>0.030197</th>
+<td>0.821658</td>
+<td>0.006876</td>
+</tr>
+<tr>
+<th>0.049787</th>
+<td>0.785117</td>
+<td>0.012208</td>
+</tr>
+<tr>
+<th>0.082085</th>
+<td>0.774618</td>
+<td>0.015692</td>
+</tr>
+<tr>
+<th>0.135335</th>
+<td>0.774898</td>
+<td>0.015677</td>
+</tr>
+<tr>
+<th>0.223130</th>
+<td>0.774853</td>
+<td>0.015721</td>
+</tr>
+<tr>
+<th rowspan="14" valign="top">0.006738</th>
+<th>0.000335</th>
+<td>0.839506</td>
+<td>0.015608</td>
+</tr>
+<tr>
+<th>0.000553</th>
+<td>0.839563</td>
+<td>0.015375</td>
+</tr>
+<tr>
+<th>0.000912</th>
+<td>0.839494</td>
+<td>0.015641</td>
+</tr>
+<tr>
+<th>0.001503</th>
+<td>0.839695</td>
+<td>0.015665</td>
+</tr>
+<tr>
+<th>0.002479</th>
+<td>0.839303</td>
+<td>0.015955</td>
+</tr>
+<tr>
+<th>0.004087</th>
+<td>0.839278</td>
+<td>0.015767</td>
+</tr>
+<tr>
+<th>0.006738</th>
+<td>0.839070</td>
+<td>0.015203</td>
+</tr>
+<tr>
+<th>0.011109</th>
+<td>0.838922</td>
+<td>0.014411</td>
+</tr>
+<tr>
+<th>0.018316</th>
+<td>0.835204</td>
+<td>0.011192</td>
+</tr>
+<tr>
+<th>0.030197</th>
+<td>0.822213</td>
+<td>0.005912</td>
+</tr>
+<tr>
+<th>0.049787</th>
+<td>0.785897</td>
+<td>0.012848</td>
+</tr>
+<tr>
+<th>0.082085</th>
+<td>0.776100</td>
+<td>0.015153</td>
+</tr>
+<tr>
+<th>0.135335</th>
+<td>0.776380</td>
+<td>0.015139</td>
+</tr>
+<tr>
+<th>0.223130</th>
+<td>0.776335</td>
+<td>0.015184</td>
+</tr>
+<tr>
+<th rowspan="14" valign="top">0.011109</th>
+<th>0.000335</th>
+<td>0.839046</td>
+<td>0.016343</td>
+</tr>
+<tr>
+<th>0.000553</th>
+<td>0.839020</td>
+<td>0.016408</td>
+</tr>
+<tr>
+<th>0.000912</th>
+<td>0.839202</td>
+<td>0.016388</td>
+</tr>
+<tr>
+<th>0.001503</th>
+<td>0.838919</td>
+<td>0.016603</td>
+</tr>
+<tr>
+<th>0.002479</th>
+<td>0.838946</td>
+<td>0.016389</td>
+</tr>
+<tr>
+<th>0.004087</th>
+<td>0.839008</td>
+<td>0.016914</td>
+</tr>
+<tr>
+<th>0.006738</th>
+<td>0.839067</td>
+<td>0.016148</td>
+</tr>
+<tr>
+<th>0.011109</th>
+<td>0.838108</td>
+<td>0.015115</td>
+</tr>
+<tr>
+<th>0.018316</th>
+<td>0.834542</td>
+<td>0.012781</td>
+</tr>
+<tr>
+<th>0.030197</th>
+<td>0.822281</td>
+<td>0.006193</td>
+</tr>
+<tr>
+<th>0.049787</th>
+<td>0.787564</td>
+<td>0.014657</td>
+</tr>
+<tr>
+<th>0.082085</th>
+<td>0.776986</td>
+<td>0.017123</td>
+</tr>
+<tr>
+<th>0.135335</th>
+<td>0.777267</td>
+<td>0.017108</td>
+</tr>
+<tr>
+<th>0.223130</th>
+<td>0.777221</td>
+<td>0.017148</td>
+</tr>
+<tr>
+<th rowspan="14" valign="top">0.018316</th>
+<th>0.000335</th>
+<td>0.835257</td>
+<td>0.016302</td>
+</tr>
+<tr>
+<th>0.000553</th>
+<td>0.835103</td>
+<td>0.016123</td>
+</tr>
+<tr>
+<th>0.000912</th>
+<td>0.835091</td>
+<td>0.015831</td>
+</tr>
+<tr>
+<th>0.001503</th>
+<td>0.835023</td>
+<td>0.015652</td>
+</tr>
+<tr>
+<th>0.002479</th>
+<td>0.834942</td>
+<td>0.015868</td>
+</tr>
+<tr>
+<th>0.004087</th>
+<td>0.834990</td>
+<td>0.015789</td>
+</tr>
+<tr>
+<th>0.006738</th>
+<td>0.835301</td>
+<td>0.015642</td>
+</tr>
+<tr>
+<th>0.011109</th>
+<td>0.835309</td>
+<td>0.015189</td>
+</tr>
+<tr>
+<th>0.018316</th>
+<td>0.831576</td>
+<td>0.011445</td>
+</tr>
+<tr>
+<th>0.030197</th>
+<td>0.821664</td>
+<td>0.006425</td>
+</tr>
+<tr>
+<th>0.049787</th>
+<td>0.788653</td>
+<td>0.016959</td>
+</tr>
+<tr>
+<th>0.082085</th>
+<td>0.780039</td>
+<td>0.020316</td>
+</tr>
+<tr>
+<th>0.135335</th>
+<td>0.780320</td>
+<td>0.020299</td>
+</tr>
+<tr>
+<th>0.223130</th>
+<td>0.780274</td>
+<td>0.020321</td>
+</tr>
+<tr>
+<th rowspan="14" valign="top">0.030197</th>
+<th>0.000335</th>
+<td>0.814710</td>
+<td>0.015876</td>
+</tr>
+<tr>
+<th>0.000553</th>
+<td>0.814745</td>
+<td>0.015663</td>
+</tr>
+<tr>
+<th>0.000912</th>
+<td>0.814631</td>
+<td>0.015975</td>
+</tr>
+<tr>
+<th>0.001503</th>
+<td>0.814247</td>
+<td>0.016350</td>
+</tr>
+<tr>
+<th>0.002479</th>
+<td>0.814106</td>
+<td>0.016617</td>
+</tr>
+<tr>
+<th>0.004087</th>
+<td>0.813703</td>
+<td>0.016317</td>
+</tr>
+<tr>
+<th>0.006738</th>
+<td>0.813543</td>
+<td>0.016564</td>
+</tr>
+<tr>
+<th>0.011109</th>
+<td>0.813497</td>
+<td>0.016480</td>
+</tr>
+<tr>
+<th>0.018316</th>
+<td>0.809512</td>
+<td>0.014985</td>
+</tr>
+<tr>
+<th>0.030197</th>
+<td>0.798333</td>
+<td>0.016604</td>
+</tr>
+<tr>
+<th>0.049787</th>
+<td>0.770253</td>
+<td>0.027722</td>
+</tr>
+<tr>
+<th>0.082085</th>
+<td>0.759912</td>
+<td>0.027838</td>
+</tr>
+<tr>
+<th>0.135335</th>
+<td>0.760192</td>
+<td>0.027821</td>
+</tr>
+<tr>
+<th>0.223130</th>
+<td>0.760147</td>
+<td>0.027759</td>
+</tr>
+<tr>
+<th rowspan="14" valign="top">0.049787</th>
+<th>0.000335</th>
+<td>0.767913</td>
+<td>0.014539</td>
+</tr>
+<tr>
+<th>0.000553</th>
+<td>0.768009</td>
+<td>0.014360</td>
+</tr>
+<tr>
+<th>0.000912</th>
+<td>0.768047</td>
+<td>0.014529</td>
+</tr>
+<tr>
+<th>0.001503</th>
+<td>0.767932</td>
+<td>0.014657</td>
+</tr>
+<tr>
+<th>0.002479</th>
+<td>0.768087</td>
+<td>0.014794</td>
+</tr>
+<tr>
+<th>0.004087</th>
+<td>0.767950</td>
+<td>0.015078</td>
+</tr>
+<tr>
+<th>0.006738</th>
+<td>0.767536</td>
+<td>0.014674</td>
+</tr>
+<tr>
+<th>0.011109</th>
+<td>0.767847</td>
+<td>0.013736</td>
+</tr>
+<tr>
+<th>0.018316</th>
+<td>0.762140</td>
+<td>0.011930</td>
+</tr>
+<tr>
+<th>0.030197</th>
+<td>0.738421</td>
+<td>0.022566</td>
+</tr>
+<tr>
+<th>0.049787</th>
+<td>0.693013</td>
+<td>0.031937</td>
+</tr>
+<tr>
+<th>0.082085</th>
+<td>0.697943</td>
+<td>0.020535</td>
+</tr>
+<tr>
+<th>0.135335</th>
+<td>0.698223</td>
+<td>0.020517</td>
+</tr>
+<tr>
+<th>0.223130</th>
+<td>0.698178</td>
+<td>0.020518</td>
+</tr>
+<tr>
+<th rowspan="14" valign="top">0.082085</th>
+<th>0.000335</th>
+<td>0.784645</td>
+<td>0.018999</td>
+</tr>
+<tr>
+<th>0.000553</th>
+<td>0.784499</td>
+<td>0.019231</td>
+</tr>
+<tr>
+<th>0.000912</th>
+<td>0.784805</td>
+<td>0.019623</td>
+</tr>
+<tr>
+<th>0.001503</th>
+<td>0.784836</td>
+<td>0.019550</td>
+</tr>
+<tr>
+<th>0.002479</th>
+<td>0.784909</td>
+<td>0.019320</td>
+</tr>
+<tr>
+<th>0.004087</th>
+<td>0.785301</td>
+<td>0.018848</td>
+</tr>
+<tr>
+<th>0.006738</th>
+<td>0.786166</td>
+<td>0.020660</td>
+</tr>
+<tr>
+<th>0.011109</th>
+<td>0.785523</td>
+<td>0.019952</td>
+</tr>
+<tr>
+<th>0.018316</th>
+<td>0.780788</td>
+<td>0.017355</td>
+</tr>
+<tr>
+<th>0.030197</th>
+<td>0.752271</td>
+<td>0.019530</td>
+</tr>
+<tr>
+<th>0.049787</th>
+<td>0.672445</td>
+<td>0.028903</td>
+</tr>
+<tr>
+<th>0.082085</th>
+<td>0.826968</td>
+<td>0.010104</td>
+</tr>
+<tr>
+<th>0.135335</th>
+<td>0.826940</td>
+<td>0.010734</td>
+</tr>
+<tr>
+<th>0.223130</th>
+<td>0.826910</td>
+<td>0.010692</td>
+</tr>
+<tr>
+<th rowspan="14" valign="top">0.135335</th>
+<th>0.000335</th>
+<td>0.784838</td>
+<td>0.018920</td>
+</tr>
+<tr>
+<th>0.000553</th>
+<td>0.784692</td>
+<td>0.019158</td>
+</tr>
+<tr>
+<th>0.000912</th>
+<td>0.784998</td>
+<td>0.019550</td>
+</tr>
+<tr>
+<th>0.001503</th>
+<td>0.785029</td>
+<td>0.019472</td>
+</tr>
+<tr>
+<th>0.002479</th>
+<td>0.785102</td>
+<td>0.019250</td>
+</tr>
+<tr>
+<th>0.004087</th>
+<td>0.785494</td>
+<td>0.018774</td>
+</tr>
+<tr>
+<th>0.006738</th>
+<td>0.786359</td>
+<td>0.020611</td>
+</tr>
+<tr>
+<th>0.011109</th>
+<td>0.785716</td>
+<td>0.019881</td>
+</tr>
+<tr>
+<th>0.018316</th>
+<td>0.780982</td>
+<td>0.017265</td>
+</tr>
+<tr>
+<th>0.030197</th>
+<td>0.752464</td>
+<td>0.019229</td>
+</tr>
+<tr>
+<th>0.049787</th>
+<td>0.672638</td>
+<td>0.028580</td>
+</tr>
+<tr>
+<th>0.082085</th>
+<td>0.828181</td>
+<td>0.009055</td>
+</tr>
+<tr>
+<th>0.135335</th>
+<td>0.828035</td>
+<td>0.010011</td>
+</tr>
+<tr>
+<th>0.223130</th>
+<td>0.827822</td>
+<td>0.010142</td>
+</tr>
+<tr>
+<th rowspan="14" valign="top">0.223130</th>
+<th>0.000335</th>
+<td>0.784937</td>
+<td>0.018952</td>
+</tr>
+<tr>
+<th>0.000553</th>
+<td>0.784790</td>
+<td>0.019195</td>
+</tr>
+<tr>
+<th>0.000912</th>
+<td>0.785097</td>
+<td>0.019588</td>
+</tr>
+<tr>
+<th>0.001503</th>
+<td>0.785127</td>
+<td>0.019506</td>
+</tr>
+<tr>
+<th>0.002479</th>
+<td>0.785201</td>
+<td>0.019289</td>
+</tr>
+<tr>
+<th>0.004087</th>
+<td>0.785593</td>
+<td>0.018811</td>
+</tr>
+<tr>
+<th>0.006738</th>
+<td>0.786458</td>
+<td>0.020666</td>
+</tr>
+<tr>
+<th>0.011109</th>
+<td>0.785815</td>
+<td>0.019919</td>
+</tr>
+<tr>
+<th>0.018316</th>
+<td>0.781080</td>
+<td>0.017290</td>
+</tr>
+<tr>
+<th>0.030197</th>
+<td>0.752562</td>
+<td>0.019069</td>
+</tr>
+<tr>
+<th>0.049787</th>
+<td>0.672737</td>
+<td>0.028392</td>
+</tr>
+<tr>
+<th>0.082085</th>
+<td>0.828618</td>
+<td>0.009264</td>
+</tr>
+<tr>
+<th>0.135335</th>
+<td>0.828195</td>
+<td>0.009819</td>
+</tr>
+<tr>
+<th>0.223130</th>
+<td>0.828290</td>
+<td>0.010145</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We choose the optimal penalizers to be the ones that maximize the global-AUC, i.e., <span class="arithmatex">\(\log(\eta_j)\)</span>, <span class="arithmatex">\(j=1,2\)</span>, are</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">chosen_eta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">gauc_cv_results</span><span class="p">[</span><span class="s1">&#39;Mean&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">idxmax</span><span class="p">())</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="n">chosen_eta</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_text output_subarea output_execute_result">
+<pre>
+<code>array([-5. , -6.5])</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Lastly, we train a regularized <code>TwoStagesFitter</code> using the entire dataset and the chosen optimal penalizers:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="n">L1_regularized_fitter</span> <span class="o">=</span> <span class="n">TwoStagesFitter</span><span class="p">()</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="n">fit_beta_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>    <span class="s1">&#39;model_kwargs&#39;</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>        <span class="mi">1</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;penalizer&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">chosen_eta</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="s1">&#39;l1_ratio&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>        <span class="mi">2</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;penalizer&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">chosen_eta</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="s1">&#39;l1_ratio&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="p">}}</span>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="n">L1_regularized_fitter</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df</span> <span class="o">=</span> <span class="n">patients_df</span><span class="p">[[</span><span class="s1">&#39;pid&#39;</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;J&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">selected_covariates</span><span class="p">],</span>
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>                          <span class="n">fit_beta_kwargs</span> <span class="o">=</span> <span class="n">fit_beta_kwargs</span><span class="p">,</span> <span class="n">covariates</span><span class="o">=</span><span class="n">fitter</span><span class="o">.</span><span class="n">chosen_covariates_j</span><span class="p">)</span>
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="n">lasso_beta</span> <span class="o">=</span> <span class="n">L1_regularized_fitter</span><span class="o">.</span><span class="n">get_beta_SE</span><span class="p">()</span> 
+</code></pre></div>
+
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Thus, the final SIS-L model is </p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="n">lasso_beta</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>j1_params</th>
+<th>j1_SE</th>
+<th>j2_params</th>
+<th>j2_SE</th>
+</tr>
+<tr>
+<th>covariate</th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>Z1</th>
+<td>-0.545206</td>
+<td>0.079020</td>
+<td>0.435527</td>
+<td>0.086359</td>
+</tr>
+<tr>
+<th>Z2</th>
+<td>0.510060</td>
+<td>0.086179</td>
+<td>-0.915843</td>
+<td>0.095965</td>
+</tr>
+<tr>
+<th>Z3</th>
+<td>-0.509418</td>
+<td>0.089982</td>
+<td>0.645257</td>
+<td>0.078984</td>
+</tr>
+<tr>
+<th>Z4</th>
+<td>0.689470</td>
+<td>0.080248</td>
+<td>-0.614332</td>
+<td>0.084495</td>
+</tr>
+<tr>
+<th>Z5</th>
+<td>-0.567603</td>
+<td>0.087249</td>
+<td>-0.785802</td>
+<td>0.083732</td>
+</tr>
+<tr>
+<th>Z95</th>
+<td>0.065064</td>
+<td>0.082256</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr>
+<th>Z198</th>
+<td>NaN</td>
+<td>NaN</td>
+<td>0.125372</td>
+<td>0.081348</td>
+</tr>
+<tr>
+<th>Z355</th>
+<td>NaN</td>
+<td>NaN</td>
+<td>-0.188075</td>
+<td>0.083523</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Recall that the true non-zero <span class="arithmatex">\(\beta_j\)</span> values were:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="n">true_values</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">beta1</span><span class="p">[:</span><span class="mi">5</span><span class="p">]),</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">beta2</span><span class="p">[:</span><span class="mi">5</span><span class="p">])],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="n">true_values</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Z1&#39;</span><span class="p">,</span> <span class="s1">&#39;Z2&#39;</span><span class="p">,</span> <span class="s1">&#39;Z3&#39;</span><span class="p">,</span> <span class="s1">&#39;Z4&#39;</span><span class="p">,</span> <span class="s1">&#39;Z5&#39;</span><span class="p">]</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="n">true_values</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;j1&#39;</span><span class="p">,</span> <span class="s1">&#39;j2&#39;</span><span class="p">]</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="n">true_values</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>j1</th>
+<th>j2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>Z1</th>
+<td>-0.90</td>
+<td>0.75</td>
+</tr>
+<tr>
+<th>Z2</th>
+<td>0.75</td>
+<td>-1.05</td>
+</tr>
+<tr>
+<th>Z3</th>
+<td>-0.75</td>
+<td>1.05</td>
+</tr>
+<tr>
+<th>Z4</th>
+<td>0.90</td>
+<td>-0.75</td>
+</tr>
+<tr>
+<th>Z5</th>
+<td>-0.90</td>
+<td>-1.05</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Thus, using SIS, we identified the informative variables and filtered out most of the non-informative ones. Adding LASSO as a subsequent step further reduced the false positive coefficient in event-type 1 to nearly zero. In this specific example, SIS-L did not eliminate additional false positives for event-type 2; however, given the large number of initial covariates, this still represents a substantial improvement.</p>
+</div>
+</div>
+</div>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.sections", "toc.integrate", "header.autohide"], "search": "../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.92b07e13.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
