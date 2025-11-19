@@ -3,8 +3,9 @@
 [![documentation](https://img.shields.io/badge/docs-mkdocs%20material-blue.svg?style=flat)](https://tomer1812.github.io/pydts)
 [![codecov](https://codecov.io/gh/tomer1812/pydts/branch/main/graph/badge.svg)](https://codecov.io/gh/tomer1812/pydts)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17593777.svg)](https://doi.org/10.5281/zenodo.17593777)
+[![status](https://joss.theoj.org/papers/9cbe5336e55ae2db51d5a1b2415232ff/status.svg)](https://joss.theoj.org/papers/9cbe5336e55ae2db51d5a1b2415232ff)
 
-# Discrete Time Survival Analysis  
+# PyDTS: A Python Package for Discrete-Time Survival Analysis with Competing Risks and Optional Penalization
 
 *PyDTS* is a Python package designed for discrete-time survival analysis with competing risks, offering tools for model fitting, evaluation, and simulation.
 
