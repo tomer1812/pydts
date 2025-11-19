@@ -1,0 +1,44 @@
+cff-version: "1.2.0"
+authors:
+- family-names: Meir
+  given-names: Tomer
+  orcid: "https://orcid.org/0000-0002-3208-8460"
+- family-names: Gutman
+  given-names: Rom
+  orcid: "https://orcid.org/0000-0002-4125-7545"
+- family-names: Gorfine
+  given-names: Malka
+  orcid: "https://orcid.org/0000-0002-1577-6624"
+contact:
+- family-names: Meir
+  given-names: Tomer
+  orcid: "https://orcid.org/0000-0002-3208-8460"
+doi: 10.5281/zenodo.17593777
+message: If you use this software, please cite our article in the
+  Journal of Open Source Software.
+preferred-citation:
+  authors:
+  - family-names: Meir
+    given-names: Tomer
+    orcid: "https://orcid.org/0000-0002-3208-8460"
+  - family-names: Gutman
+    given-names: Rom
+    orcid: "https://orcid.org/0000-0002-4125-7545"
+  - family-names: Gorfine
+    given-names: Malka
+    orcid: "https://orcid.org/0000-0002-1577-6624"
+  date-published: 2025-11-19
+  doi: 10.21105/joss.08815
+  issn: 2475-9066
+  issue: 115
+  journal: Journal of Open Source Software
+  publisher:
+    name: Open Journals
+  start: 8815
+  title: "PyDTS: A Python Package for Discrete-Time Survival Analysis
+    with Competing Risks and Optional Penalization"
+  type: article
+  url: "https://joss.theoj.org/papers/10.21105/joss.08815"
+  volume: 10
+title: "PyDTS: A Python Package for Discrete-Time Survival Analysis with
+  Competing Risks and Optional Penalization"
