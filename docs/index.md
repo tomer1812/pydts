@@ -101,10 +101,14 @@ If you found *PyDTS* software useful to your research, please cite the papers:
 ```bibtex
 @article{Meir_PyDTS_2022,
     author = {Meir, Tomer and Gutman, Rom, and Gorfine, Malka},
-    doi = {10.48550/arXiv.2204.05731},
-    title = {{PyDTS: A Python Package for Discrete Time Survival Analysis with Competing Risks}},
-    url = {https://arxiv.org/abs/2204.05731},
-    year = {2022}
+    doi = {10.21105/joss.08815},
+    title = {{PyDTS: A Python Package for Discrete-Time Survival Analysis with Competing Risks and Optional Penalization}},
+    year = {2025},
+    journal = {Journal of Open Source Software},
+    volume = {10},
+    number = {115},
+    url = {https://doi.org/10.21105/joss.08815},
+    pages = {8815}
 }
 
 @article{Meir_Gorfine_DTSP_2025,
