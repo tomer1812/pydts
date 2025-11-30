@@ -1,0 +1,2622 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="The documentation for the PyDTS software library.">
+      
+      
+        <meta name="author" content="Tomer Meir, Rom Gutman">
+      
+      
+      
+        <link rel="prev" href="../Regularization/">
+      
+      
+        <link rel="next" href="../UsageExample-SIS-SIS-L/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
+    
+    
+      
+        <title>Small Sample Size Example - PyDTS</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.7e37652d.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../css/ansi-colours.css">
+    
+      <link rel="stylesheet" href="../css/jupyter-cells.css">
+    
+      <link rel="stylesheet" href="../css/pandas-dataframe.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  
+  
+
+<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","G-Z0XYP3868P"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","G-Z0XYP3868P",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=G-Z0XYP3868P",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#estimating-with-twostagesfitterexact" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="PyDTS" class="md-header__button md-logo" aria-label="PyDTS" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PyDTS
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Small Sample Size Example
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/tomer1812/pydts/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    tomer1812/pydts
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="PyDTS" class="md-nav__button md-logo" aria-label="PyDTS" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    PyDTS
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/tomer1812/pydts/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    tomer1812/pydts
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Methods
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Methods
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../methodsintro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../methods/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Definitions and Estimation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../methodsevaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Evaluation Metrics
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Examples
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Examples
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples-intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../EventTimesSampler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Event Times Sampler
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Estimation Example
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            Estimation Example
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../UsageExample-Intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../UsageExample-DataPreparation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Preparation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../UsageExample-FittingTwoStagesFitter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Estimation with TwoStagesFitter
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../UsageExample-FittingDataExpansionFitter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Estimation with DataExpansionFitter
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../UsageExample-RegroupingData/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Regrouping Example
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ModelsComparison/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Comparing the Estimation Methods
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../PerformanceMeasures/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Evaluation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Regularization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Regularization
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Small Sample Size Example
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Small Sample Size Example
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      Introduction
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-preparation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Preparation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#estimation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Estimation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#standard-error-of-the-regression-coefficients" class="md-nav__link">
+    <span class="md-ellipsis">
+      Standard Error of the Regression Coefficients
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#regularization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Regularization
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Regularization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#l1" class="md-nav__link">
+    <span class="md-ellipsis">
+      L1
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#l2" class="md-nav__link">
+    <span class="md-ellipsis">
+      L2
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#elastic-net" class="md-nav__link">
+    <span class="md-ellipsis">
+      Elastic Net
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prediction" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prediction
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../UsageExample-SIS-SIS-L/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Screening Example
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SimulatedDataset/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Hospitalization LOS Simulation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../JOSS_mimic_example/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    MIMIC Example Summary
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    API
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            API
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/two_stages_fitter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    The Two Stages Procedure of Meir and Gorfine (2023) - Efron
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/two_stages_fitter_exact/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    The Two Stages Procedure of Meir and Gorfine (2023) - Exact
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/data_expansion_fitter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Expansion Procedure of Lee et al. (2018)
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/event_times_sampler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Event Times Sampler
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Evaluation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/cross_validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Cross Validation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/model_selection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Model Selection
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/screening/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Sure Independent Screening
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/utils/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Utils
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+<script>
+(function() {
+  function addWidgetsRenderer() {
+    var requireJsScript = document.createElement('script');
+    requireJsScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js';
+
+    var mimeElement = document.querySelector('script[type="application/vnd.jupyter.widget-view+json"]');
+    var jupyterWidgetsScript = document.createElement('script');
+    var widgetRendererSrc = 'https://unpkg.com/@jupyter-widgets/html-manager@*/dist/embed-amd.js';
+    var widgetState;
+
+    // Fallback for older version:
+    try {
+      widgetState = mimeElement && JSON.parse(mimeElement.innerHTML);
+
+      if (widgetState && (widgetState.version_major < 2 || !widgetState.version_major)) {
+        widgetRendererSrc = 'jupyter-js-widgets@*/dist/embed.js';
+      }
+    } catch(e) {}
+
+    jupyterWidgetsScript.src = widgetRendererSrc;
+
+    document.body.appendChild(requireJsScript);
+    document.body.appendChild(jupyterWidgetsScript);
+  }
+
+  document.addEventListener('DOMContentLoaded', addWidgetsRenderer);
+}());
+</script>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="estimating-with-twostagesfitterexact">Estimating with TwoStagesFitterExact<a class="headerlink" href="#estimating-with-twostagesfitterexact" title="Permanent link">¤</a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">¤</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The <code>CoxPHFitter</code> from the Python <em>lifelines</em> package, which is used in the first stage of <code>TwoStagesFitter</code>, employs Efron’s approximation of the partial likelihood function when ties are present. While Efron's method is computationally efficient for large sample sizes, it may yield biased coefficient estimates when the sample size is small.</p>
+<p>Therefore, for datasets with up to approximately 500 observations, it is recommended to use the exact method, i.e., <code>TwoStagesFitterExact</code>, as illustrated below. This method employs <code>ConditionalLogit</code> models from <em>statsmodels</em> to estimate the <span class="arithmatex">\(\beta_j\)</span> coefficients using the exact likelihood. However, due to its computational complexity, it is suitable only for small sample sizes. Additional tools for model selection and screening available in <em>PyDTS</em> for use with <code>TwoStagesFitter</code> also have corresponding "Exact" versions for small sample sizes, which rely on <code>TwoStagesFitterExact</code>.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="data-preparation">Data Preparation<a class="headerlink" href="#data-preparation" title="Permanent link">¤</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pydts.examples_utils.generate_simulations_data</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate_quick_start_df</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pydts.examples_utils.plots</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_example_pred_output</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">&quot;display.max_rows&quot;</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+</code></pre></div>
+
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">real_coef_dict</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>        <span class="mi">1</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.</span> <span class="o">+</span> <span class="mf">0.4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">t</span><span class="p">),</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>        <span class="mi">2</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.</span> <span class="o">+</span> <span class="mf">0.4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">t</span><span class="p">),</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="p">},</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="s2">&quot;beta&quot;</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>        <span class="mi">1</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">([</span><span class="mf">0.8</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>        <span class="mi">2</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.3</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="p">}</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="p">}</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="n">n_patients</span> <span class="o">=</span> <span class="mi">300</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="n">n_cov</span> <span class="o">=</span> <span class="mi">5</span>
+</code></pre></div>
+
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">patients_df</span> <span class="o">=</span> <span class="n">generate_quick_start_df</span><span class="p">(</span><span class="n">n_patients</span><span class="o">=</span><span class="n">n_patients</span><span class="p">,</span> <span class="n">n_cov</span><span class="o">=</span><span class="n">n_cov</span><span class="p">,</span> <span class="n">d_times</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> 
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>                                      <span class="n">j_events</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">pid_col</span><span class="o">=</span><span class="s1">&#39;pid&#39;</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>                                      <span class="n">real_coef_dict</span><span class="o">=</span><span class="n">real_coef_dict</span><span class="p">,</span> <span class="n">censoring_prob</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">patients_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>pid</th>
+<th>Z1</th>
+<th>Z2</th>
+<th>Z3</th>
+<th>Z4</th>
+<th>Z5</th>
+<th>J</th>
+<th>T</th>
+<th>C</th>
+<th>X</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>0</td>
+<td>0.548814</td>
+<td>0.715189</td>
+<td>0.602763</td>
+<td>0.544883</td>
+<td>0.423655</td>
+<td>1</td>
+<td>2</td>
+<td>5</td>
+<td>2</td>
+</tr>
+<tr>
+<th>1</th>
+<td>1</td>
+<td>0.645894</td>
+<td>0.437587</td>
+<td>0.891773</td>
+<td>0.963663</td>
+<td>0.383442</td>
+<td>2</td>
+<td>2</td>
+<td>5</td>
+<td>2</td>
+</tr>
+<tr>
+<th>2</th>
+<td>2</td>
+<td>0.791725</td>
+<td>0.528895</td>
+<td>0.568045</td>
+<td>0.925597</td>
+<td>0.071036</td>
+<td>1</td>
+<td>1</td>
+<td>5</td>
+<td>1</td>
+</tr>
+<tr>
+<th>3</th>
+<td>3</td>
+<td>0.087129</td>
+<td>0.020218</td>
+<td>0.832620</td>
+<td>0.778157</td>
+<td>0.870012</td>
+<td>1</td>
+<td>4</td>
+<td>5</td>
+<td>4</td>
+</tr>
+<tr>
+<th>4</th>
+<td>4</td>
+<td>0.978618</td>
+<td>0.799159</td>
+<td>0.461479</td>
+<td>0.780529</td>
+<td>0.118274</td>
+<td>2</td>
+<td>1</td>
+<td>5</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="estimation">Estimation<a class="headerlink" href="#estimation" title="Permanent link">¤</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In the following we apply the estimation method of Meir et al. (2022). Note that the data dataframe must not contain a column named 'C'.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pydts.fitters</span><span class="w"> </span><span class="kn">import</span> <span class="n">TwoStagesFitterExact</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">new_fitter</span> <span class="o">=</span> <span class="n">TwoStagesFitterExact</span><span class="p">()</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">new_fitter</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">patients_df</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">new_fitter</span><span class="o">.</span><span class="n">print_summary</span><span class="p">()</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_html rendered_html output_subarea">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead tr th {
+        text-align: left;
+    }
+
+    .dataframe thead tr:last-of-type th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr>
+<th></th>
+<th colspan="6" halign="left">1</th>
+<th colspan="6" halign="left">2</th>
+</tr>
+<tr>
+<th></th>
+<th>coef</th>
+<th>std err</th>
+<th>z</th>
+<th>P&gt;|z|</th>
+<th>[0.025</th>
+<th>0.975]</th>
+<th>coef</th>
+<th>std err</th>
+<th>z</th>
+<th>P&gt;|z|</th>
+<th>[0.025</th>
+<th>0.975]</th>
+</tr>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>Z1</th>
+<td>-0.2946</td>
+<td>0.347</td>
+<td>-0.848</td>
+<td>0.397</td>
+<td>-0.976</td>
+<td>0.386</td>
+<td>0.2337</td>
+<td>0.321</td>
+<td>0.728</td>
+<td>0.467</td>
+<td>-0.395</td>
+<td>0.863</td>
+</tr>
+<tr>
+<th>Z2</th>
+<td>-0.8902</td>
+<td>0.367</td>
+<td>-2.427</td>
+<td>0.015</td>
+<td>-1.609</td>
+<td>-0.171</td>
+<td>-0.3483</td>
+<td>0.341</td>
+<td>-1.022</td>
+<td>0.307</td>
+<td>-1.016</td>
+<td>0.319</td>
+</tr>
+<tr>
+<th>Z3</th>
+<td>-0.1380</td>
+<td>0.348</td>
+<td>-0.397</td>
+<td>0.692</td>
+<td>-0.820</td>
+<td>0.544</td>
+<td>-0.7829</td>
+<td>0.333</td>
+<td>-2.349</td>
+<td>0.019</td>
+<td>-1.436</td>
+<td>-0.130</td>
+</tr>
+<tr>
+<th>Z4</th>
+<td>-0.4728</td>
+<td>0.328</td>
+<td>-1.442</td>
+<td>0.149</td>
+<td>-1.115</td>
+<td>0.170</td>
+<td>0.1123</td>
+<td>0.310</td>
+<td>0.362</td>
+<td>0.718</td>
+<td>-0.496</td>
+<td>0.721</td>
+</tr>
+<tr>
+<th>Z5</th>
+<td>-0.3284</td>
+<td>0.349</td>
+<td>-0.941</td>
+<td>0.347</td>
+<td>-1.012</td>
+<td>0.356</td>
+<td>-0.0659</td>
+<td>0.330</td>
+<td>-0.200</td>
+<td>0.842</td>
+<td>-0.712</td>
+<td>0.580</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="output_area">
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+<code>
+
+Model summary for event: 1
+</code>
+</pre>
+</div>
+</div>
+<div class="output_area">
+<div class="output_html rendered_html output_subarea">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th></th>
+<th>n_jt</th>
+<th>success</th>
+<th>alpha_jt</th>
+</tr>
+<tr>
+<th>J</th>
+<th>X</th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th rowspan="4" valign="top">1</th>
+<th>1</th>
+<td>48</td>
+<td>True</td>
+<td>-0.632059</td>
+</tr>
+<tr>
+<th>2</th>
+<td>32</td>
+<td>True</td>
+<td>-0.552136</td>
+</tr>
+<tr>
+<th>3</th>
+<td>27</td>
+<td>True</td>
+<td>-0.083812</td>
+</tr>
+<tr>
+<th>4</th>
+<td>15</td>
+<td>True</td>
+<td>0.056266</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="output_area">
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+<code>
+
+Model summary for event: 2
+</code>
+</pre>
+</div>
+</div>
+<div class="output_area">
+<div class="output_html rendered_html output_subarea">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th></th>
+<th>n_jt</th>
+<th>success</th>
+<th>alpha_jt</th>
+</tr>
+<tr>
+<th>J</th>
+<th>X</th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th rowspan="4" valign="top">2</th>
+<th>1</th>
+<td>56</td>
+<td>True</td>
+<td>-1.093067</td>
+</tr>
+<tr>
+<th>2</th>
+<td>43</td>
+<td>True</td>
+<td>-0.817784</td>
+</tr>
+<tr>
+<th>3</th>
+<td>27</td>
+<td>True</td>
+<td>-0.744723</td>
+</tr>
+<tr>
+<th>4</th>
+<td>16</td>
+<td>True</td>
+<td>-0.545621</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="standard-error-of-the-regression-coefficients">Standard Error of the Regression Coefficients<a class="headerlink" href="#standard-error-of-the-regression-coefficients" title="Permanent link">¤</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">new_fitter</span><span class="o">.</span><span class="n">get_beta_SE</span><span class="p">()</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead tr th {
+        text-align: left;
+    }
+
+    .dataframe thead tr:last-of-type th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr>
+<th></th>
+<th colspan="6" halign="left">1</th>
+<th colspan="6" halign="left">2</th>
+</tr>
+<tr>
+<th></th>
+<th>coef</th>
+<th>std err</th>
+<th>z</th>
+<th>P&gt;|z|</th>
+<th>[0.025</th>
+<th>0.975]</th>
+<th>coef</th>
+<th>std err</th>
+<th>z</th>
+<th>P&gt;|z|</th>
+<th>[0.025</th>
+<th>0.975]</th>
+</tr>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>Z1</th>
+<td>-0.2946</td>
+<td>0.347</td>
+<td>-0.848</td>
+<td>0.397</td>
+<td>-0.976</td>
+<td>0.386</td>
+<td>0.2337</td>
+<td>0.321</td>
+<td>0.728</td>
+<td>0.467</td>
+<td>-0.395</td>
+<td>0.863</td>
+</tr>
+<tr>
+<th>Z2</th>
+<td>-0.8902</td>
+<td>0.367</td>
+<td>-2.427</td>
+<td>0.015</td>
+<td>-1.609</td>
+<td>-0.171</td>
+<td>-0.3483</td>
+<td>0.341</td>
+<td>-1.022</td>
+<td>0.307</td>
+<td>-1.016</td>
+<td>0.319</td>
+</tr>
+<tr>
+<th>Z3</th>
+<td>-0.1380</td>
+<td>0.348</td>
+<td>-0.397</td>
+<td>0.692</td>
+<td>-0.820</td>
+<td>0.544</td>
+<td>-0.7829</td>
+<td>0.333</td>
+<td>-2.349</td>
+<td>0.019</td>
+<td>-1.436</td>
+<td>-0.130</td>
+</tr>
+<tr>
+<th>Z4</th>
+<td>-0.4728</td>
+<td>0.328</td>
+<td>-1.442</td>
+<td>0.149</td>
+<td>-1.115</td>
+<td>0.170</td>
+<td>0.1123</td>
+<td>0.310</td>
+<td>0.362</td>
+<td>0.718</td>
+<td>-0.496</td>
+<td>0.721</td>
+</tr>
+<tr>
+<th>Z5</th>
+<td>-0.3284</td>
+<td>0.349</td>
+<td>-0.941</td>
+<td>0.347</td>
+<td>-1.012</td>
+<td>0.356</td>
+<td>-0.0659</td>
+<td>0.330</td>
+<td>-0.200</td>
+<td>0.842</td>
+<td>-0.712</td>
+<td>0.580</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="regularization">Regularization<a class="headerlink" href="#regularization" title="Permanent link">¤</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The Exact version supports adding regularization when estimating the Beta coefficients. It is done by passing the <code>fit_beta_kwargs</code> argument to the <code>fit()</code> method. The added regularization term is of the form:
+$$
+\mbox{Penalizer} \cdot \Bigg( \frac{1-\mbox{L1_wt}}{2}||\beta||_{2}^{2} + \mbox{L1_wt} ||\beta||_1 \Bigg)
+$$
+In <em>statsmodels</em>, the penalization parameter is denoted as <code>alpha</code>. Thus, adding L1, L2, or Elastic Net regularization can be done as follows:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="l1">L1<a class="headerlink" href="#l1" title="Permanent link">¤</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">L1_regularized_fitter</span> <span class="o">=</span> <span class="n">TwoStagesFitterExact</span><span class="p">()</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">fit_beta_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="s1">&#39;model_fit_kwargs&#39;</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>        <span class="mi">1</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>                <span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="mf">0.003</span><span class="p">,</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>                <span class="s1">&#39;L1_wt&#39;</span><span class="p">:</span> <span class="mi">1</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>        <span class="p">},</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>        <span class="mi">2</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>                <span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="mf">0.005</span><span class="p">,</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>                <span class="s1">&#39;L1_wt&#39;</span><span class="p">:</span> <span class="mi">1</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>        <span class="p">}</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>    <span class="p">}</span>
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="p">}</span>
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="n">L1_regularized_fitter</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">patients_df</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">fit_beta_kwargs</span><span class="o">=</span><span class="n">fit_beta_kwargs</span><span class="p">)</span>
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a><span class="n">L1_regularized_fitter</span><span class="o">.</span><span class="n">get_beta_SE</span><span class="p">()</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>1</th>
+<th>2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>Z1</th>
+<td>-0.058633</td>
+<td>0.000000</td>
+</tr>
+<tr>
+<th>Z2</th>
+<td>-0.653238</td>
+<td>0.000000</td>
+</tr>
+<tr>
+<th>Z3</th>
+<td>0.000000</td>
+<td>-0.455494</td>
+</tr>
+<tr>
+<th>Z4</th>
+<td>-0.290221</td>
+<td>0.000000</td>
+</tr>
+<tr>
+<th>Z5</th>
+<td>-0.143967</td>
+<td>0.000000</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="l2">L2<a class="headerlink" href="#l2" title="Permanent link">¤</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">L2_regularized_fitter</span> <span class="o">=</span> <span class="n">TwoStagesFitterExact</span><span class="p">()</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">fit_beta_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="s1">&#39;model_fit_kwargs&#39;</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>        <span class="mi">1</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>                <span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>                <span class="s1">&#39;L1_wt&#39;</span><span class="p">:</span> <span class="mi">0</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>        <span class="p">},</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>        <span class="mi">2</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>                <span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="mf">0.002</span><span class="p">,</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>                <span class="s1">&#39;L1_wt&#39;</span><span class="p">:</span> <span class="mi">0</span>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>        <span class="p">}</span>
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>    <span class="p">}</span>
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="p">}</span>
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="n">L2_regularized_fitter</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">patients_df</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">fit_beta_kwargs</span><span class="o">=</span><span class="n">fit_beta_kwargs</span><span class="p">)</span>
+<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>
+<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="n">L2_regularized_fitter</span><span class="o">.</span><span class="n">get_beta_SE</span><span class="p">()</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>1</th>
+<th>2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>Z1</th>
+<td>-0.294621</td>
+<td>0.203402</td>
+</tr>
+<tr>
+<th>Z2</th>
+<td>-0.890082</td>
+<td>-0.305744</td>
+</tr>
+<tr>
+<th>Z3</th>
+<td>-0.137424</td>
+<td>-0.685264</td>
+</tr>
+<tr>
+<th>Z4</th>
+<td>-0.473069</td>
+<td>0.096045</td>
+</tr>
+<tr>
+<th>Z5</th>
+<td>-0.328632</td>
+<td>-0.074304</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="elastic-net">Elastic Net<a class="headerlink" href="#elastic-net" title="Permanent link">¤</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">EN_regularized_fitter</span> <span class="o">=</span> <span class="n">TwoStagesFitterExact</span><span class="p">()</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">fit_beta_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="s1">&#39;model_kwargs&#39;</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>        <span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="mf">0.003</span><span class="p">,</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>        <span class="s1">&#39;L1_wt&#39;</span><span class="p">:</span> <span class="mf">0.5</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    <span class="p">}</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="p">}</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="n">EN_regularized_fitter</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">patients_df</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">fit_beta_kwargs</span><span class="o">=</span><span class="n">fit_beta_kwargs</span><span class="p">)</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="n">EN_regularized_fitter</span><span class="o">.</span><span class="n">get_beta_SE</span><span class="p">()</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead tr th {
+        text-align: left;
+    }
+
+    .dataframe thead tr:last-of-type th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr>
+<th></th>
+<th colspan="6" halign="left">1</th>
+<th colspan="6" halign="left">2</th>
+</tr>
+<tr>
+<th></th>
+<th>coef</th>
+<th>std err</th>
+<th>z</th>
+<th>P&gt;|z|</th>
+<th>[0.025</th>
+<th>0.975]</th>
+<th>coef</th>
+<th>std err</th>
+<th>z</th>
+<th>P&gt;|z|</th>
+<th>[0.025</th>
+<th>0.975]</th>
+</tr>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>Z1</th>
+<td>-0.2946</td>
+<td>0.347</td>
+<td>-0.848</td>
+<td>0.397</td>
+<td>-0.976</td>
+<td>0.386</td>
+<td>0.2337</td>
+<td>0.321</td>
+<td>0.728</td>
+<td>0.467</td>
+<td>-0.395</td>
+<td>0.863</td>
+</tr>
+<tr>
+<th>Z2</th>
+<td>-0.8902</td>
+<td>0.367</td>
+<td>-2.427</td>
+<td>0.015</td>
+<td>-1.609</td>
+<td>-0.171</td>
+<td>-0.3483</td>
+<td>0.341</td>
+<td>-1.022</td>
+<td>0.307</td>
+<td>-1.016</td>
+<td>0.319</td>
+</tr>
+<tr>
+<th>Z3</th>
+<td>-0.1380</td>
+<td>0.348</td>
+<td>-0.397</td>
+<td>0.692</td>
+<td>-0.820</td>
+<td>0.544</td>
+<td>-0.7829</td>
+<td>0.333</td>
+<td>-2.349</td>
+<td>0.019</td>
+<td>-1.436</td>
+<td>-0.130</td>
+</tr>
+<tr>
+<th>Z4</th>
+<td>-0.4728</td>
+<td>0.328</td>
+<td>-1.442</td>
+<td>0.149</td>
+<td>-1.115</td>
+<td>0.170</td>
+<td>0.1123</td>
+<td>0.310</td>
+<td>0.362</td>
+<td>0.718</td>
+<td>-0.496</td>
+<td>0.721</td>
+</tr>
+<tr>
+<th>Z5</th>
+<td>-0.3284</td>
+<td>0.349</td>
+<td>-0.941</td>
+<td>0.347</td>
+<td>-1.012</td>
+<td>0.356</td>
+<td>-0.0659</td>
+<td>0.330</td>
+<td>-0.200</td>
+<td>0.842</td>
+<td>-0.712</td>
+<td>0.580</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="prediction">Prediction<a class="headerlink" href="#prediction" title="Permanent link">¤</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Full prediction is given by the method <code>predict_full()</code></p>
+<p>The input is a <code>pandas.DataFrame()</code> containing for each observation the covariates columns which were used in the <code>fit()</code> method (<span class="arithmatex">\(Z1\)</span>-<span class="arithmatex">\(Z5\)</span> in our example).</p>
+<p>The following columns will be added:</p>
+<ol>
+<li>The overall survival at each time point t</li>
+<li>The hazard for each failure type <span class="arithmatex">\(j\)</span> at each time point t</li>
+<li>The probability of event type <span class="arithmatex">\(j\)</span> at time t</li>
+<li>The Cumulative Incident Function (CIF) of event type <span class="arithmatex">\(j\)</span> at time t</li>
+</ol>
+<p>In the following, we provide predictions for the individuals with ID values (pid) 0, 1 and 2. We transposed the output for easy view.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">pred_df</span> <span class="o">=</span> <span class="n">new_fitter</span><span class="o">.</span><span class="n">predict_full</span><span class="p">(</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>    <span class="n">patients_df</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s1">&#39;J&#39;</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;pid&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="n">pred_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="n">pred_df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ID=0&#39;</span><span class="p">,</span> <span class="s1">&#39;ID=1&#39;</span><span class="p">,</span> <span class="s1">&#39;ID=2&#39;</span><span class="p">]</span>
+</code></pre></div>
+
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">pred_df</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>ID=0</th>
+<th>ID=1</th>
+<th>ID=2</th>
+</tr>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>Z1</th>
+<td>0.548814</td>
+<td>0.645894</td>
+<td>0.791725</td>
+</tr>
+<tr>
+<th>Z2</th>
+<td>0.715189</td>
+<td>0.437587</td>
+<td>0.528895</td>
+</tr>
+<tr>
+<th>Z3</th>
+<td>0.602763</td>
+<td>0.891773</td>
+<td>0.568045</td>
+</tr>
+<tr>
+<th>Z4</th>
+<td>0.544883</td>
+<td>0.963663</td>
+<td>0.925597</td>
+</tr>
+<tr>
+<th>Z5</th>
+<td>0.423655</td>
+<td>0.383442</td>
+<td>0.071036</td>
+</tr>
+<tr>
+<th>overall_survival_t1</th>
+<td>0.710298</td>
+<td>0.718560</td>
+<td>0.675201</td>
+</tr>
+<tr>
+<th>overall_survival_t2</th>
+<td>0.469059</td>
+<td>0.481542</td>
+<td>0.418215</td>
+</tr>
+<tr>
+<th>overall_survival_t3</th>
+<td>0.273296</td>
+<td>0.285601</td>
+<td>0.225275</td>
+</tr>
+<tr>
+<th>overall_survival_t4</th>
+<td>0.143109</td>
+<td>0.152871</td>
+<td>0.107048</td>
+</tr>
+<tr>
+<th>hazard_j1_t1</th>
+<td>0.128945</td>
+<td>0.128253</td>
+<td>0.132910</td>
+</tr>
+<tr>
+<th>hazard_j1_t2</th>
+<td>0.138191</td>
+<td>0.137457</td>
+<td>0.142394</td>
+</tr>
+<tr>
+<th>hazard_j1_t3</th>
+<td>0.203904</td>
+<td>0.202903</td>
+<td>0.209619</td>
+</tr>
+<tr>
+<th>hazard_j1_t4</th>
+<td>0.227586</td>
+<td>0.226502</td>
+<td>0.233770</td>
+</tr>
+<tr>
+<th>hazard_j2_t1</th>
+<td>0.160757</td>
+<td>0.153188</td>
+<td>0.191889</td>
+</tr>
+<tr>
+<th>hazard_j2_t2</th>
+<td>0.201439</td>
+<td>0.192393</td>
+<td>0.238213</td>
+</tr>
+<tr>
+<th>hazard_j2_t3</th>
+<td>0.213448</td>
+<td>0.204001</td>
+<td>0.251724</td>
+</tr>
+<tr>
+<th>hazard_j2_t4</th>
+<td>0.248774</td>
+<td>0.238237</td>
+<td>0.291040</td>
+</tr>
+<tr>
+<th>prob_j1_at_t1</th>
+<td>0.128945</td>
+<td>0.128253</td>
+<td>0.132910</td>
+</tr>
+<tr>
+<th>prob_j1_at_t2</th>
+<td>0.098157</td>
+<td>0.098771</td>
+<td>0.096145</td>
+</tr>
+<tr>
+<th>prob_j1_at_t3</th>
+<td>0.095643</td>
+<td>0.097706</td>
+<td>0.087666</td>
+</tr>
+<tr>
+<th>prob_j1_at_t4</th>
+<td>0.062198</td>
+<td>0.064689</td>
+<td>0.052662</td>
+</tr>
+<tr>
+<th>prob_j2_at_t1</th>
+<td>0.160757</td>
+<td>0.153188</td>
+<td>0.191889</td>
+</tr>
+<tr>
+<th>prob_j2_at_t2</th>
+<td>0.143082</td>
+<td>0.138246</td>
+<td>0.160842</td>
+</tr>
+<tr>
+<th>prob_j2_at_t3</th>
+<td>0.100120</td>
+<td>0.098235</td>
+<td>0.105275</td>
+</tr>
+<tr>
+<th>prob_j2_at_t4</th>
+<td>0.067989</td>
+<td>0.068041</td>
+<td>0.065564</td>
+</tr>
+<tr>
+<th>cif_j1_at_t1</th>
+<td>0.128945</td>
+<td>0.128253</td>
+<td>0.132910</td>
+</tr>
+<tr>
+<th>cif_j1_at_t2</th>
+<td>0.227102</td>
+<td>0.227024</td>
+<td>0.229055</td>
+</tr>
+<tr>
+<th>cif_j1_at_t3</th>
+<td>0.322745</td>
+<td>0.324730</td>
+<td>0.316721</td>
+</tr>
+<tr>
+<th>cif_j1_at_t4</th>
+<td>0.384944</td>
+<td>0.389420</td>
+<td>0.369383</td>
+</tr>
+<tr>
+<th>cif_j2_at_t1</th>
+<td>0.160757</td>
+<td>0.153188</td>
+<td>0.191889</td>
+</tr>
+<tr>
+<th>cif_j2_at_t2</th>
+<td>0.303839</td>
+<td>0.291434</td>
+<td>0.352730</td>
+</tr>
+<tr>
+<th>cif_j2_at_t3</th>
+<td>0.403958</td>
+<td>0.389669</td>
+<td>0.458005</td>
+</tr>
+<tr>
+<th>cif_j2_at_t4</th>
+<td>0.471948</td>
+<td>0.457710</td>
+<td>0.523569</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.sections", "toc.integrate", "header.autohide"], "search": "../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.92b07e13.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

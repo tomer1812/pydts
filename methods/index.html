@@ -1,0 +1,1564 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="The documentation for the PyDTS software library.">
+      
+      
+        <meta name="author" content="Tomer Meir, Rom Gutman">
+      
+      
+      
+        <link rel="prev" href="../methodsintro/">
+      
+      
+        <link rel="next" href="../methodsevaluation/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
+    
+    
+      
+        <title>Definitions and Estimation - PyDTS</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.7e37652d.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../css/ansi-colours.css">
+    
+      <link rel="stylesheet" href="../css/jupyter-cells.css">
+    
+      <link rel="stylesheet" href="../css/pandas-dataframe.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  
+  
+
+<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","G-Z0XYP3868P"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","G-Z0XYP3868P",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=G-Z0XYP3868P",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#methods" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="PyDTS" class="md-header__button md-logo" aria-label="PyDTS" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PyDTS
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Definitions and Estimation
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/tomer1812/pydts/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    tomer1812/pydts
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="PyDTS" class="md-nav__button md-logo" aria-label="PyDTS" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    PyDTS
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/tomer1812/pydts/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    tomer1812/pydts
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Methods
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Methods
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../methodsintro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Definitions and Estimation
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Definitions and Estimation
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#definitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Definitions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-collapsed-log-likelihood-approach-and-the-proposed-estimators" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Collapsed Log-Likelihood Approach and the Proposed Estimators
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Collapsed Log-Likelihood Approach and the Proposed Estimators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#proposed-estimators" class="md-nav__link">
+    <span class="md-ellipsis">
+      Proposed Estimators
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Proposed Estimators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 1.
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 2.
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#time-dependent-covariates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Time-dependent covariates
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regularized-regression-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      Regularized regression models
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sure-independence-screening" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sure Independence Screening
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      References
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../methodsevaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Evaluation Metrics
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Examples
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Examples
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples-intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../EventTimesSampler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Event Times Sampler
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Estimation Example
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            Estimation Example
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../UsageExample-Intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../UsageExample-DataPreparation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Preparation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../UsageExample-FittingTwoStagesFitter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Estimation with TwoStagesFitter
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../UsageExample-FittingDataExpansionFitter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Estimation with DataExpansionFitter
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../UsageExample-RegroupingData/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Regrouping Example
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ModelsComparison/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Comparing the Estimation Methods
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../PerformanceMeasures/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Evaluation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Regularization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Regularization
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../UsageExample-FittingTwoStagesFitterExact-FULL/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Small Sample Size Example
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../UsageExample-SIS-SIS-L/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Screening Example
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SimulatedDataset/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Hospitalization LOS Simulation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../JOSS_mimic_example/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    MIMIC Example Summary
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    API
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            API
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/two_stages_fitter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    The Two Stages Procedure of Meir and Gorfine (2023) - Efron
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/two_stages_fitter_exact/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    The Two Stages Procedure of Meir and Gorfine (2023) - Exact
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/data_expansion_fitter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Expansion Procedure of Lee et al. (2018)
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/event_times_sampler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Event Times Sampler
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Evaluation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/cross_validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Cross Validation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/model_selection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Model Selection
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/screening/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Sure Independent Screening
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/utils/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Utils
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">¤</a></h1>
+<h2 id="definitions">Definitions<a class="headerlink" href="#definitions" title="Permanent link">¤</a></h2>
+<p>We let <span class="arithmatex">\(T\)</span>  denote a discrete event time that can take on only the values <span class="arithmatex">\(\{1,2,...,d\}\)</span> and <span class="arithmatex">\(J\)</span> denote the type of event, <span class="arithmatex">\(J \in \{1,\ldots,M\}\)</span>.  Consider a <span class="arithmatex">\(p \times 1\)</span> vector of baseline covariates <span class="arithmatex">\(Z\)</span>. A general discrete cause-specific hazard function is of the form
+$$
+\lambda_j(t|Z) = \Pr(T=t,J=j|T\geq t, Z)  \hspace{0.3cm} t \in {1,2,...,d} \hspace{0.3cm} j=1,\ldots,M  \, .
+$$
+A popular semi-parametric model of the above hazard function based on a transformation regression model is of the form
+$$
+h(\lambda_{j}(t|Z))  = \alpha_{jt} +Z^T \beta_j \hspace{0.3cm} t \in {1,2,...,d} \hspace{0.3cm} j=1, \ldots,M<br />
+$$
+such that <span class="arithmatex">\(h\)</span> is a known function <a href="#2">[2, and reference therein]</a>. The total number of parameters in the model is <span class="arithmatex">\(M(d+p)\)</span>. The logit function <span class="arithmatex">\(h(a)=\log \{ a/(1-a) \}\)</span> yields 
+\begin{equation}\label{eq:logis}
+\lambda_j(t|Z)=\frac{\exp(\alpha_{jt}+Z^T\beta_j)}{1+\exp(\alpha_{jt}+Z^T\beta_j)} \, .
+\end{equation}
+It should be noted that leaving <span class="arithmatex">\(\alpha_{jt}\)</span> unspecified is analogous to having an unspecified baseline hazard function in the Cox proportional hazard model <a href="#3">[3]</a>, and thus we consider the above as a semi-parametric model.</p>
+<p>Let <span class="arithmatex">\(S(t|Z) = \Pr(T&gt;t|Z)\)</span> be the overall survival given <span class="arithmatex">\(Z\)</span>. Then, the probability of experiencing event of type <span class="arithmatex">\(j\)</span> at time <span class="arithmatex">\(t\)</span> equals
+$$
+\Pr(T=t,J=j|Z)=\lambda_j(t|Z) \prod_{k=1}^{t-1} \left\lbrace 1-
+\sum_{j'=1}^M\lambda_{j'}(k|Z) \right\rbrace<br />
+$$
+and the cumulative incident function (CIF) of cause <span class="arithmatex">\(j\)</span> is given by
+$$
+F_j(t|Z) = \Pr(T \leq t, J=j|Z) = \sum_{m=1}^{t} \lambda_j(m|Z) S(m-1|Z) = \sum_{m=1}^{t}\lambda_j(m|Z) \prod_{k=1}^{m-1} \left\lbrace 1-\sum_{j'=1}^M\lambda_{j'}(k|Z) \right\rbrace \, .
+$$
+Finally, the marginal probability of event type <span class="arithmatex">\(j\)</span> (marginally with respect to the time of event), given <span class="arithmatex">\(Z\)</span>, equals
+$$
+\Pr(J=j|Z) = \sum_{m=1}^{d} \lambda_j(m|Z) \prod_{k=1}^{m-1} \left\lbrace 1-\sum_{j'=1}^M\lambda_{j'}(k|Z) \right\rbrace \, .
+$$
+In the next section we provide a fast estimation technique of the parameters <span class="arithmatex">\(\{\alpha_{j1},\ldots,\alpha_{jd},\beta_j^T \, ; \, j=1,\ldots,M\}\)</span>.</p>
+<h2 id="the-collapsed-log-likelihood-approach-and-the-proposed-estimators">The Collapsed Log-Likelihood Approach and the Proposed Estimators<a class="headerlink" href="#the-collapsed-log-likelihood-approach-and-the-proposed-estimators" title="Permanent link">¤</a></h2>
+<p>For simplicity of presentation, we assume two competing events, i.e., <span class="arithmatex">\(M=2\)</span> and our goal is estimating <span class="arithmatex">\(\{\alpha_{11},\ldots,\alpha_{1d},\beta_1^T,\alpha_{21},\ldots,\alpha_{2d},\beta_2^T\}\)</span> along with the standard error of the estimators. The data at hand consist of <span class="arithmatex">\(n\)</span> independent observations, each with <span class="arithmatex">\((X_i,\delta_i,J_i,Z_i)\)</span> where <span class="arithmatex">\(X_i=\min(C_i,T_i)\)</span>, <span class="arithmatex">\(C_i\)</span> is a right-censoring time, 
+<span class="arithmatex">\(\delta_i=I(X_i=T_i)\)</span> is the event indicator and <span class="arithmatex">\(J_i\in\{0,1,2\}\)</span>, where <span class="arithmatex">\(J_i=0\)</span> if and only if <span class="arithmatex">\(\delta_i=0\)</span>. Assume that given the covariates, the censoring and failure time are independent and non-informative. Then, the likelihood function is proportional to 
+$$
+L = \prod_{i=1}^n  \left\lbrace\frac{\lambda_1(X_i|Z_i)}{1-\lambda_1(X_i|Z_i)-\lambda_2(X_i|Z_i)}\right\rbrace^{I(\delta_{1i}=1)} \left\lbrace\frac{\lambda_2(X_i|Z_i)}{1-\lambda_1(X_i|Z_i)-\lambda_2(X_i|Z_i)}\right\rbrace^{I(\delta_{2i}=1)} \prod_{k=1}^{X_i}\lbrace 1-\lambda_1(k|Z_i)-\lambda_2(k|Z_i)\rbrace
+$$
+or, equivalently,
+$$
+L = \prod_{i=1}^n \left[ \prod_{j=1}^2 \prod_{m=1}^{X_i} \left\lbrace \frac{\lambda_j(m|Z_i)}{1-\lambda_1(m|Z_i)-\lambda_2(m|Z_i)}\right\rbrace^{\delta_{jim}}\right] \prod_{k=1}^{X_i}\lbrace 1-\lambda_1(k|Z_i)-\lambda_2(k|Z_i)\rbrace
+$$
+where <span class="arithmatex">\(\delta_{jim}\)</span> equals one if subject <span class="arithmatex">\(i\)</span> experienced event type <span class="arithmatex">\(j\)</span> at time <span class="arithmatex">\(m\)</span>; and 0 otherwise. Clearly <span class="arithmatex">\(L\)</span> cannot be decomposed into separate likelihoods for each cause-specific
+hazard function <span class="arithmatex">\(\lambda_j\)</span>.
+The log likelihood becomes
+$$
+\log L = \sum_{i=1}^n \left[ \sum_{j=1}^2 \sum_{m=1}^{X_i} \left[ \delta_{jim} \log \lambda_j(m|Z_i) - \delta_{jim}{1-\lambda_1(m|Z_i)-\lambda_2(m|Z_i)}\right] \right.<br />
++\left.\sum_{k=1}^{X_i}\log \lbrace 1-\lambda_1(k|Z_i)-\lambda_2(k|Z_i)\rbrace \right]
+$$
+$$
+    = \sum_{i=1}^n \sum_{m=1}^{X_i} \left[  \delta_{1im} \log \lambda_1(m|Z_i)+\delta_{2im} \log \lambda_2(m|Z_i) \right. +\left. \lbrace 1-\delta_{1im}-\delta_{2im}\rbrace \log\lbrace 1-\lambda_1(m|Z_i)-\lambda_2(m|Z_i)\rbrace \right] \, .
+$$</p>
+<p>Instead of maximizing the <span class="arithmatex">\(M(d+p)\)</span> parameters simultaneously based on the above log-likelihood, the collapsed log-likelihood of Lee et al. <a href="#4">[4]</a> can be adopted. Specifically, the data are expanded  such that for each observation <span class="arithmatex">\(i\)</span> the expanded dataset includes <span class="arithmatex">\(X_i\)</span> rows, one row for each time <span class="arithmatex">\(t\)</span>, <span class="arithmatex">\(t \leq X_i\)</span>. At each time point <span class="arithmatex">\(t\)</span> the expanded data are conditionally multinomial with one of three possible outcomes <span class="arithmatex">\(\{\delta_{1it},\delta_{2it},1-\delta_{1it}-\delta_{2it}\}\)</span>, as in <a href="#tbl:expanded">Table 1</a>.</p>
+<p><a id="tbl:expanded">Table 1:</a>  Original and expanded datasets with <span class="arithmatex">\(M = 2\)</span> competing events <a href="#4">[Lee et al. (2018)]</a>. </p>
+<table>
+<thead>
+<tr>
+<th><span class="arithmatex">\(i\)</span></th>
+<th><span class="arithmatex">\(X_i\)</span></th>
+<th><span class="arithmatex">\(\delta_i\)</span></th>
+<th><span class="arithmatex">\(Z_i\)</span></th>
+<th><span class="arithmatex">\(i\)</span></th>
+<th><span class="arithmatex">\(\tilde{X}_i\)</span></th>
+<th><span class="arithmatex">\(\delta_{1it}\)</span></th>
+<th><span class="arithmatex">\(\delta_{2it}\)</span></th>
+<th><span class="arithmatex">\(1 - \delta_{1it} - \delta_{2it}\)</span></th>
+<th><span class="arithmatex">\(Z_i\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>1</td>
+<td><span class="arithmatex">\(Z_1\)</span></td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td><span class="arithmatex">\(Z_1\)</span></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>1</td>
+<td>2</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td><span class="arithmatex">\(Z_1\)</span></td>
+</tr>
+<tr>
+<td>2</td>
+<td>3</td>
+<td>2</td>
+<td><span class="arithmatex">\(Z_2\)</span></td>
+<td>2</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td><span class="arithmatex">\(Z_2\)</span></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>2</td>
+<td>2</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td><span class="arithmatex">\(Z_2\)</span></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>2</td>
+<td>3</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td><span class="arithmatex">\(Z_2\)</span></td>
+</tr>
+<tr>
+<td>3</td>
+<td>3</td>
+<td>0</td>
+<td><span class="arithmatex">\(Z_3\)</span></td>
+<td>3</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td><span class="arithmatex">\(Z_3\)</span></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>3</td>
+<td>2</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td><span class="arithmatex">\(Z_3\)</span></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>3</td>
+<td>3</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td><span class="arithmatex">\(Z_3\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>Then, for estimating <span class="arithmatex">\(\{\alpha_{11},\ldots,\alpha_{1d},\beta_1^T\}\)</span>, we combine <span class="arithmatex">\(\delta_{2it}\)</span> and <span class="arithmatex">\(1-\delta_{1it}-\delta_{2it}\)</span>, and the collapsed log-likelihood for cause <span class="arithmatex">\(J=1\)</span> based on a binary regression model with <span class="arithmatex">\(\delta_{1it}\)</span> as the outcome is given by
+$$
+\log L_1 = \sum_{i=1}^n \sum_{m=1}^{X_i}\left[ \delta_{1im} \log \lambda_1(m|Z_i)+(1-\delta_{1im})\log \lbrace 1-\lambda_1(m|Z_i)\rbrace \right] \, .
+$$
+Similarly, the collapsed log-likelihood for cause <span class="arithmatex">\(J=2\)</span> based on a binary regression model with <span class="arithmatex">\(\delta_{2it}\)</span> as the outcome becomes
+$$
+\log L_2 = \sum_{i=1}^n \sum_{m=1}^{X_i}\left[ \delta_{2im} \log \lambda_2(m|Z_i)+(1-\delta_{2im})\log \lbrace 1-\lambda_2(m|Z_i)\rbrace \right]
+$$
+and one can fit the two models, separately.  </p>
+<p>In general, for <span class="arithmatex">\(M\)</span> competing events, 
+the estimators of <span class="arithmatex">\(\{\alpha_{j1},\ldots,\alpha_{jd},\beta_j^T\}\)</span>, <span class="arithmatex">\(j=1,\ldots,M\)</span>, are the respective values that maximize<br />
+$$
+\log L_j = \sum_{i=1}^n \sum_{m=1}^{X_i}\left[ \delta_{jim} \log \lambda_j(m|Z_i)+(1-\delta_{jim})\log {1-\lambda_j(m|Z_i)} \right] \, .
+$$
+Namely, each maximization <span class="arithmatex">\(j\)</span>, <span class="arithmatex">\(j=1,\ldots,M\)</span>, consists of  maximizing <span class="arithmatex">\(d + p\)</span> parameters simultaneously. </p>
+<h3 id="proposed-estimators">Proposed Estimators<a class="headerlink" href="#proposed-estimators" title="Permanent link">¤</a></h3>
+<p>Alternatively, we propose the following simpler and faster estimation procedure, with a negligible efficiency loss, if any. Our idea exploits the close relationship between conditional logistic regression analysis and stratified Cox regression analysis <a href="#5">[5]</a>. We propose to estimate each <span class="arithmatex">\(\beta_j\)</span> separately, and given <span class="arithmatex">\(\beta_j\)</span>, <span class="arithmatex">\(\alpha_{jt}\)</span>, <span class="arithmatex">\(t=1\ldots,d\)</span>, are separately estimated. In particular, the proposed estimating procedure consists of the following two speedy steps:</p>
+<h4 id="step-1">Step 1.<a class="headerlink" href="#step-1" title="Permanent link">¤</a></h4>
+<p>Use the expanded dataset and estimate each vector <span class="arithmatex">\(\beta_j\)</span>, <span class="arithmatex">\(j \in \{1,\ldots, M\}\)</span>, by a simple conditional logistic regression, conditioning on the event time <span class="arithmatex">\(X\)</span>, using a stratified Cox analysis.</p>
+<h4 id="step-2">Step 2.<a class="headerlink" href="#step-2" title="Permanent link">¤</a></h4>
+<p>Given the estimators <span class="arithmatex">\(\widehat{\beta}_j\)</span> , <span class="arithmatex">\(j \in \{1,\ldots, M\}\)</span>, of Step 1, use the original (un-expanded) data and estimate each <span class="arithmatex">\(\alpha_{jt}\)</span>, <span class="arithmatex">\(j \in \{1,\ldots,M\}\)</span>, <span class="arithmatex">\(t=1,\ldots,d\)</span>, separately, by</p>
+<div class="arithmatex">\[\widehat{ \alpha }_{jt} = argmin_{a} \left\lbrace \frac{1}{y_t} \sum_{i=1}^n I(X_i \geq t) \frac{ \exp(a+Z_i^T \widehat{\beta}_j)}{1 + \exp(a + Z_i^T \widehat{\beta}_j)} - \frac{n_{tj}}{y_t} \right\rbrace ^2 \]</div>
+<p>where <span class="arithmatex">\(y_t=\sum_{i=1}^n I(X_i \geq t)\)</span> and <span class="arithmatex">\(n_{tj}=\sum_{i=1}^n I(X_i = t, J_i=j)\)</span>.</p>
+<p>The above equation consists minimizing the squared distance between the observed proportion of failures of type <span class="arithmatex">\(j\)</span> at time <span class="arithmatex">\(t\)</span> 
+(<span class="arithmatex">\(n_{tj}/y_t\)</span>) and the expected proportion of failures given model defined above for <span class="arithmatex">\(\lambda_j\)</span> and <span class="arithmatex">\(\widehat{\beta}_j\)</span>. 
+The simulation results of section Simple Simulation reveals that the above two-step procedure performs well in terms of bias, and provides similar standard error of that of <a href="#3">[3]</a>. However, the improvement in computational time, by using our procedure, could be improved by a factor of 1.5-3.5 depending on d. Standard errors of <span class="arithmatex">\(\widehat{\beta}_j\)</span>, <span class="arithmatex">\(j \in \{1,\ldots,M\}\)</span>, can be derived directly from the stratified Cox analysis.</p>
+<h3 id="time-dependent-covariates">Time-dependent covariates<a class="headerlink" href="#time-dependent-covariates" title="Permanent link">¤</a></h3>
+<p>Similarly to the continuous-time Cox model, the simplest way to code time-dependent covariates uses intervals of time <a href="#6">[Therneau et al. (2000)]</a>. Then, the data is encoded by breaking the individual’s time into multiple time intervals, with one row of data for each interval. Hence combining this data expansion step with the expansion demonstrated in <a href="#tbl:expanded">Table 1</a> is straightforward.</p>
+<h3 id="regularized-regression-models">Regularized regression models<a class="headerlink" href="#regularized-regression-models" title="Permanent link">¤</a></h3>
+<p>Penalized regression methods, such as lasso, adaptive lasso, and elastic net <a href="#7">[Hastie et al. 2009]</a>, place a constraint on the size of the regression coefficients. The estimation procedure of <a href="#8">[Meir and Gorfine (2023)]</a> that separates the estimation of <span class="arithmatex">\(\beta_j\)</span> and <span class="arithmatex">\(\alpha_{jt}\)</span> can easily incorporate such constraints in Lagrangian form by minimizing</p>
+<div class="arithmatex">\[
+-\log L_j^c(\beta_j)  + \eta_j P(\beta_j) \, , \quad j=1,\ldots,M \, ,
+\]</div>
+<p>where <span class="arithmatex">\(P\)</span> is a penalty function and <span class="arithmatex">\(\eta_j \geq 0\)</span> are shrinkage tuning parameters. The parameters <span class="arithmatex">\(\alpha_{jt}\)</span> are estimated once the regularization step is completed and <span class="arithmatex">\(\beta_j\)</span> are estimated.</p>
+<p>Clearly, any regularized Cox regression model routines can be used for estimating <span class="arithmatex">\(\beta_j\)</span>, <span class="arithmatex">\(j=1,\ldots,M\)</span>, based on the above equation, for example, the <code>CoxPHFitter</code> of the <code>lifelines</code> Python package <a href="#9">[Davidson-Pilon (2019)]</a> with penalization.</p>
+<h3 id="sure-independence-screening">Sure Independence Screening<a class="headerlink" href="#sure-independence-screening" title="Permanent link">¤</a></h3>
+<p>When the number of available covariates greatly exceeds the number of observations (as common in genetic datasets, for example), i.e., the ultra-high setting, most regularized methods suffer from the curse of dimensionality, high variance, and overfitting <a href="#7">[Hastie et al. (2009)]</a>. 
+Sure Independent Screening (SIS) is a marginal screening technique designed to filter out uninformative covariates. 
+Penalized regression methods can be applied after the marginal screening process to the remaining covariates.</p>
+<p>We start the SIS procedure by ranking all the covariates using a utility measure between the response and each covariate, and then retain only covariates with estimated coefficients that exceeds a threshold value. 
+We focus on SIS and SIS followed by lasso (SIS-L) <a href="#10">[Fan et al. (2010); Saldana and Feng (2018)]</a> within the proposed two-step procedure.</p>
+<p>We start by fitting a marginal regression for each covariate by maximizing:</p>
+<div class="arithmatex">\[
+L_j^{\mathcal{C}}(\beta_{jr}) \quad \text{for } j=1,\ldots,M, \quad r=1,\ldots,p 
+\]</div>
+<p>where <span class="arithmatex">\(\boldsymbol{\beta}_j = (\beta_{j1},\ldots,\beta_{jp})^T\)</span>. 
+Then we rank the features based on the magnitude of their marginal regression coefficients. 
+The selected sets of variables are given by:</p>
+<div class="arithmatex">\[
+\widehat{\mathcal{M}}_{j,w_n} = \left\{1 \leq k \leq p \, : \, |\widehat{\beta}_{jk}| \geq w_n \right\}, \quad j=1,\ldots,M,
+\]</div>
+<p>where <span class="arithmatex">\(w_n\)</span> is a threshold value. 
+We adopt the data-driven threshold of <a href="#11">[Saldana and Feng (2018)]</a>. 
+Given data of the form <span class="arithmatex">\(\{X_i, \delta_i, J_i, \mathbf{Z}_i \, ; \, i = 1, \ldots, n\}\)</span>, a random permutation <span class="arithmatex">\(\pi\)</span> of <span class="arithmatex">\(\{1,\ldots,n\}\)</span> is used to decouple <span class="arithmatex">\(\mathbf{Z}_i\)</span> and <span class="arithmatex">\((X_i, \delta_i, J_i)\)</span>, so that the permuted data <span class="arithmatex">\(\{X_i, \delta_i, J_i, \mathbf{Z}_{\pi(i)}\}\)</span> follow a model where the covariates have no predictive power over the survival time of any event type.</p>
+<p>For the permuted data, we re-estimate individual regression coefficients and obtain <span class="arithmatex">\(\widehat{\beta}^*_{jr}\)</span>. The data-driven threshold is defined as:</p>
+<div class="arithmatex">\[
+w_n = \max_{1 \leq j \leq M, \, 1 \leq k \leq p} |\widehat{\beta}^*_{jk}|.
+\]</div>
+<p>For the SIS-L procedure, lasso regularization is then applied in the first step of the two-step procedure to the set of covariates selected by SIS. </p>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">¤</a></h2>
+<p><a id="1">[1]</a> 
+Meir, Tomer, Gutman, Rom, and Gorfine, Malka, 
+"PyDTS: A Python Package for Discrete-Time Survival Analysis with Competing Risks and Optional Penalization", Journal of Open Source Software (2025), 
+doi: 10.21105/joss.08815</p>
+<p><a id="2">[2]</a> 
+Allison, Paul D.
+"Discrete-Time Methods for the Analysis of Event Histories"
+Sociological Methodology (1982),
+doi: 10.2307/270718</p>
+<p><a id="3">[3]</a> 
+Cox, D. R.
+"Regression Models and Life-Tables"
+Journal of the Royal Statistical Society: Series B (Methodological) (1972)
+doi: 10.1111/j.2517-6161.1972.tb00899.x</p>
+<p><a id="4">[4]</a> 
+Lee, Minjung and Feuer, Eric J. and Fine, Jason P.
+"On the analysis of discrete time competing risks data"
+Biometrics (2018)
+doi: 10.1111/biom.12881</p>
+<p><a id="5">[5]</a> 
+Prentice, Ross L and Breslow, Norman E
+"Retrospective studies and failure time models"
+Biometrika (1978)
+doi: 10.1111/j.2517-6161.1972.tb00899.x</p>
+<p><a id="6">[6]</a> 
+Therneau, Terry M and Grambsch, Patricia M,
+"Modeling Survival Data: Extending the Cox Model", Springer-Verlag,
+(2000)</p>
+<p><a id="7">[7]</a> 
+Hastie, Trevor and Tibshirani, Robert and Friedman, Jerome H,
+"The Elements of Statistical Learning: Data Mining, Inference, and Prediction.", Springer-Verlag,
+(2009)</p>
+<p><a id="8">[8]</a> 
+Meir, Tomer and Gorfine, Malka, 
+"Discrete-time Competing-Risks Regression with or without Penalization", Biometrics (2025), doi: 10.1093/biomtc/ujaf040</p>
+<p><a id="9">[9]</a> 
+Davidson-Pilon, Cameron,
+"lifelines: Survival Analysis in Python", Journal of Open Source Software,
+(2019)</p>
+<p><a id="10">[10]</a> 
+Fan, J and Feng, Y and Wu, Y,
+"High-dimensional variable selection for Cox’s proportional hazards model", 
+Institute of Mathematical Statistics,
+(2010)</p>
+<p><a id="11">[11]</a> 
+Saldana, DF and Feng, Y,
+"SIS: An R package for sure independence screening in ultrahigh-dimensional statistical models", 
+Journal of Statistical Software,
+(2018)</p>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.sections", "toc.integrate", "header.autohide"], "search": "../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.92b07e13.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
