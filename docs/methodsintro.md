@@ -6,8 +6,8 @@ In this section, we outline the statistical background for the tools incorporate
 ## References
 <a id="1">[1]</a> 
 Meir, Tomer, Gutman, Rom, and Gorfine, Malka, 
-"PyDTS: A Python Package for Discrete-Time Survival Analysis with Competing Risks"
-(2022)
+"PyDTS: A Python Package for Discrete-Time Survival Analysis with Competing Risks and Optional Penalization", Journal of Open Source Software (2025), 
+doi: 10.21105/joss.08815
 
 <a id="2">[2]</a> 
 Meir, Tomer and Gorfine, Malka, 
